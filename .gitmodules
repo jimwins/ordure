@@ -1,0 +1,3 @@
+[submodule "externals/fatfree"]
+	path = externals/fatfree
+	url = git://github.com/bcosca/fatfree.git
