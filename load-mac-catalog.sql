@@ -76,8 +76,8 @@ SELECT DISTINCT
          WHERE mac_item_brands.item_no = mac_catalog.item_no) brand,
        product_title,
        description,
-       large_480,
        REPLACE(REPLACE(LOWER(product_title), '&', 'and'), ' ', '-') slug,
+       large_480,
        item_no
   FROM mac_catalog
 HAVING dept AND brand;
@@ -85,7 +85,7 @@ HAVING dept AND brand;
 -- Figure out items
 TRUNCATE item;
 INSERT INTO item
-       (product, code, name, short_name,
+       (product, code, mac_sku, name, short_name,
         unit_of_sale, retail_price, purchase_qty,
         length, width, height, weight,
         thumbnail)
@@ -93,7 +93,7 @@ SELECT (SELECT id FROM product
          WHERE department = (SELECT id FROM department
                               WHERE department.name = category LIMIT 1)
            AND product.name = product_title LIMIT 1) product,
-       item_no, internal_name, name,
+       item_no, IF(sku, sku, NULL) sku, internal_name, name,
        unit_of_sale, retail_price, purchase_qty,
        length, width, height, weight,
        small_100
