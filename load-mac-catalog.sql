@@ -1,3 +1,8 @@
+DROP FUNCTION IF EXISTS slug;
+CREATE FUNCTION slug(val VARCHAR(255))
+  RETURNS VARCHAR(255) DETERMINISTIC
+  RETURN REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(REPLACE(LOWER(val), CHAR(0xC2A0), '-')), '&', 'and'), ' ', '-'), '"', ''), "'", ''), '/', '-'), ':', ''), '.', ''), '#', ''), '!', ''), '(', ''), ')', ''), '[', ''), ']', ''), ',', ''), '+', ''), '@', 'a'), '%', ''), '‘', ''), '’', ''), '“', ''), '”', ''), '®', ''), '°', '');
+
 -- Load the catalog
 TRUNCATE TABLE mac_catalog;
 LOAD DATA LOCAL INFILE 'Gen_Catalog.txt'
@@ -40,7 +45,7 @@ DELETE FROM mac_item_brands
 -- Load the brands into our table
 INSERT IGNORE INTO brand (name, slug)
   SELECT brand_name,
-         REPLACE(REPLACE(LOWER(brand_name), '&', 'and'), ' ', '-') slug
+         slug(brand_name) slug
     FROM mac_item_brands ORDER BY brand_name;
 
 -- And link them back to the mac_item_brands info
@@ -50,7 +55,7 @@ UPDATE mac_item_brands, brand SET brand_id = id WHERE brand_name = name;
 TRUNCATE department;
 INSERT INTO department (name, slug, pos)
 SELECT DISTINCT chapter,
-                REPLACE(REPLACE(LOWER(chapter), '&', 'and'), ' ', '-'),
+                slug(chapter),
                 0
   FROM mac_catalog
  WHERE category != '';
@@ -61,7 +66,7 @@ SELECT DISTINCT (SELECT id FROM department
                   WHERE parent IS NULL
                     AND name = chapter) dept,
                 category,
-                REPLACE(REPLACE(LOWER(category), '&', 'and'), ' ', '-'),
+                slug(category),
                 0
   FROM mac_catalog
  WHERE category != '';
@@ -76,7 +81,7 @@ SELECT DISTINCT
          WHERE mac_item_brands.item_no = mac_catalog.item_no) brand,
        product_title,
        description,
-       REPLACE(REPLACE(LOWER(product_title), '&', 'and'), ' ', '-') slug,
+       slug(product_title),
        large_480,
        item_no
   FROM mac_catalog
