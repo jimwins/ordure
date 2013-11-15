@@ -136,7 +136,6 @@ if ($product) {
         <th>Item No.</th><th>Description</th>
         <th>List</th><th>Sale</th>
         <th>UOM</th><th>Inc</th>
-        <th class="text-center">&nbsp;<span class="glyphicon glyphicon-picture"></span>&nbsp;</th>
       </tr>
     </thead>
     <tbody>
@@ -148,7 +147,6 @@ if ($product) {
         <td></td>
         <td><?=ashtml($item['unit_of_sale'])?></td>
         <td><?=ashtml($item['purchase_qty'])?></td>
-        <td class="text-center"><a class="item-thumb" data-original-title="<?=$item['short_name']?>" data-placement="left" data-trigger="hover"><?=img($item['thumbnail'], 32)?></a></td>
       </tr>
 <?}?>
     </tbody>
