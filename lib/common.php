@@ -22,11 +22,17 @@ function ashtml($t) {
 }
 
 function href() {
-  return ashtml(implode('', array_merge((array)BASE, func_get_args())));
+  $ret= BASE;
+  foreach (func_get_args() as $arg) {
+    if (!empty($arg)) {
+      $ret.= $arg;
+    }
+  }
+  return ashtml($ret);
 }
 
 function img($name, $width) {
-  return '<img src="' . href('images/', $name) . ' " style=" width: ' . $width . 'px">';
+  return '<img src="' . href('images/', $name) . ' " width="' . $width . '">';
 }
 
 /** Set up database connection */
