@@ -128,6 +128,13 @@ foreach($departments as $row) {
 if ($product) {
 ?>
 <div class="col-sm-9">
+  <ol class="breadcrumb">
+    <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
+    <li><a href="<?=href('art-supplies/', $dept['slug'])?>"><?=ashtml($dept['name'])?></a></li>
+    <li><a href="<?=href('art-supplies/', $dept['slug'], '/', $subdept['slug'])?>"><?=ashtml($subdept['name'])?></a></li>
+    <li class="active"><?=ashtml($product['name'])?></li>
+  </ol>
+
   <div class="page-header">
     <h1>
       <?=ashtml($product['name'])?>
@@ -198,6 +205,12 @@ foreach ($variations as $var => $num) {
 } else if ($subdept) {
 ?>
 <div class="col-sm-9">
+  <ol class="breadcrumb">
+    <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
+    <li><a href="<?=href('art-supplies/', $dept['slug'])?>"><?=ashtml($dept['name'])?></a></li>
+    <li class="active"><?=ashtml($subdept['name'])?></li>
+  </ol>
+
   <table class="table table-striped table-condensed">
     <tbody>
 <?
@@ -208,6 +221,15 @@ foreach ($variations as $var => $num) {
 ?>
     </tbody>
   </table>
+</div>
+<?
+} else if ($dept) {
+?>
+<div class="col-sm-9">
+  <ol class="breadcrumb">
+    <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
+    <li><?=ashtml($dept['name'])?></li>
+  </ol>
 </div>
 <?
 }
