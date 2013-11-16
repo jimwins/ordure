@@ -168,7 +168,7 @@ $c= 0;
 foreach ($variations as $var => $num) {
   $c++;
   if (count($variations) > 1) {?>
-    <div id="c<?=$c?>" class="tab-pane fade <?=($c == 1) ? 'in active' : ''?>">
+    <div id="c<?=$c?>" class="tab-pane <?=($c == 1) ? 'active' : ''?>">
 <?}?>
   <table class="table table-condensed table-striped">
     <thead>
