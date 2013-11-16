@@ -90,7 +90,7 @@ HAVING dept AND brand;
 -- Figure out items
 TRUNCATE item;
 INSERT INTO item
-       (product, code, mac_sku, name, short_name,
+       (product, code, mac_sku, name, short_name, variation,
         unit_of_sale, retail_price, purchase_qty,
         length, width, height, weight,
         thumbnail)
