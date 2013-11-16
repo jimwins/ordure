@@ -12,6 +12,9 @@ Ordure includes the Bootstrap front-end framework:
 Ordure includes the Knockout JavaScript MVVM library:
   http://knockoutjs.com/
 
+Ordure includes PHP Markdown Extra (classic version):
+  http://michelf.ca/projects/php-markdown/classic/
+
 Ordure uses the Fat-Free Framework.
   https://github.com/bcosca/fatfree
 

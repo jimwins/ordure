@@ -14,6 +14,7 @@ $DEBUG= false;
 require dirname(dirname(__FILE__)).'/config.php';
 require dirname(__FILE__).'/db.php';
 require dirname(__FILE__).'/layout.php';
+require dirname(dirname(__FILE__)).'/externals/php-markdown-extra/markdown.php';
 
 /** Basic functions */
 
@@ -33,6 +34,14 @@ function href() {
 
 function img($name, $width) {
   return '<img src="' . href('images/', $name) . ' " width="' . $width . '">';
+}
+
+function render_page_contents($db, $slug) {
+  $q= "SELECT * FROM page WHERE slug = '" . $db->escape($slug) . "'";
+  $page= $db->get_one_assoc($q) or die($db->error);
+  if ($page['format'] == 'markdown')
+    $page['content']= markdown($page['content']);
+  return $page;
 }
 
 /** Set up database connection */
