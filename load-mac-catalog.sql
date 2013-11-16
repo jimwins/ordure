@@ -74,7 +74,8 @@ SELECT DISTINCT (SELECT id FROM department
 -- Figure out products
 TRUNCATE product;
 INSERT IGNORE INTO product
-       (department, brand, name, description, slug, image, from_item_no)
+       (department, brand, name, description, slug, image,
+        from_item_no, inactive)
 SELECT DISTINCT
        (SELECT id FROM department WHERE name = category LIMIT 1) dept,
        (SELECT brand_id FROM mac_item_brands
@@ -83,7 +84,8 @@ SELECT DISTINCT
        description,
        slug(product_title),
        large_480,
-       item_no
+       item_no,
+       1 inactive
   FROM mac_catalog
 HAVING dept AND brand;
 

@@ -73,11 +73,11 @@ if ($i_product) {
   }
 
 } elseif ($subdept) {
-  $q= "SELECT product.name, product.slug, brand.name brand
+  $q= "SELECT product.name, product.slug, brand.name brand, inactive
          FROM product
          LEFT JOIN brand ON product.brand = brand.id
         WHERE department = $subdept[id]
-        ORDER BY brand.name, name";
+        ORDER BY inactive, brand.name, name";
   
   $r= $db->query($q) or die($db->error);
   // XXX errors
@@ -201,8 +201,9 @@ foreach ($variations as $var => $num) {
   <table class="table table-striped table-condensed">
     <tbody>
 <?
+  $class = array('', 'text-muted', 'text-danger');
   foreach ($products as $row) {
-    echo '<tr><td>' . ashtml($row['brand']) . '</td><td><a href="' . href('art-supplies/', $dept['slug'], '/', $subdept['slug'], '/', $row['slug']) . '">' . ashtml($row['name']) . '</a></td></tr>';
+    echo '<tr class=' . $class[$row['inactive']] . '><td>' . ashtml($row['brand']) . '</td><td><a href="' . href('art-supplies/', $dept['slug'], '/', $subdept['slug'], '/', $row['slug']) . '">' . ashtml($row['name']) . '</a></td></tr>';
   }
 ?>
     </tbody>
