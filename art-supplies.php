@@ -135,10 +135,10 @@ foreach($departments as $row) {
     </div>
   </div>
 </div>
+<div class="col-sm-9">
 <?
 if ($product) {
 ?>
-<div class="col-sm-9">
   <ol class="breadcrumb">
     <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
     <li><a href="<?=href('art-supplies/', $dept['slug'])?>"><?=ashtml($dept['name'])?></a></li>
@@ -224,11 +224,9 @@ foreach ($variations as $var => $num) {
 <?}
 }
 ?>
-</div><!-- .col-sm-9 -->
 <?
 } else if ($subdept) {
 ?>
-<div class="col-sm-9">
   <ol class="breadcrumb">
     <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
     <li><a href="<?=href('art-supplies/', $dept['slug'])?>"><?=ashtml($dept['name'])?></a></li>
@@ -247,16 +245,19 @@ foreach ($variations as $var => $num) {
   </table>
 </div>
 <?
-} else if ($dept) {
-?>
-<div class="col-sm-9">
+} else {
+  if ($dept) {?>
   <ol class="breadcrumb">
     <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
     <li><?=ashtml($dept['name'])?></li>
   </ol>
-</div>
-<?
+<?}
+  $page= render_page_contents($db, $dept ? $dept['slug'] : 'art-supplies');
+  echo $page['rendered'];
 }
+?>
+</div><!-- .col-sm-9 -->
+<?
 foot();
 ?>
 <script>

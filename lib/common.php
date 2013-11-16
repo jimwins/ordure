@@ -40,7 +40,9 @@ function render_page_contents($db, $slug) {
   $q= "SELECT * FROM page WHERE slug = '" . $db->escape($slug) . "'";
   $page= $db->get_one_assoc($q) or die($db->error);
   if ($page['format'] == 'markdown')
-    $page['content']= markdown($page['content']);
+    $page['rendered']= markdown($page['content']);
+  else
+    $page['rendered']= $page['content'];
   return $page;
 }
 
