@@ -30,7 +30,7 @@ footer {
   top: 25px;
   width: 200px;
   padding: 6px 0px;
-  z-index: 20000;
+  z-index: 1030;
 
   -webkit-transform: rotate(-45deg);  /* Saf3.1+, Chrome */
   transform: rotate(-45deg);  /* CSS3 (for when it gets supported) */

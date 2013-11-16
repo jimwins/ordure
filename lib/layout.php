@@ -13,9 +13,6 @@ function head($title= 'Raw Materials Art Supplies') {
        href="<?=BASE?>style.css">
 </head>
 <body>
-<?if ($GLOBALS['DEBUG']) {?>
-  <div id="corner-banner">DEBUG</div>
-<?}?>
 <div id="wrap">
   <header class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
@@ -53,6 +50,9 @@ function foot() {
    <div class="pull-left" id="status">&nbsp;</div>
  </div>
 </footer>
+<?if ($GLOBALS['DEBUG']) {?>
+  <div id="corner-banner">DEBUG</div>
+<?}?>
 <script src="<?=BASE?>externals/jquery/jquery-1.10.2.min.js"></script>
 <script src="<?=BASE?>externals/bootstrap/js/bootstrap.min.js"></script>
 <script src="<?=BASE?>externals/knockout/knockout-3.0.0.js"></script>
