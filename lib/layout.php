@@ -11,6 +11,9 @@ function head($title= 'Raw Materials Art Supplies') {
        href="<?=BASE?>externals/bootstrap/css/bootstrap.min.css">
  <link rel="stylesheet" type="text/css"
        href="<?=BASE?>style.css">
+ <!-- Directa Serif Heavy -->
+ <link rel="stylesheet" type="text/css"
+       href="http://i.rawm.us/font/MyFontsWebfontsKit.css">
 </head>
 <body>
 <div id="wrap">
