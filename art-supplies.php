@@ -1,9 +1,10 @@
 <?php
 require 'lib/common.php';
 
-list(, $i_dept, $i_subdept, $i_product)= explode('/', $_SERVER['PATH_INFO']);
+$dept= $subdept= $departments=
+  $product= $products= $items= $variations= array();
 
-$dept= $subdept= $departments= $product= $products= $items= array();
+list(, $i_dept, $i_subdept, $i_product)= explode('/', $_SERVER['PATH_INFO']);
 
 if ($i_dept) {
   $slug= $db->escape($i_dept);
@@ -55,19 +56,19 @@ if ($i_product) {
   $product= $db->get_one_assoc($q)
     or die($db->error);
 
-  $q= "SELECT id, code, name, short_name,
+  $q= "SELECT id, code, name, short_name, variation,
               unit_of_sale, retail_price, purchase_qty,
               length, width, height, weight,
               thumbnail
          FROM item
         WHERE product = $product[id]
-        ORDER BY short_name";
+        ORDER BY variation, code";
 
   $r= $db->query($q) or die($db->error);
   // XXX errors
 
-  $items= array();
   while ($row= $r->fetch_assoc()) {
+    $variations[$row['variation']]++;
     $items[]= $row;
   }
 
@@ -130,6 +131,29 @@ if ($product) {
     <?=img($product['image'], 240)?>
   </div>
 <?}?>
+<?
+if (count($variations) > 1) {?>
+<ul class="nav nav-tabs">
+<?
+  $c= 0;
+  foreach ($variations as $var => $num) {
+    $c++;
+    echo '<li',
+         ($c == 1) ? ' class="active"' : '',
+         '><a href="#c', $c, '" data-toggle="tab">',
+         ashtml($var), '</a></li>';
+  }
+?>
+</ul>
+<div class="tab-content">
+<?
+}
+$c= 0;
+foreach ($variations as $var => $num) {
+  $c++;
+  if (count($variations) > 1) {?>
+    <div id="c<?=$c?>" class="tab-pane fade <?=($c == 1) ? 'in active' : ''?>">
+<?}?>
   <table class="table table-condensed table-striped">
     <thead>
       <tr>
@@ -139,7 +163,9 @@ if ($product) {
       </tr>
     </thead>
     <tbody>
-<?foreach ($items as $item) {?>
+<?foreach ($items as $item) {
+    if (strcmp($item['variation'], $var)) continue;
+?>
       <tr> 
         <td><?=ashtml($item['code'])?></td>
         <td><?=ashtml($item['short_name'])?></td>
@@ -151,7 +177,14 @@ if ($product) {
 <?}?>
     </tbody>
   </table>
-</div>
+<?if (count($variations) > 1) {?>
+  </div><!-- .tab-pane -->
+<?}?>
+<?}?>
+<?if (count($variations) > 1) {?>
+  </div><!-- .tab-content -->
+<?}?>
+</div><!-- .col-sm-9 -->
 <?
 } else if ($subdept) {
 ?>

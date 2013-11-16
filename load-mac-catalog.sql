@@ -98,7 +98,7 @@ SELECT (SELECT id FROM product
          WHERE department = (SELECT id FROM department
                               WHERE department.name = category LIMIT 1)
            AND product.name = product_title LIMIT 1) product,
-       item_no, IF(sku, sku, NULL) sku, internal_name, name,
+       item_no, IF(sku, sku, NULL) sku, internal_name, name, product_subtitle,
        unit_of_sale, retail_price, purchase_qty,
        length, width, height, weight,
        small_100
