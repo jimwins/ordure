@@ -86,7 +86,16 @@ if ($i_product) {
   }
 }
 
-head();
+$title= 'Raw Materials Art Supplies';
+if ($product) {
+  $title= "$product[name] by $product[brand] - $title";
+} elseif ($subdept) {
+  $title= "$subdept[name] - $title";
+} elseif ($dept) {
+  $title= "$dept[name] - $title";
+}
+
+head($title);
 ?>
 <div class="col-sm-3">
   <div class="panel panel-default">
