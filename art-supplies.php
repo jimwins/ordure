@@ -23,7 +23,10 @@ if ($dept) {
   $parent_check= "parent IS NULL";
 }
 
-$q= "SELECT slug, name, parent
+$q= "SELECT id, slug, name, parent,
+            (SELECT COUNT(*)
+               FROM product
+              WHERE department = department.id) products
        FROM department
       WHERE $parent_check
       ORDER BY IFNULL(parent, 0), IF(parent IS NULL, -1, pos), name";
@@ -56,11 +59,18 @@ if ($i_product) {
   $product= $db->get_one_assoc($q)
     or die($db->error);
 
-  $q= "SELECT id, code, name, short_name, variation,
-              unit_of_sale, retail_price, purchase_qty,
+  $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
+              unit_of_sale,
+              IFNULL(scat_item.retail_price, item.retail_price) retail_price,
+              purchase_qty,
               length, width, height, weight,
+              scat.sale_price(scat_item.retail_price,
+                              scat_item.discount_type,
+                              scat_item.discount) sale_price,
+              stock stocked,
               thumbnail
          FROM item
+         LEFT JOIN scat_item ON scat_item.code = item.code
         WHERE product = $product[id]
         ORDER BY variation, code";
 
@@ -118,6 +128,7 @@ foreach($departments as $row) {
   echo '<a class="list-group-item ' . $active . '" href="' .
        href('art-supplies/', $dept['slug'], ($dept ? '/' : ''),
             $row['slug']), '">',
+       '<span class="badge pull-right">', $row['products'], '</span>',
        ashtml($row['name']), '</a>';
 }
 ?>
@@ -141,14 +152,26 @@ if ($product) {
       <small><?=ashtml($product['brand'])?></small>
     </h1>
   </div>
-  <div class="col-sm-9"><?=$product['description']?></div>
+  <div class="col-sm-9">
+    <?=$product['description']?>
+    <dl class="dl-horizontal">
+<?if (count($items) == 1) { $item= $items[0]; ?>
+      <dt>List Price</dt><dd>$<?=$item['retail_price']?></dd>
+<?if ($item['sale_price']) {?>
+      <dt class="text-primary"><b>Sale Price</b></dt>
+      <dd class="text-primary"><b>$<?=$item['sale_price']?></b></dd>
+<?}?>
+    </dl>
+<?}?>
+  </div>
 <?if ($product['image']) {?>
   <div class="col-sm-3 thumbnail">
     <?=img($product['image'], 240)?>
   </div>
 <?}?>
 <?
-if (count($variations) > 1) {?>
+if (count($items) > 1) {
+  if (count($variations) > 1) {?>
 <ul class="nav nav-tabs">
 <?
   $c= 0;
@@ -163,7 +186,7 @@ if (count($variations) > 1) {?>
 </ul>
 <div class="tab-content">
 <?
-}
+  }
 $c= 0;
 foreach ($variations as $var => $num) {
   $c++;
@@ -175,7 +198,7 @@ foreach ($variations as $var => $num) {
       <tr>
         <th>Item No.</th><th>Description</th>
         <th>List</th><th>Sale</th>
-        <th>UOM</th><th>Inc</th>
+        <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
       </tr>
     </thead>
     <tbody>
@@ -186,9 +209,8 @@ foreach ($variations as $var => $num) {
         <td><?=ashtml($item['code'])?></td>
         <td><?=ashtml($item['short_name'])?></td>
         <td>$<?=ashtml($item['retail_price'])?></td>
-        <td></td>
-        <td><?=ashtml($item['unit_of_sale'])?></td>
-        <td><?=ashtml($item['purchase_qty'])?></td>
+        <td class="text-primary"><strong><?if ($item['sale_price']) {?>$<?=$item['sale_price']?><?}?></strong></td>
+        <td class="text-center"><?if ($item['stocked']) {?><span class="glyphicon glyphicon-ok-circle"><?}?></td>
       </tr>
 <?}?>
     </tbody>
@@ -199,7 +221,9 @@ foreach ($variations as $var => $num) {
 <?}?>
 <?if (count($variations) > 1) {?>
   </div><!-- .tab-content -->
-<?}?>
+<?}
+}
+?>
 </div><!-- .col-sm-9 -->
 <?
 } else if ($subdept) {
@@ -235,3 +259,6 @@ foreach ($variations as $var => $num) {
 }
 foot();
 ?>
+<script>
+$('.hastip').tooltip();
+</script>
