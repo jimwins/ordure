@@ -61,11 +61,10 @@ function foot() {
  <div class="panel panel-default">
    <div class="panel-footer small">
      <div class="clearfix">
-       <span class="pull-left" id="time">
+       <div class="pull-right col-sm-3" id="time">
          Page generated in <?=$time?> seconds.
-       </span>
-       <span class="pull-right">
-       </span>
+       </div>
+       Copyright &copy; 2013 <a href="http://rawmaterialsla.com/">Raw Materials Art Supplies</a>
       </div>
    </div>
  </div>
