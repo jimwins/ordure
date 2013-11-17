@@ -44,13 +44,30 @@ function head($title= 'Raw Materials Art Supplies') {
 }
 
 function foot() {
+  global $start_time;
+  $finish_time= microtime();
+
+  list($secs, $usecs)= explode(' ', $start_time);
+  $start= $secs + $usecs;
+
+  list($secs, $usecs)= explode(' ', $finish_time);
+  $finish= $secs + $usecs;
+
+  $time= sprintf("%0.3f", $finish - $start);
 ?>
   </div><!-- .container -->
 </div><!-- #wrap -->
-<footer class="small">
- <div class="container">
-   <div class="pull-right">Copyright &copy; 2013 Raw Materials Art Supplies</div>
-   <div class="pull-left" id="status">&nbsp;</div>
+<footer class="container">
+ <div class="panel panel-default">
+   <div class="panel-footer small">
+     <div class="clearfix">
+       <span class="pull-left" id="time">
+         Page generated in <?=$time?> seconds.
+       </span>
+       <span class="pull-right">
+       </span>
+      </div>
+   </div>
  </div>
 </footer>
 <?if ($GLOBALS['DEBUG']) {?>
