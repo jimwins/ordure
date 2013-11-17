@@ -288,5 +288,11 @@ foreach ($variations as $var => $num) {
 foot();
 ?>
 <script>
-$('.hastip').tooltip();
+$(function() {
+  $('.hastip').tooltip();
+});
 </script>
+<script>
+var BASE= '<?=BASE?>';
+</script>
+<script src="<?=BASE?>admin/admin.js"></script>
