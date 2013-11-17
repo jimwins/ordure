@@ -107,6 +107,10 @@ if ($product) {
 
 head($title);
 ?>
+<div class="alert alert-info">
+  <strong>Welcome</strong> to the beginnings of our new online store. Please
+  feel free to look around while we continue construction.
+</div>
 <div class="col-sm-3">
   <div class="panel panel-default">
     <div class="panel-heading">
