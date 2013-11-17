@@ -97,12 +97,16 @@ if ($i_product) {
 }
 
 $title= 'Raw Materials Art Supplies';
+$page_slug= 'art-supplies';
 if ($product) {
   $title= "$product[name] by $product[brand] - $title";
+  $page_slug.= "/$dept[slug]/$subdept[slug]/$product[slug]";
 } elseif ($subdept) {
   $title= "$subdept[name] - $title";
+  $page_slug.= "/$dept[slug]/$subdept[slug]";
 } elseif ($dept) {
   $title= "$dept[name] - $title";
+  $page_slug.= "/$dept[slug]";
 }
 
 head($title);
@@ -242,6 +246,15 @@ foreach ($variations as $var => $num) {
     <li class="active"><?=ashtml($subdept['name'])?></li>
   </ol>
 
+  <div data-slug="<?=$page_slug?>">
+    <div class="rendered">
+<?
+  $page= render_page_contents($db, $page_slug);
+  echo $page['rendered'];
+?>
+    </div><!-- .rendered -->
+  </div>
+
   <table class="table table-striped table-condensed">
     <tbody>
 <?
@@ -260,11 +273,16 @@ foreach ($variations as $var => $num) {
     <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
     <li><?=ashtml($dept['name'])?></li>
   </ol>
-<?}
-  $page= render_page_contents($db, $dept ? $dept['slug'] : 'art-supplies');
+<?}?>
+  <div data-slug="<?=$page_slug?>">
+    <div class="rendered">
+<?
+  $page= render_page_contents($db, $page_slug);
   echo $page['rendered'];
-}
 ?>
+    </div><!-- .rendered -->
+  </div>
+<?}?>
 </div><!-- .col-sm-9 -->
 <?
 foot();
