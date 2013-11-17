@@ -1,3 +1,16 @@
+/* Create room for header */
+body {
+  padding-top: 70px;
+}
+
+/* Use our font for logotype */
+.navbar-brand a {
+  font-family: 'Directa Serif', 'DirectaSerifHeavy';
+  font-size: 1.2em;
+  color: #cd6a21;
+}
+
+/* Place the corner banner */
 #corner-banner {
   position: fixed;
   left: -65px;
@@ -11,8 +24,6 @@
   
   box-shadow: rgba(0,0,0, 0.2) 0px 0px 6px;  
 
-}
-#corner-banner {
   text-align: center;
 
   font-weight: bold;
@@ -22,10 +33,4 @@
   text-shadow: #000 2px 2px 2px;
 
   background: #b00;
-}
-
-.navbar-brand a {
-  font-family: 'Directa Serif', 'DirectaSerifHeavy';
-  font-size: 1.2em;
-  color: #cd6a21;
 }
