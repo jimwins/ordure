@@ -158,12 +158,17 @@ if ($product) {
   </div>
   <div class="col-sm-9">
     <?=$product['description']?>
-    <dl class="dl-horizontal">
 <?if (count($items) == 1) { $item= $items[0]; ?>
+    <dl class="dl-horizontal">
       <dt>List Price</dt><dd>$<?=$item['retail_price']?></dd>
 <?if ($item['sale_price']) {?>
       <dt class="text-primary"><b>Sale Price</b></dt>
       <dd class="text-primary"><b>$<?=$item['sale_price']?></b></dd>
+<?}?>
+<?if ($item['stocked']) {?>
+      <dd class="text-primary">Available in store.</dd>
+<?} else {?>
+      <dd>Available by special order.</dd>
 <?}?>
     </dl>
 <?}?>
