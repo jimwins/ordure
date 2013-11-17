@@ -2,3 +2,5 @@ config.php
 item_brands.csv
 Gen_Catalog.txt
 images
+
+config.ini
