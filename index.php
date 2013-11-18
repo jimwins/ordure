@@ -6,6 +6,29 @@ $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
                            $f3->get('db.password')));
 
+$f3->set('markdown', function($text) {
+  return Markdown::instance()->convert($text);
+});
+
+$f3->route('GET /admin/page-editor.html', function ($f3) {
+  Web::instance()->send('admin/page-editor.html');
+});
+
+$f3->route('GET /@page', function ($f3, $args) {
+  $db= $f3->get('DBH');
+  $page= new DB\SQL\Mapper($db, 'page');
+  $page->load(array('slug=?', $f3->get('PARAMS.page')))
+    or $f3->error(404);
+
+  $f3->set('PAGE', $page);
+
+  echo Template::instance()->render('page.html');
+});
+
+$f3->route('GET /info', function ($f3) {
+  phpinfo();
+});
+
 $f3->route('GET /api/page-load', function($f3) {
   $db= $f3->get('DBH');
   $page= new DB\SQL\Mapper($db, 'page');
