@@ -6,6 +6,12 @@ $dept= $subdept= $departments=
 
 list(, $i_dept, $i_subdept, $i_product)= explode('/', $_SERVER['PATH_INFO']);
 
+$search= false;
+if ($i_dept == 'search') {
+  $search= true;
+  $i_dept= '';
+}
+
 if ($i_dept) {
   $slug= $db->escape($i_dept);
   $q= "SELECT id, name, slug
@@ -96,9 +102,34 @@ if ($i_product) {
   }
 }
 
+if ($search) {
+  $terms= $db->escape($_REQUEST['q']);
+  $q= "SELECT product.name,
+              (SELECT slug
+                 FROM department
+                WHERE subdept.parent = department.id) AS dept,
+              subdept.slug AS subdept, product.slug,
+              brand.name brand, inactive
+         FROM product
+         LEFT JOIN brand ON product.brand = brand.id
+         JOIN department subdept ON product.department = subdept.id
+        WHERE MATCH(product.name, description)
+              AGAINST('$terms' IN NATURAL LANGUAGE MODE)
+        -- ORDER BY inactive, brand.name, name";
+  
+  $r= $db->query($q) or die($db->error);
+  // XXX errors
+  while ($row= $r->fetch_assoc()) {
+    $products[]= $row;
+  }
+}
+
 $title= 'Raw Materials Art Supplies';
 $page_slug= 'art-supplies';
-if ($product) {
+if ($search) {
+  $title= "Search Results - $title";
+  $page_slug.= "/search";
+} elseif ($product) {
   $title= "$product[name] by $product[brand] - $title";
   $page_slug.= "/$dept[slug]/$subdept[slug]/$product[slug]";
 } elseif ($subdept) {
@@ -144,6 +175,20 @@ foreach($departments as $row) {
   </div>
 </div>
 <div class="col-sm-9">
+<div class="well well-sm">
+  <form class="form"
+        method="get" action="<?=href('art-supplies/search')?>">
+    <div class="input-group">
+      <label class="sr-only" for="search">Search</label>
+      <input name="q" type="text" class="form-control"
+             value="<?=ashtml($_REQUEST['q'])?>"
+             placeholder="Keywords for searching">
+      <span class="input-group-btn">
+        <input type="submit" class="btn btn-primary" value="Search">
+      </span>
+    </div>
+  </form>
+</div>
 <?
 if ($product) {
 ?>
@@ -261,6 +306,34 @@ foreach ($variations as $var => $num) {
   $class = array('', 'text-muted', 'text-danger');
   foreach ($products as $row) {
     echo '<tr class=' . $class[$row['inactive']] . '><td>' . ashtml($row['brand']) . '</td><td><a href="' . href('art-supplies/', $dept['slug'], '/', $subdept['slug'], '/', $row['slug']) . '">' . ashtml($row['name']) . '</a></td></tr>';
+  }
+?>
+    </tbody>
+  </table>
+</div>
+<?
+} elseif ($search) {
+?>
+  <ol class="breadcrumb">
+    <li><a href="<?=href('art-supplies')?>">Art Supplies</a></li>
+    <li class="active">Search</li>
+  </ol>
+
+  <div data-slug="<?=$page_slug?>">
+    <div class="rendered">
+<?
+  $page= render_page_contents($db, $page_slug);
+  echo $page['rendered'];
+?>
+    </div><!-- .rendered -->
+  </div>
+
+  <table class="table table-striped table-condensed">
+    <tbody>
+<?
+  $class = array('', 'text-muted', 'text-danger');
+  foreach ($products as $row) {
+    echo '<tr class=' . $class[$row['inactive']] . '><td>' . ashtml($row['brand']) . '</td><td><a href="' . href('art-supplies/', $row['dept'], '/', $row['subdept'], '/', $row['slug']) . '">' . ashtml($row['name']) . '</a></td></tr>';
   }
 ?>
     </tbody>
