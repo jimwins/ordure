@@ -1,0 +1,9 @@
+<include href="head.html" />
+
+<div class="container" data-slug="{{ @PAGE.slug }}">
+  <div class="rendered">
+    {{ @markdown(@PAGE.content) | raw }}
+  </div>
+</div>
+
+<include href="foot.html" />

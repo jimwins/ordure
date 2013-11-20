@@ -10,8 +10,16 @@ $f3->set('markdown', function($text) {
   return Markdown::instance()->convert($text);
 });
 
-$f3->route('GET /admin/page-editor.html', function ($f3) {
-  Web::instance()->send('admin/page-editor.html');
+// Index is a special page
+$f3->route('GET /', function ($f3, $args) {
+  $db= $f3->get('DBH');
+  $page= new DB\SQL\Mapper($db, 'page');
+  $page->load(array('slug=?', '@home'))
+    or $f3->error(404);
+
+  $f3->set('PAGE', $page);
+
+  echo Template::instance()->render('home.html');
 });
 
 $f3->route('GET /@page', function ($f3, $args) {
