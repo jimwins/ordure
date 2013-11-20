@@ -6,9 +6,17 @@ $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
                            $f3->get('db.password')));
 
+// Add @markdown() function for templates
 $f3->set('markdown', function($text) {
   return Markdown::instance()->convert($text);
 });
+
+// if DEBUG, allow access to /info
+if ($f3->get('DEBUG')) {
+  $f3->route('GET /info', function ($f3) {
+    phpinfo();
+  });
+}
 
 // Index is a special page
 $f3->route('GET /', function ($f3, $args) {
@@ -31,10 +39,6 @@ $f3->route('GET /@page', function ($f3, $args) {
   $f3->set('PAGE', $page);
 
   echo Template::instance()->render('page.html');
-});
-
-$f3->route('GET /info', function ($f3) {
-  phpinfo();
 });
 
 /* Handle API calls */
