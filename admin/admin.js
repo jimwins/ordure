@@ -1,5 +1,5 @@
 $(function() {
-  $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug pull-right"><span class="glyphicon glyphicon-pencil"></span></button>'));
+  $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug" style="float: right; position: relative; top: 0; right: 0"><span class="glyphicon glyphicon-pencil"></span></button>'));
 
   $('.edit-slug').on('click', function(ev) {
     $.get(BASE + 'admin/page-editor.html').done(function (html) {
@@ -16,7 +16,7 @@ $(function() {
       var rendered= $(ev.target).closest('[data-slug]');
 
       var page_slug= rendered.data('slug');
-      $.getJSON(BASE + 'api/page-load?callback=?',
+      $.getJSON(BASE + 'api/pageLoad?callback=?',
                 { slug: page_slug })
         .done(function (data) {
           ko.mapping.fromJS(data, pageModel);
@@ -28,7 +28,7 @@ $(function() {
 
 
       pageModel.savePage= function(place, ev) {
-        $.getJSON(BASE + 'api/page-save?callback=?',
+        $.getJSON(BASE + 'api/pageSave?callback=?',
                   ko.mapping.toJS(pageModel))
           .done(function (data) {
             $(place).closest('.modal').modal('hide');
