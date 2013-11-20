@@ -1,0 +1,28 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Departments</h3>
+  </div>
+  <div class="list-group">
+    <check if="{{ isset(@dept) }}">
+        <a class="list-group-item"
+           href="{{ @BASE . '/' . @PRODUCT }}">
+          <b>
+            <span class="pull-right glyphicon glyphicon-chevron-up"></span>
+            Back to Top
+          </b>
+        </a>
+      </div>
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ @dept.name }}</h3>
+      </div>
+      <div class="list-group">
+    </check>
+    <repeat group="{{ @departments }}" value="{{ @item }}">
+      <a class="list-group-item {{ (isset(@subdept) && @subdept.slug == @item.slug) ? 'active' : '' }}"
+         href="{{ @BASE . '/' . @PRODUCT . '/' . (isset(@dept) ? (@dept.slug . '/') : '') . @item.slug }}">
+        <span class="badge pull-right">{{ @item.products }}</span>
+        {{ @item.name }}
+      </a>
+    </repeat>
+  </div>
+</div>

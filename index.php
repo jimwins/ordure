@@ -41,6 +41,10 @@ $f3->route('GET /@page', function ($f3, $args) {
   echo Template::instance()->render('page.html');
 });
 
+/* Handle product URLs */
+require 'lib/product.php';
+Product::addRoutes($f3);
+
 /* Handle API calls */
 require 'lib/api.php';
 $f3->route('GET /api/@action [json]', 'API->@action');

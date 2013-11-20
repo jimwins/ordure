@@ -1,0 +1,115 @@
+<include href="header.html" />
+<div class="alert alert-info">
+  <strong>Welcome</strong> to the beginnings of our new online store. Please
+  feel free to look around while we continue construction.
+</div>
+<div class="row">
+  <div class="col-sm-3">
+    <include href="dept-sidebar.html" />
+  </div>
+  <div class="col-sm-9">
+    <ol class="breadcrumb">
+      <li><a href="{{ @BASE . '/' . @PRODUCT }}">Art Supplies</a></li>
+      <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
+      <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug . '/' . @subdept.slug }}">{{ @subdept.name }}</a></li>
+      <li class="active">{{ @product.name }}</li>
+    </ol>
+
+    <include href="dept-searchform.html" />
+
+    <div class="page-header">
+      <h1>
+        {{ @product.name }}
+        <small>{{ @product.brand_name }}</small>
+      </h1>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-9">
+        {{ @markdown(@product.description) | raw }}
+
+        <check if="count(@items) == 1">
+          <dl class="dl-horizontal">
+            <dt>List Price</dt><dd>${{ @items.0.retail_price }}</dd>
+            <check if="@items.0.sale_price">
+              <dt class="text-primary"><b>Sale Price</b></dt>
+              <dd class="text-primary"><b>${{ @items.0.sale_price }}</b></dd>
+            </check>
+            <check if="@items.0.stocked">
+              <true>
+                <dd class="text-primary">Available in store.</dd>
+              </true>
+              <false>
+                <dd>Available by special order.</dd>
+              </false>
+            </check>
+          </dl>
+        </check>
+      </div>
+
+      <div class="col-sm-3">
+        <check if="@product.image">
+          <div class="thumbnail pull-right">
+            <img src="{{ @BASE . '/images' . @product.image }}" width="240">
+          </div>
+        </check>
+      </div>
+    </div>
+    <check if="{{ count(@items) > 1 }}">
+      <check if="{{ count(@variations) > 1 }}">
+        <ul class="nav nav-tabs">
+          <repeat group="{{ @variations }}"
+                  key="{{ @variation }}"
+                  value="{{ @num }}"
+                  counter="{{ @ctr }}">
+            <li class="{{ @ctr == 1 ? 'active' : '' }}">
+              <a href="#v{{ @ctr }}" data-toggle="tab">{{ @variation }}</a>
+            </li>
+          </repeat>
+        </ul>
+      </check>
+      <div class="tab-content">
+        <repeat group="{{ @variations }}"
+                key="{{ @variation }}"
+                value="{{ @num }}"
+                counter="{{ @ctr }}">
+          <div class="tab-pane {{ @ctr == 1 ? 'active' : '' }}"
+               id="v{{ @ctr }}">
+            <table class="table table-condensed table-striped">
+              <thead>
+                <tr>
+                  <th>Item No.</th><th>Description</th>
+                  <th>List</th><th>Sale</th>
+                  <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
+                </tr>
+              </thead>
+              <tbody>
+                <repeat group="{{ @items }}" value="{{ @item }}">
+                  <check if="{{ @variation == @item.variation }}">
+                    <tr> 
+                      <td nowrap>{{ @item.code }}</td>
+                      <td>{{ @item.short_name }}</td>
+                      <td>${{ @item.retail_price }}</td>
+                      <td class="text-primary">
+                        <strong>
+                          {{ @item.sale_price ? ('$' . @item.sale_price) : '' }}
+                        </strong>
+                      </td>
+                      <td class="text-center">
+                        {{ @item.stocked ?
+                           '<span class="glyphicon glyphicon-ok-circle">' :
+                           '' }}
+                    </tr>
+                  </check>
+                </repeat>
+              </tbody>
+            </table>
+          </div>
+        </repeat>
+      </div>
+    </check>
+  </div>
+</div>
+<include href="footer.html" />
+
+

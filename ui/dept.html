@@ -1,0 +1,60 @@
+<include href="header.html" />
+<div class="alert alert-info">
+  <strong>Welcome</strong> to the beginnings of our new online store. Please
+  feel free to look around while we continue construction.
+</div>
+<div class="row">
+  <div class="col-sm-3">
+    <include href="dept-sidebar.html" />
+  </div>
+  <div class="col-sm-9">
+    <check if="{{ isset(@dept) }}">
+      <ol class="breadcrumb">
+        <li><a href="{{ @BASE . '/' . @PRODUCT }}">Art Supplies</a></li>
+        <check if="{{ isset(@subdept) }}">
+          <false>
+            <li>{{ @dept.name }}</li>
+          </false>
+          <true>
+            <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
+            <li>{{ @subdept.name }}</li>
+          </true>
+        </check>
+      </ol>
+    </check>
+
+    <include href="dept-searchform.html" />
+
+    <check if="{{ isset(@dept) }}">
+      <div class="page-header">
+        <h1>
+          {{ isset(@subdept) ? @subdept.name : @dept.name }}
+        </h1>
+      </div>
+    </check>
+
+    <div data-slug="{{ @PAGE.slug }}">
+      <div class="rendered">
+        {{ @markdown(@PAGE.content) | raw }}
+      </div>
+    </div>
+    <check if="isset(@products)">
+      <table class="table table-striped table-condensed">
+        <tbody>
+          <repeat group="{{ @products }}" value="{{ @product }}">
+            <tr class="">
+              <td>{{ @product.brand_name }}</td>
+              <td>
+                <a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
+                  {{ @product.name }}
+                </a>
+              </td>
+            </tr>
+          </repeat>
+        </tbody>
+      </table>
+    </check>
+  </div>
+</div>
+<include href="footer.html" />
+
