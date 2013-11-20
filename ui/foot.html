@@ -1,0 +1,35 @@
+<footer class="container">
+ <div class="panel panel-default">
+   <div class="panel-footer small">
+     <div class="clearfix">
+       <div class="pull-right col-sm-3">
+       </div>
+       Copyright &copy; 2013 <a href="http://rawmaterialsla.com/">Raw Materials Art Supplies</a>
+      </div>
+   </div>
+ </div>
+</footer>
+<check if="{{ @DEBUG }}">
+  <true>
+    <div id="corner-banner">DEBUG</div>
+  </true>
+</check>
+<script src="{{ @BASE }}/externals/jquery/jquery-1.10.2.min.js"></script>
+<script src="{{ @BASE }}/externals/bootstrap/js/bootstrap.min.js"></script>
+<script src="{{ @BASE }}/externals/knockout/knockout-3.0.0.js"></script>
+<script src="{{ @BASE }}/externals/knockout/knockout.mapping-2.4.1.js"></script>
+<script>
+$(function() {
+
+  // dynamically set active navbar link based on script
+  var page= '{{ @PAGE.slug }}';
+  $("#navbar a[href='{{ @BASE }}/" + page + "']").parent().addClass('active');
+
+});
+</script>
+<check if="{{ @ADMIN }}">
+  <script>
+  var BASE= '{{ @BASE }}/';
+  </script>
+  <script src="{{ @BASE }}/admin/admin.js"></script>
+</check>
