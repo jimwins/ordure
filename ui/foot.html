@@ -20,11 +20,10 @@
 <script src="{{ @BASE }}/externals/knockout/knockout.mapping-2.4.1.js"></script>
 <script>
 $(function() {
-
-  // dynamically set active navbar link based on script
-  var page= '{{ @PAGE.slug }}';
-  $("#navbar a[href='{{ @BASE }}/" + page + "']").parent().addClass('active');
-
+  $(window).on('resize', function() {
+    $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
+  });
+  $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
 });
 </script>
 <check if="{{ @ADMIN }}">
