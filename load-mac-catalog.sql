@@ -78,15 +78,15 @@ INSERT IGNORE INTO product
         from_item_no, inactive)
 SELECT DISTINCT
        (SELECT id FROM department WHERE name = category LIMIT 1) dept,
-       (SELECT brand_id FROM mac_item_brands
-         WHERE mac_item_brands.item_no = mac_catalog.item_no) brand,
+       brand_id brand,
        product_title,
        description,
-       slug(product_title),
+       slug(CONCAT(brand_name, '-', product_title)),
        large_480,
-       item_no,
+       mac_catalog.item_no,
        1 inactive
   FROM mac_catalog
+  JOIN mac_item_brands ON mac_item_brands.item_no = mac_catalog.item_no
 HAVING dept AND brand;
 
 -- Figure out items
@@ -99,10 +99,14 @@ INSERT INTO item
 SELECT (SELECT id FROM product
          WHERE department = (SELECT id FROM department
                               WHERE department.name = category LIMIT 1)
+           AND brand = brand_id
            AND product.name = product_title LIMIT 1) product,
-       item_no, IF(sku, sku, NULL) sku, internal_name, name, product_subtitle,
+       mac_catalog.item_no,
+       IF(sku, sku, NULL) sku,
+       mac_catalog.internal_name, name, product_subtitle,
        unit_of_sale, retail_price, purchase_qty,
        length, width, height, weight,
        small_100
   FROM mac_catalog
+  JOIN mac_item_brands ON mac_item_brands.item_no = mac_catalog.item_no
 HAVING product;
