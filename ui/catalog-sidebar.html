@@ -5,7 +5,7 @@
   <div class="list-group">
     <check if="{{ isset(@dept) }}">
         <a class="list-group-item"
-           href="{{ @BASE . '/' . @PRODUCT }}">
+           href="{{ @BASE . '/' . @CATALOG }}">
           <b>
             <span class="pull-right glyphicon glyphicon-chevron-up"></span>
             Back to Top
@@ -19,7 +19,7 @@
     </check>
     <repeat group="{{ @departments }}" value="{{ @item }}">
       <a class="list-group-item {{ (isset(@subdept) && @subdept.slug == @item.slug) ? 'active' : '' }}"
-         href="{{ @BASE . '/' . @PRODUCT . '/' . (isset(@dept) ? (@dept.slug . '/') : '') . @item.slug }}">
+         href="{{ @BASE . '/' . @CATALOG . '/' . (isset(@dept) ? (@dept.slug . '/') : '') . @item.slug }}">
         <span class="badge pull-right">{{ @item.products }}</span>
         {{ @item.name }}
       </a>

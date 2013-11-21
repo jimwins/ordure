@@ -5,17 +5,17 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <include href="dept-sidebar.html" />
+    <include href="catalog-sidebar.html" />
   </div>
   <div class="col-sm-9">
     <ol class="breadcrumb">
-      <li><a href="{{ @BASE . '/' . @PRODUCT }}">Art Supplies</a></li>
-      <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
-      <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug . '/' . @subdept.slug }}">{{ @subdept.name }}</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug }}">{{ @subdept.name }}</a></li>
       <li class="active">{{ @product.name }}</li>
     </ol>
 
-    <include href="dept-searchform.html" />
+    <include href="searchform.html" />
 
     <div class="page-header">
       <h1>

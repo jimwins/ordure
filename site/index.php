@@ -1,6 +1,6 @@
 <?php
-$f3= require('externals/fatfree/lib/base.php');
-$f3->config('config.ini');
+$f3= require('../externals/fatfree/lib/base.php');
+$f3->config('../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
@@ -41,12 +41,38 @@ $f3->route('GET /@page', function ($f3, $args) {
   echo Template::instance()->render('page.html');
 });
 
-/* Handle product URLs */
-require 'lib/product.php';
-Product::addRoutes($f3);
+/* Handle catalog URLs */
+require '../lib/catalog.php';
+Catalog::addRoutes($f3);
 
 /* Handle API calls */
-require 'lib/api.php';
+require '../lib/api.php';
 $f3->route('GET /api/@action [json]', 'API->@action');
+
+/* Handle externals */
+$f3->route('GET /externals/*', function ($f3, $args) {
+  if (preg_match('/\.(css|js|eot|svg|ttf|woff)$/', $args[1]) &&
+      file_exists("../externals/" . $args[1])) {
+    $type= 'text/css';
+    if (preg_match('/\.js$/', $args[1])) {
+      $type= 'application/javascript';
+    }
+    if (preg_match('/\.svg$/', $args[1])) {
+      $type= 'application/xml+svg';
+    }
+    if (preg_match('/\.woff$/', $args[1])) {
+      $type= 'application/font-woff';
+    }
+    if (preg_match('/\.ttf$/', $args[1])) {
+      $type= 'application/x-font-ttf';
+    }
+    if (preg_match('/\.eot$/', $args[1])) {
+      $type= 'application/vnd.ms-fontobject';
+    }
+    Web::instance()->send("../externals/" . $args[1], $type, 0, false);
+  } else {
+    $f3->error(404);
+  }
+});
 
 $f3->run();

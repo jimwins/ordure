@@ -1,14 +1,14 @@
 <?php
 
-class Product {
+class Catalog {
 
   static function addRoutes($f3) {
-    $PRODUCT= $f3->get('PRODUCT');
-    $f3->route("GET /$PRODUCT", 'Product->top');
-    $f3->route("GET /$PRODUCT/@dept", 'Product->dept');
-    $f3->route("GET /$PRODUCT/@dept/@subdept", 'Product->subdept');
-    $f3->route("GET /$PRODUCT/@dept/@subdept/@prod", 'Product->prod');
-    $f3->route("GET /$PRODUCT/search", 'Product->search');
+    $CATALOG= $f3->get('CATALOG');
+    $f3->route("GET /$CATALOG", 'Catalog->top');
+    $f3->route("GET /$CATALOG/@dept", 'Catalog->dept');
+    $f3->route("GET /$CATALOG/@dept/@subdept", 'Catalog->subdept');
+    $f3->route("GET /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
+    $f3->route("GET /$CATALOG/search", 'Catalog->search');
   }
 
   function top($f3) {
@@ -24,12 +24,12 @@ class Product {
     $f3->set('departments', $departments);
 
     $page= new DB\SQL\Mapper($db, 'page');
-    $page->load(array('slug=?', $f3->get('PRODUCT')))
+    $page->load(array('slug=?', $f3->get('CATALOG')))
       or $f3->error(404);
 
     $f3->set('PAGE', $page);
 
-    echo Template::instance()->render('dept.html');
+    echo Template::instance()->render('catalog-dept.html');
   }
 
   function dept($f3, $args) {
@@ -55,7 +55,7 @@ class Product {
     $page->load(array('slug=?', $slug));
     $f3->set('PAGE', $page);
 
-    echo Template::instance()->render('dept.html');
+    echo Template::instance()->render('catalog-dept.html');
   }
 
   function subdept($f3, $args) {
@@ -96,10 +96,10 @@ class Product {
     $page->load(array('slug=?', $slug));
     $f3->set('PAGE', $page);
 
-    echo Template::instance()->render('dept.html');
+    echo Template::instance()->render('catalog-dept.html');
   }
 
-  function prod($f3, $args) {
+  function product($f3, $args) {
     $db= $f3->get('DBH');
 
     $dept= new DB\SQL\Mapper($db, 'department');
@@ -126,7 +126,7 @@ class Product {
     $product->brand_name = '(SELECT name
                                FROM brand
                               WHERE brand = brand.id)';
-    $product->load(array('slug=?', $f3->get('PARAMS.prod')));
+    $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
@@ -157,7 +157,7 @@ class Product {
     $f3->set('PAGE',
              array('title' => "$product[name] by $product[brand_name]"));
 
-    echo Template::instance()->render('product.html');
+    echo Template::instance()->render('catalog-product.html');
   }
 
   function search($f3, $args) {
@@ -196,6 +196,6 @@ class Product {
     $page->load(array('slug=?', $slug));
     $f3->set('PAGE', $page);
 
-    echo Template::instance()->render('dept-search.html');
+    echo Template::instance()->render('catalog-search.html');
   }
 }

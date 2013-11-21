@@ -5,25 +5,25 @@
 </div>
 <div class="row">
   <div class="col-sm-3">
-    <include href="dept-sidebar.html" />
+    <include href="catalog-sidebar.html" />
   </div>
   <div class="col-sm-9">
     <check if="{{ isset(@dept) }}">
       <ol class="breadcrumb">
-        <li><a href="{{ @BASE . '/' . @PRODUCT }}">Art Supplies</a></li>
+        <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
         <check if="{{ isset(@subdept) }}">
           <false>
             <li>{{ @dept.name }}</li>
           </false>
           <true>
-            <li><a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
+            <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
             <li>{{ @subdept.name }}</li>
           </true>
         </check>
       </ol>
     </check>
 
-    <include href="dept-searchform.html" />
+    <include href="searchform.html" />
 
     <check if="{{ isset(@dept) }}">
       <div class="page-header">
@@ -45,7 +45,7 @@
             <tr class="">
               <td>{{ @product.brand_name }}</td>
               <td>
-                <a href="{{ @BASE . '/' . @PRODUCT . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
+                <a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
                   {{ @product.name }}
                 </a>
               </td>
