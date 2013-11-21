@@ -142,7 +142,7 @@ class Catalog {
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
           WHERE product = ?
-          ORDER BY variation, code";
+          ORDER BY variation, IF(stocked IS NULL, 1, 0), code";
 
     $items= $db->exec($q, $product['id']);
 
