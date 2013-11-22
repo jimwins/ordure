@@ -3,6 +3,10 @@ body.page {
   padding-top: 70px;
 }
 
+.page-header, .page-header h1 {
+  margin-top: 0px;
+}
+
 /* Use our font for logotype */
 .brand {
   font-family: 'Directa Serif', 'DirectaSerifHeavy';
