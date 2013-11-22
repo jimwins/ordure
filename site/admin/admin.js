@@ -28,8 +28,8 @@ $(function() {
 
 
       pageModel.savePage= function(place, ev) {
-        $.getJSON(BASE + 'api/pageSave?callback=?',
-                  ko.mapping.toJS(pageModel))
+        $.ajax(BASE + 'api/pageSave',
+               { type : 'POST', data : ko.mapping.toJS(pageModel) })
           .done(function (data) {
             $(place).closest('.modal').modal('hide');
             $('.rendered', rendered).empty().append(data.rendered);

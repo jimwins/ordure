@@ -38,6 +38,6 @@ Catalog::addRoutes($f3);
 
 /* Handle API calls */
 require '../lib/api.php';
-$f3->route('GET /api/@action [json]', 'API->@action');
+$f3->route('GET|POST /api/@action [json]', 'API->@action');
 
 $f3->run();
