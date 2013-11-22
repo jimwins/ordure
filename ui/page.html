@@ -1,5 +1,5 @@
 <include href="header.html" />
-<div class="container" data-slug="{{ @PAGE.slug }}">
+<div class="row" data-slug="{{ @PAGE.slug }}">
   <div class="rendered">
     {{ @markdown(@PAGE.content) | raw }}
   </div>
