@@ -18,27 +18,18 @@ if ($f3->get('DEBUG')) {
   });
 }
 
-// Index is a special page
-$f3->route('GET /', function ($f3, $args) {
+$f3->route('GET /*', function ($f3, $args) {
   $db= $f3->get('DBH');
+
   $page= new DB\SQL\Mapper($db, 'page');
-  $page->load(array('slug=?', '@home'))
+
+  $page->load(array('slug=?', $args[1]))
     or $f3->error(404);
 
   $f3->set('PAGE', $page);
 
-  echo Template::instance()->render('home.html');
-});
-
-$f3->route('GET /@page', function ($f3, $args) {
-  $db= $f3->get('DBH');
-  $page= new DB\SQL\Mapper($db, 'page');
-  $page->load(array('slug=?', $f3->get('PARAMS.page')))
-    or $f3->error(404);
-
-  $f3->set('PAGE', $page);
-
-  echo Template::instance()->render('page.html');
+  $template= empty($args[1]) ? 'home.html' : 'page.html';
+  echo Template::instance()->render($template);
 });
 
 /* Handle catalog URLs */
