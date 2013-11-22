@@ -27,6 +27,10 @@ class Catalog {
     $page->load(array('slug=?', $f3->get('CATALOG')))
       or $f3->error(404);
 
+    if (!$page->title) {
+      $page->title= 'Shop Online at Raw Materials Art Supplies';
+    }
+
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-dept.html');
@@ -53,6 +57,11 @@ class Catalog {
     $slug= substr_replace($f3->get('URI'), '', 0, strlen($f3->get('BASE')) + 1);
     $page= new DB\SQL\Mapper($db, 'page');
     $page->load(array('slug=?', $slug));
+
+    if (!$page->title) {
+      $page->title= $dept->name . ' - Raw Materials Art Supplies';
+    }
+
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-dept.html');
@@ -94,6 +103,11 @@ class Catalog {
     $slug= substr_replace($f3->get('URI'), '', 0, strlen($f3->get('BASE')) + 1);
     $page= new DB\SQL\Mapper($db, 'page');
     $page->load(array('slug=?', $slug));
+
+    if (!$page->title) {
+      $page->title= $dept->name . ' - Raw Materials Art Supplies';
+    }
+
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-dept.html');
@@ -155,7 +169,7 @@ class Catalog {
     $f3->set('variations', $variations);
 
     $f3->set('PAGE',
-             array('title' => "$product[name] by $product[brand_name]"));
+             array('title' => "$product[name] by $product[brand_name] - Raw Materials Art Supplies"));
 
     echo Template::instance()->render('catalog-product.html');
   }
