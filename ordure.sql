@@ -45,7 +45,8 @@ CREATE TABLE `department` (
   `slug` varchar(80) NOT NULL,
   `pos` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `parent` (`parent`,`slug`)
+  UNIQUE KEY `parent` (`parent`,`slug`),
+  KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -60,8 +61,10 @@ CREATE TABLE `item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `product` int(10) unsigned NOT NULL,
   `code` varchar(32) NOT NULL,
+  `mac_sku` char(6) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `short_name` varchar(255) DEFAULT NULL,
+  `variation` varchar(255) NOT NULL,
   `unit_of_sale` varchar(16) NOT NULL,
   `retail_price` decimal(9,2) NOT NULL,
   `purchase_qty` int(10) unsigned NOT NULL,
@@ -75,6 +78,7 @@ CREATE TABLE `item` (
   `inactive` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
+  UNIQUE KEY `mac_sku` (`mac_sku`),
   KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -131,7 +135,26 @@ CREATE TABLE `mac_item_brands` (
   `brand_id` int(10) unsigned DEFAULT NULL,
   `brand_name` varchar(255) DEFAULT NULL,
   `vendor_number` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`item_no`)
+  PRIMARY KEY (`item_no`),
+  KEY `brand_name` (`brand_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `page`
+--
+
+DROP TABLE IF EXISTS `page`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `page` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) DEFAULT '',
+  `slug` varchar(255) NOT NULL,
+  `format` enum('markdown','html') NOT NULL DEFAULT 'markdown',
+  `content` mediumtext,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -156,9 +179,50 @@ CREATE TABLE `product` (
   `inactive` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `department` (`department`,`brand`,`slug`),
-  KEY `from_item_no` (`from_item_no`)
+  KEY `from_item_no` (`from_item_no`),
+  KEY `name` (`name`),
+  FULLTEXT KEY `full` (`name`,`description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `scat_item`
+--
+
+DROP TABLE IF EXISTS `scat_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `scat_item` (
+  `retail_price` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
+  `discount` decimal(9,2) DEFAULT NULL,
+  `stock` int(11) DEFAULT NULL,
+  `code` varchar(255) NOT NULL,
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'ordure'
+--
+/*!50003 DROP FUNCTION IF EXISTS `slug` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` FUNCTION `slug`(val VARCHAR(255)) RETURNS varchar(255) CHARSET utf8
+    DETERMINISTIC
+RETURN REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(TRIM(REPLACE(LOWER(val), CHAR(0xC2A0), '-')), '&', 'and'), ' ', '-'), '"', ''), "'", ''), '/', '-'), ':', ''), '.', ''), '#', ''), '!', ''), '(', ''), ')', ''), '[', ''), ']', ''), ',', ''), '+', ''), '@', 'a'), '%', ''), '‘', ''), '’', ''), '“', ''), '”', ''), '®', ''), '°', '') ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -169,4 +233,4 @@ CREATE TABLE `product` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-11-14 16:07:51
+-- Dump completed on 2013-11-23 13:28:53
