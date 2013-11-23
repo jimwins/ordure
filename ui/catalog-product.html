@@ -50,7 +50,7 @@
       <div class="col-sm-3">
         <check if="@product.image">
           <div class="thumbnail pull-right">
-            <img src="{{ @BASE . '/images' . @product.image }}" width="240">
+            <img src="{{ @IMAGES . @product.image }}" width="240">
           </div>
         </check>
       </div>
@@ -98,10 +98,10 @@
                       <td class="text-center">
                         <check if="@item.stocked === null">
                           <true>
-                            <span class="glyphicon glyphicon-unchecked text-muted" title="Available by special order"></span>
+                            <span class="fa fa-square-o text-muted" title="Available by special order"></span>
                           </true>
                           <false>
-                            <span class="glyphicon glyphicon-check {{ @item.stocked ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked ? @item.stocked . ' current available' : 'Currently out of stock' }}"></span>
+                            <span class="fa fa-check-square-o {{ @item.stocked ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked ? @item.stocked . ' current available' : 'Currently out of stock' }}"></span>
                           </false>
                         </check>
                     </tr>

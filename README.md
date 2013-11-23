@@ -6,14 +6,14 @@ Ordure is an online store.
 Ordure uses the jQuery Javascript library.
   http://jquery.com/
 
-Ordure includes the Bootstrap front-end framework:
+Ordure uses the Bootstrap front-end framework:
   http://getbootstrap.com/
 
-Ordure includes the Knockout JavaScript MVVM library:
-  http://knockoutjs.com/
+Ordure uses Font Awesome, the iconic font designed for Bootstrap:
+  http://fontawesome.io/
 
-Ordure includes PHP Markdown Extra (classic version):
-  http://michelf.ca/projects/php-markdown/classic/
+Ordure uses the Knockout JavaScript MVVM library:
+  http://knockoutjs.com/
 
 Ordure uses the Fat-Free Framework.
   https://github.com/bcosca/fatfree
