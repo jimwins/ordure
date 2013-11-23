@@ -1,0 +1,10 @@
+<include href="header.html" />
+<div class="jumbotron">
+  <h2>Oops!</h2>
+  <p>Sorry, but something went awry here at this website for <strong>Raw Materials Art Supplies</strong>. It appears that that page you are looking for no longer exists.</p>
+  <p id="buttons"><a href="{{ @BASE }}/" class="btn btn-primary btn-lg" role="button">Start from the top &raquo;</a></p>
+</div>
+<script>
+  var slug404= "{{ str_replace(@BASE . "/", "", @URI) }}";
+</script>
+<include href="footer.html" />

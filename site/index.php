@@ -18,6 +18,13 @@ if ($f3->get('DEBUG')) {
   });
 }
 
+$f3->set('ONERROR', function ($f3) {
+  // XXX There is some sort of bug in calling a template within ONERROR
+  // related to escaping. Running fast and loose for now.
+  $f3->set('ESCAPE', false);
+  echo Template::instance()->render('404.html');
+});
+
 $f3->route('GET /*', function ($f3, $args) {
   $db= $f3->get('DBH');
 

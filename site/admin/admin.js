@@ -1,6 +1,10 @@
 $(function() {
   $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug" style="float: right; position: relative; top: 0; right: 0"><span class="glyphicon glyphicon-pencil"></span></button>'));
 
+  if (typeof slug404 != 'undefined' && slug404) {
+    $('#buttons').append($('<a class="edit-slug btn btn-success btn-lg" role="button" data-slug="' + slug404 + '">Create page &raquo;</a>'));
+  }
+
   $('.edit-slug').on('click', function(ev) {
     $.get(BASE + 'admin/page-editor.html').done(function (html) {
       var page_editor= $(html);
