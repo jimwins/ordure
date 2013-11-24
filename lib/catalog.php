@@ -91,9 +91,13 @@ class Catalog {
     $f3->set('subdept', $dept);
 
     $product= new DB\SQL\Mapper($db, 'product');
-    $product->brand_name = '(SELECT name
-                               FROM brand
-                              WHERE brand = brand.id)';
+    $product->brand_name= '(SELECT name
+                              FROM brand
+                             WHERE brand = brand.id)';
+    $product->stocked= '(SELECT SUM(stock)
+                           FROM item
+                           JOIN scat_item ON item.code = scat_item.code
+                          WHERE item.product = product.id)';
 
     $products= $product->find(array('department=?', $dept->id),
                               array('order' => 'brand_name, name'));

@@ -39,7 +39,14 @@
       </div>
     </div>
     <check if="isset(@products)">
-      <table class="table table-striped table-condensed">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Brand</th>
+            <th>Product</th>
+            <th class="text-center hastip" title="Whether this product is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
+          </tr>
+        </thead>
         <tbody>
           <repeat group="{{ @products }}" value="{{ @product }}">
             <tr class="">
@@ -49,6 +56,15 @@
                   {{ @product.name }}
                 </a>
               </td>
+              <td class="text-center">
+                <check if="@product.stocked === null">
+                  <true>
+                    <span class="fa fa-square-o text-muted" title="Available by special order"></span>
+                  </true>
+                  <false>
+                    <span class="fa fa-check-square-o {{ @product.stocked ? 'text-success' : 'text-warning' }}" title="{{ @product.stocked ? 'Current available in store' : 'Currently out of stock' }}"></span>
+                  </false>
+                </check>
             </tr>
           </repeat>
         </tbody>
