@@ -181,7 +181,37 @@ class Catalog {
   function search($f3, $args) {
     $db= $f3->get('DBH');
 
-    if ($f3->exists('REQUEST.q') && $f3->get('REQUEST.q')) {
+    $term= '';
+    if ($f3->exists('REQUEST.q')) {
+      $term= $f3->get('REQUEST.q');
+    }
+
+    if ($term && preg_match('!^[-A-Z0-9/]+$!i', $term)) {
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->load(array('code=?', $term));
+
+      if (!$item->dry()) {
+        $product= new DB\SQL\Mapper($db, 'product');
+        $product->load(array('id=?', $item->product));
+
+        if (!$product->dry()) {
+          $dept= new DB\SQL\Mapper($db, 'department');
+          $dept->load(array('id=?', $product->department));
+
+          if (!$dept->dry()) {
+            $subdept_slug= $dept->slug;
+            $dept->load(array('id=?', $dept->parent));
+            if (!$dept->dry()) {
+              $f3->reroute('/'. $f3->get('CATALOG') . '/' .
+                           $dept->slug . '/' . $subdept_slug . '/' .
+                           $product->slug, false);
+            }
+          }
+        }
+      }
+    }
+
+    if ($term) {
       $q= "SELECT product.name,
                   (SELECT slug
                      FROM department
@@ -196,7 +226,7 @@ class Catalog {
               AND inactive != 2
             -- ORDER BY inactive, brand.name, name";
       
-      $products= $db->exec($q, $f3->get('REQUEST.q'));
+      $products= $db->exec($q, $term);
 
       $f3->set('products', $products);
     }
