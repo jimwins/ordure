@@ -1,13 +1,28 @@
-<footer class="container">
- <div class="panel panel-default">
-   <div class="panel-footer small">
-     <div class="clearfix">
-       <div class="pull-right col-sm-3">
-       </div>
-       Copyright &copy; 2013 <a href="http://rawmaterialsla.com/">Raw Materials Art Supplies</a>
+<footer class="container small">
+  <div class="panel panel-default">
+    <div class="panel-body row">
+      <div class="col-sm-4">
+        <ul>
+          <li><a href="{{ @BASE }}/">Home</a>
+          <li><a href="{{ @BASE }}/art-supplies">Art Supplies</a>
+          <li><a href="{{ @BASE }}/framing">Custom Framing</a>
+          <li><a href="{{ @BASE }}/printing">Digital Printing</a>
+        </ul>
       </div>
-   </div>
- </div>
+      <div class="col-sm-4">
+        <ul>
+          <li><a href="{{ @BASE }}/jobs">Jobs</a>
+          <li><a href="{{ @BASE }}/newsletter">Newsletter</a>
+          <li><a href="{{ @BASE }}/windowbox">WindowBox Gallery</a>
+        </ul>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="clearfix text-right">
+        Copyright &copy; 2013 <a href="http://rawmaterialsla.com/">Raw Materials Art Supplies</a>
+      </div>
+    </div>
+  </div>
 </footer>
 <check if="{{ @DEBUG }}">
   <true>
