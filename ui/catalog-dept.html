@@ -71,7 +71,7 @@
               </td>
               <check if="{{ @ADMIN }}">
                 <td class="text-center">
-                  <a class="product-toggle fa fa-lg {{ @product.inactive > 1 ? 'fa-eye-slash' : 'fa-eye' }}"></a>
+                  <a class="product-toggle fa fa-lg {{ @product.inactive > 1 ? 'fa-eye-slash' : 'fa-eye' }} {{ @product.inactive == 1 ? 'text-muted' : '' }}"></a>
                 </td>
               </check>
             </tr>

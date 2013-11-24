@@ -57,8 +57,8 @@ $(function() {
     $.getJSON(BASE + 'api/productToggle?callback=?',
               { product: product.data('product') })
       .done(function (data) {
-        var cl= [ 'fa-eye', 'fa-eye', 'fa-eye-slash' ];
-        $(ev.target).removeClass('fa-eye fa-eye-slash')
+        var cl= [ 'fa-eye', 'fa-eye text-muted', 'fa-eye-slash' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash text-muted')
                     .addClass(cl[data.inactive]);
       })
       .fail(function (jqxhr, textStatus, error) {
