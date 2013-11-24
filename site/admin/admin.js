@@ -50,4 +50,20 @@ $(function() {
       page_editor.appendTo($('body')).modal();
     });
   });
+
+  $('.product-toggle').on('click', function(ev) {
+    var product= $(ev.target).closest('[data-product]');
+
+    $.getJSON(BASE + 'api/productToggle?callback=?',
+              { product: product.data('product') })
+      .done(function (data) {
+        var cl= [ 'fa-eye', 'fa-eye', 'fa-eye-slash' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash')
+                    .addClass(cl[data.inactive]);
+      })
+      .fail(function (jqxhr, textStatus, error) {
+        var data= $.parseJSON(jqxhr.responseText);
+        // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
+      });
+  });
 });

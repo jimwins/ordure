@@ -26,6 +26,17 @@ class API {
     $ret['rendered']= Markdown::instance()->convert($ret['content']);
     echo jsonp($f3, $ret);
   }
+
+  function productToggle($f3) {
+    $db= $f3->get('DBH');
+    $page= new DB\SQL\Mapper($db, 'product');
+    $page->load(array('id=?', $_REQUEST['product']));
+    $page->inactive= ($page->inactive + 1) % 3;
+    $page->save();
+    $ret= $page->cast();
+    echo jsonp($f3, $ret);
+  }
+
 }
 
 function jsonp($f3, $data) {
