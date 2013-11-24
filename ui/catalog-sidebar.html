@@ -20,7 +20,7 @@
     <repeat group="{{ @departments }}" value="{{ @item }}">
       <a class="list-group-item {{ (isset(@subdept) && @subdept.slug == @item.slug) ? 'active' : '' }}"
          href="{{ @BASE . '/' . @CATALOG . '/' . (isset(@dept) ? (@dept.slug . '/') : '') . @item.slug }}">
-        <check if="{{ @ADMIN }}"><span class="badge pull-right">{{ @item.products }}</span></check>
+        <check if="{{ @ADMIN && isset(@dept) }}"><span class="badge pull-right">{{ @item.products }}</span></check>
         {{ @item.name }}
       </a>
     </repeat>
