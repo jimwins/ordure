@@ -193,6 +193,7 @@ class Catalog {
              JOIN department subdept ON product.department = subdept.id
             WHERE MATCH(product.name, description)
                   AGAINST(? IN NATURAL LANGUAGE MODE)
+              AND inactive != 2
             -- ORDER BY inactive, brand.name, name";
       
       $products= $db->exec($q, $f3->get('REQUEST.q'));
