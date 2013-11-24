@@ -8,19 +8,40 @@
           <span data-bind="text: title"></span>
         </h4>
       </div>
-      <div class="modal-body">
+      <div id="accordion" class="modal-body">
         <div class="alert alert-danger" data-bind="visible: error">
           <strong>Error!</strong> <span data-bind="text: error"></span>
         </div>
-        <div class="form-group">
-          <label for="content">Page content</label>
-          <textarea class="form-control" rows="15" id="content"
-                    data-bind="value: content"></textarea>
+        <h4>
+          <a data-toggle="collapse" data-parent="#accordion" href="#content">
+            Page
+          </a>
+        </h4>
+        <div id="content" class="collapse in">
+          <div class="form-group">
+            <label for="content">Content</label>
+            <textarea class="form-control" rows="15" id="content"
+                      data-bind="value: content"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="content">Title</label>
+            <input type="text" class="form-control" id="title"
+                      data-bind="value: title">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="content">Title</label>
-          <input type="text" class="form-control" id="title"
-                    data-bind="value: title">
+        <h4>
+          <a data-toggle="collapse" data-parent="#accordion" href="#meta">
+            Meta Content
+          </a>
+        </h4>
+        <div id="meta" class="collapse">
+          <div class="form-group">
+            <label for="content">Description</label>
+            <textarea class="form-control" rows="5" id="description"
+                      data-bind="value: description,
+                                 valueUpdate: 'afterkeydown'"></textarea>
+            <span class="help-block"><span data-bind="text: description().length"></span> characters (160 max)</span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

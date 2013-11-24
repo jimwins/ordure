@@ -14,7 +14,8 @@ $(function() {
       });
 
       var page= { id: 0, slug: '', title: '',
-                  content: '', rendered: '', error: '' };
+                  content: '', description: '',
+                  rendered: '', error: '' };
       pageModel= ko.mapping.fromJS(page);
 
       var rendered= $(ev.target).closest('[data-slug]');

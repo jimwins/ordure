@@ -4,6 +4,9 @@
   <title>
     {{ isset(@PAGE.title) ? @PAGE.title : (isset(@title) ? @title : '') }}
   </title>
+  <check if="isset(@PAGE.description) && @PAGE.description">
+    <meta name="description" content="{{ @PAGE.description }}">
+  </check>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css"
         href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
