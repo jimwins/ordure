@@ -44,7 +44,9 @@ require '../lib/catalog.php';
 Catalog::addRoutes($f3);
 
 /* Handle API calls */
-require '../lib/api.php';
-$f3->route('GET|POST /api/@action [json]', 'API->@action');
+if ($f3->get('ADMIN')) {
+  require '../lib/api.php';
+  $f3->route('GET|POST /api/@action [json]', 'API->@action');
+}
 
 $f3->run();
