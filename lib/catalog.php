@@ -148,9 +148,9 @@ class Catalog {
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
                 purchase_qty,
                 length, width, height, weight,
-                scat.sale_price(scat_item.retail_price,
-                                scat_item.discount_type,
-                                scat_item.discount) sale_price,
+                sale_price(scat_item.retail_price,
+                           scat_item.discount_type,
+                           scat_item.discount) sale_price,
                 stock stocked,
                 thumbnail
            FROM item
