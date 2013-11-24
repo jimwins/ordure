@@ -30,6 +30,7 @@
 
         <check if="count(@items) == 1">
           <dl class="dl-horizontal">
+            <dt>Item No.</dt><dd>{{ @items.0.code }}</dd>
             <dt>List Price</dt><dd>${{ @items.0.retail_price }}</dd>
             <check if="@items.0.sale_price">
               <dt class="text-primary"><b>Sale Price</b></dt>
@@ -37,7 +38,7 @@
             </check>
             <check if="@items.0.stocked">
               <true>
-                <dd class="text-primary">Available in store.</dd>
+                <dd class="{{ @items.0.stocked ? 'text-primary' : 'text-muted' }}" title="{{ @items.0.stocked ? @items.0.stocked . ' currently in stock' : 'Currently out of stock' }}">Available in store.</dd>
               </true>
               <false>
                 <dd>Available by special order.</dd>
@@ -101,7 +102,7 @@
                             <span class="fa fa-square-o text-muted" title="Available by special order"></span>
                           </true>
                           <false>
-                            <span class="fa fa-check-square-o {{ @item.stocked ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked ? @item.stocked . ' current available' : 'Currently out of stock' }}"></span>
+                            <span class="fa fa-check-square-o {{ @item.stocked ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked ? @item.stocked . ' currently in stock' : 'Currently out of stock' }}"></span>
                           </false>
                         </check>
                       </td>
