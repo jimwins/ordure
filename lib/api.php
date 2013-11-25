@@ -47,6 +47,30 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function deptLoad($f3) {
+    $db= $f3->get('DBH');
+    $page= new DB\SQL\Mapper($db, 'department');
+    if (!$page->load(array('id=?', $_REQUEST['id']))) {
+      $page->slug= $_REQUEST['id'];
+    }
+    $ret= $page->cast();
+    echo jsonp($f3, $ret);
+  }
+
+  function deptSave($f3) {
+    $db= $f3->get('DBH');
+    $page= new DB\SQL\Mapper($db, 'department');
+    if ($_REQUEST['id']) {
+      $page->load(array('id=?', $_REQUEST['id']));
+      // XXX error handling
+    }
+    foreach ($_REQUEST as $k => $v) {
+      if ($page->exists($k)) $page->set($k, $v);
+    }
+    $page->save();
+    $ret= $page->cast();
+    echo jsonp($f3, $ret);
+  }
 }
 
 function jsonp($f3, $data) {

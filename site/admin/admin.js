@@ -82,4 +82,50 @@ $(function() {
         // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
       });
   });
+
+  $('#dept-add').on('click', function(ev) {
+    $.get(BASE + 'admin/dept-editor.html').done(function (html) {
+      var page_editor= $(html);
+
+      page_editor.on('hidden.bs.modal', function() {
+        $(this).remove();
+      });
+
+      var parent= $(ev.target).closest('[data-parent]');
+
+      var page= { id: 0, parent: parent.data('parent'),
+                  slug: '', name: '',
+                  error: '' };
+      pageModel= ko.mapping.fromJS(page);
+
+      if (page.id) {
+        $.getJSON(BASE + 'api/deptLoad?callback=?',
+                  { id: page.id })
+          .done(function (data) {
+            ko.mapping.fromJS(data, pageModel);
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            page.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      pageModel.savePage= function(place, ev) {
+        $.ajax(BASE + 'api/deptSave',
+               { type : 'POST', data : ko.mapping.toJS(pageModel) })
+          .done(function (data) {
+            $(place).closest('.modal').modal('hide');
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            pageModel.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      ko.applyBindings(pageModel, page_editor[0]);
+
+      page_editor.appendTo($('body')).modal();
+    });
+  });
+
 });

@@ -1,6 +1,12 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Departments</h3>
+    <h3 class="panel-title">
+      Departments
+      <check if="{{ @ADMIN && !isset(@dept) }}">
+        <a id="dept-add"
+           class="pull-right button fa fa-lg fa-plus-circle"></a>
+      </check>
+    </h3>
   </div>
   <div class="list-group">
     <check if="{{ isset(@dept) }}">
@@ -13,7 +19,13 @@
         </a>
       </div>
       <div class="panel-heading">
-        <h3 class="panel-title">{{ @dept.name }}</h3>
+        <h3 class="panel-title">
+          {{ @dept.name }}
+          <check if="{{ @ADMIN }}">
+            <a id="dept-add" data-parent="{{ @dept.id }}"
+               class="pull-right button fa fa-lg fa-plus-circle"></a>
+          </check>
+        </h3>
       </div>
       <div class="list-group">
     </check>
