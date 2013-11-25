@@ -66,4 +66,20 @@ $(function() {
         // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
       });
   });
+
+  $('.item-toggle').on('click', function(ev) {
+    var item= $(ev.target).closest('[data-item]');
+
+    $.getJSON(BASE + 'api/itemToggle?callback=?',
+              { item: item.data('item') })
+      .done(function (data) {
+        var cl= [ 'fa-eye', 'fa-eye text-muted', 'fa-eye-slash' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash text-muted')
+                    .addClass(cl[data.inactive]);
+      })
+      .fail(function (jqxhr, textStatus, error) {
+        var data= $.parseJSON(jqxhr.responseText);
+        // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
+      });
+  });
 });

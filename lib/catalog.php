@@ -157,11 +157,11 @@ class Catalog {
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
                 stock stocked,
-                thumbnail
+                thumbnail, inactive
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
           WHERE product = ?
-          ORDER BY variation, IF(stocked IS NULL, 1, 0), code";
+          ORDER BY variation, inactive, IF(stocked IS NULL, 1, 0), code";
 
     $items= $db->exec($q, $product['id']);
 

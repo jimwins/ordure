@@ -82,12 +82,15 @@
                   <th>Item No.</th><th>Description</th>
                   <th>List</th><th>Sale</th>
                   <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
+                  <check if="{{ @ADMIN }}">
+                    <th>Active</th>
+                  </check>
                 </tr>
               </thead>
               <tbody>
                 <repeat group="{{ @items }}" value="{{ @item }}">
                   <check if="{{ @variation == @item.variation }}">
-                    <tr> 
+                    <tr data-item="{{ @item.id }}">
                       <td nowrap>{{ @item.code }}</td>
                       <td>{{ @item.short_name }}</td>
                       <td>${{ @item.retail_price }}</td>
@@ -106,6 +109,11 @@
                           </false>
                         </check>
                       </td>
+                      <check if="{{ @ADMIN }}">
+                        <td class="text-center">
+                          <a class="item-toggle fa fa-lg {{ @item.inactive > 1 ? 'fa-eye-slash' : 'fa-eye' }} {{ @item.inactive == 1 ? 'text-muted' : '' }}"></a>
+                        </td>
+                      </check>
                     </tr>
                   </check>
                 </repeat>
