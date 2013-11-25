@@ -14,9 +14,9 @@
       <div class="collapse navbar-collapse">
         <ul id="navbar" class="nav navbar-nav">
           <li><a href="{{ @BASE }}/">Home</a></li>
-          <li><a href="{{ @BASE }}/art-supplies">Art Supplies</a></li>
-          <li><a href="{{ @BASE }}/framing">Custom Framing</a></li>
-          <li><a href="{{ @BASE }}/printing">Digital Printing</a></li>
+          <li class="{{ !strncmp(@URI, @BASE . '/art-supplies', strlen(@BASE . '/art-supplies')) ? 'active' : '' }}"><a href="{{ @BASE }}/art-supplies">Art Supplies</a></li>
+          <li class="{{ !strncmp(@URI, @BASE . '/framing', strlen(@BASE . '/framing')) ? 'active' : '' }}"><a href="{{ @BASE }}/framing">Custom Framing</a></li>
+          <li class="{{ !strncmp(@URI, @BASE . '/printing', strlen(@BASE . '/printing')) ? 'active' : '' }}"><a href="{{ @BASE }}/printing">Digital Printing</a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="http://twitter.com/RawMaterials" title="Follow us on Twitter"><i class="fa fa-lg fa-twitter-square"></i></a></li>
