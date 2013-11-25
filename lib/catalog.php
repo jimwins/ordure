@@ -100,7 +100,8 @@ class Catalog {
                           WHERE item.product = product.id)';
 
     $products= $product->find(array('department=?', $dept->id),
-                              array('order' => 'brand_name, name'));
+                              array('order' =>
+                                      'inactive = 2, brand_name, name'));
 
     $f3->set('products', $products);
 
