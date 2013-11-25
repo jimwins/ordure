@@ -18,7 +18,7 @@ class Catalog {
     $dept->products= '(SELECT COUNT(*)
                          FROM product
                         WHERE department = department.id)';
-    $departments= $dept->find(array('parent IS NULL'),
+    $departments= $dept->find(array('parent = 0'),
                               array('order' => 'name'));
 
     $f3->set('departments', $departments);
@@ -44,7 +44,7 @@ class Catalog {
                          FROM product
                         WHERE department = department.id)';
 
-    $dept->load(array('slug = ? AND parent IS NULL', $f3->get('PARAMS.dept')))
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
       or $f3->error(404);
 
     $f3->set('dept', $dept);
@@ -75,7 +75,7 @@ class Catalog {
                          FROM product
                         WHERE department = department.id)';
 
-    $dept->load(array('slug = ? AND parent IS NULL', $f3->get('PARAMS.dept')))
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
       or $f3->error(404);
 
     $f3->set('dept', $dept->cast());
@@ -126,7 +126,7 @@ class Catalog {
                          FROM product
                         WHERE department = department.id)';
 
-    $dept->load(array('slug = ? AND parent IS NULL', $f3->get('PARAMS.dept')))
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
       or $f3->error(404);
 
     $f3->set('dept', $dept->cast());
@@ -236,7 +236,7 @@ class Catalog {
     $dept->products= '(SELECT COUNT(*)
                          FROM product
                         WHERE department = department.id)';
-    $departments= $dept->find(array('parent IS NULL'),
+    $departments= $dept->find(array('parent = 0'),
                               array('order' => 'name'));
 
     $f3->set('departments', $departments);
