@@ -1,5 +1,7 @@
 $(function() {
-  $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug" style="float: right; position: relative; top: 0; right: 0"><span class="glyphicon glyphicon-pencil"></span></button>'));
+  $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
+
+  $('[data-department]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-dept" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
   if (typeof slug404 != 'undefined' && slug404) {
     $('#buttons').append($('<a class="edit-slug btn btn-success btn-lg" role="button" data-slug="' + slug404 + '">Create page &raquo;</a>'));
@@ -83,7 +85,7 @@ $(function() {
       });
   });
 
-  $('#dept-add').on('click', function(ev) {
+  function deptEdit(ev) {
     $.get(BASE + 'admin/dept-editor.html').done(function (html) {
       var page_editor= $(html);
 
@@ -91,12 +93,23 @@ $(function() {
         $(this).remove();
       });
 
+      var dept= $(ev.target).closest('[data-department]');
       var parent= $(ev.target).closest('[data-parent]');
 
-      var page= { id: 0, parent: parent.data('parent'),
+      var page= { id: dept.data('department'),
+                  parent: parent.data('parent'),
                   slug: '', name: '',
-                  error: '' };
+                  error: '', parents: [] };
+
       pageModel= ko.mapping.fromJS(page);
+
+      $.getJSON(BASE + 'api/deptFind?callback=?',
+                { levels: 1 })
+        .done(function (data) {
+          ko.mapping.fromJS({ parents: data }, pageModel);
+          // make sure correct selection is made
+          pageModel.parent.valueHasMutated();
+        });
 
       if (page.id) {
         $.getJSON(BASE + 'api/deptLoad?callback=?',
@@ -110,7 +123,7 @@ $(function() {
           });
       }
 
-      pageModel.savePage= function(place, ev) {
+      pageModel.saveDepartment= function(place, ev) {
         $.ajax(BASE + 'api/deptSave',
                { type : 'POST', data : ko.mapping.toJS(pageModel) })
           .done(function (data) {
@@ -126,6 +139,9 @@ $(function() {
 
       page_editor.appendTo($('body')).modal();
     });
-  });
+  }
+
+  $('#dept-add').on('click', deptEdit);
+  $('.edit-dept').on('click', deptEdit);
 
 });

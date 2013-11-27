@@ -26,7 +26,7 @@
     <include href="searchform.html" />
 
     <check if="{{ isset(@dept) }}">
-      <div class="page-header">
+      <div class="page-header" data-department="{{ isset(@subdept) ? @subdept.id : @dept.id }}">
         <h1>
           {{ isset(@subdept) ? @subdept.name : @dept.name }}
         </h1>

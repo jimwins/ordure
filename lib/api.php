@@ -47,6 +47,22 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function deptFind($f3) {
+    $db= $f3->get('DBH');
+    $page= new DB\SQL\Mapper($db, 'department');
+
+    $departments= $page->find(array('parent = 0'),
+                              array('order' => 'name'));
+
+    $cast= function($arg) {
+      return $arg->cast();
+    };
+
+    $ret= array_map($cast, $departments);
+
+    echo jsonp($f3, $ret);
+  }
+
   function deptLoad($f3) {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'department');
@@ -71,6 +87,7 @@ class API {
     $ret= $page->cast();
     echo jsonp($f3, $ret);
   }
+
 }
 
 function jsonp($f3, $data) {
