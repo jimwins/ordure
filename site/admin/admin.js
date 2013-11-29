@@ -3,6 +3,8 @@ $(function() {
 
   $('[data-department]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-dept" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
+  $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-product" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
+
   if (typeof slug404 != 'undefined' && slug404) {
     $('#buttons').append($('<a class="edit-slug btn btn-success btn-lg" role="button" data-slug="' + slug404 + '">Create page &raquo;</a>'));
   }
@@ -144,4 +146,76 @@ $(function() {
   $('#dept-add').on('click', deptEdit);
   $('.edit-dept').on('click', deptEdit);
 
+  function productEdit(ev) {
+    $.get(BASE + 'admin/product-editor.html').done(function (html) {
+      var page_editor= $(html);
+
+      page_editor.on('hidden.bs.modal', function() {
+        $(this).remove();
+      });
+
+      var product= $(ev.target).closest('[data-product]');
+
+      var page= { id: product.data('product'),
+                  department: 0, brand: 0,
+                  slug: '', name: '',
+                  description: '',
+                  error: '', departments: [] };
+
+      pageModel= ko.mapping.fromJS(page);
+
+      if (page.id) {
+        $.getJSON(BASE + 'api/productLoad?callback=?',
+                  { id: page.id })
+          .done(function (data) {
+            ko.mapping.fromJS(data, pageModel);
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            page.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      $.getJSON(BASE + 'api/deptFind?callback=?',
+                { levels: 2 })
+        .done(function (data) {
+          ko.mapping.fromJS({ departments: data }, pageModel);
+          // make sure correct selection is made
+          pageModel.department.valueHasMutated();
+        });
+
+      pageModel.saveProduct= function(place, ev) {
+        var product= ko.mapping.toJS(pageModel);
+        delete product.departments;
+
+        $.ajax(BASE + 'api/productSave',
+               { type : 'POST', data : product })
+          .done(function (data) {
+            $(place).closest('.modal').modal('hide');
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            pageModel.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      pageModel.selectedDepartment= ko.computed({
+        read: function () {
+          return this.department();
+        },
+        write: function (value) {
+          if (typeof value != 'undefined' && value != '') {
+            this.department(value);
+          }
+        },
+        owner: pageModel
+      }).extend({ notify: 'always' });
+
+      ko.applyBindings(pageModel, page_editor[0]);
+
+      page_editor.appendTo($('body')).modal();
+    });
+  }
+
+  $('.edit-product').on('click', productEdit);
 });

@@ -27,6 +27,29 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function productLoad($f3) {
+    $db= $f3->get('DBH');
+    $obj= new DB\SQL\Mapper($db, 'product');
+    if (!$obj->load(array('id=?', $f3->get('REQUEST.id')))) {
+      $obj->slug= $_REQUEST['slug'];
+    }
+    $ret= $obj->cast();
+    echo jsonp($f3, $ret);
+  }
+
+  function productSave($f3) {
+    $db= $f3->get('DBH');
+    $obj= new DB\SQL\Mapper($db, 'product');
+    $obj->load(array('id=?', $f3->get('REQUEST.id')));
+    foreach ($_REQUEST as $k => $v) {
+      if ($obj->exists($k)) $obj->set($k, $v);
+    }
+    $obj->modified= date('Y-m-d H:i:s', time());
+    $obj->save();
+    $ret= $obj->cast();
+    echo jsonp($f3, $ret);
+  }
+
   function productToggle($f3) {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'product');
@@ -59,6 +82,14 @@ class API {
     };
 
     $ret= array_map($cast, $departments);
+
+    if ($f3->get('REQUEST.levels') == 2) {
+      foreach ($ret as $i => $dept) {
+        $departments= $page->find(array('parent = ?', $dept['id']),
+                                  array('order' => 'name'));
+        $ret[$i]['sub']= array_map($cast, $departments);
+      }
+    }
 
     echo jsonp($f3, $ret);
   }
