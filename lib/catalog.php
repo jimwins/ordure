@@ -158,6 +158,11 @@ class Catalog {
     $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
 
+    $inactive= "";
+    if (!$f3->get('ADMIN')) {
+      $inactive= " AND inactive != 2";
+    }
+
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
                 unit_of_sale,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
@@ -170,7 +175,7 @@ class Catalog {
                 thumbnail, inactive
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
-          WHERE product = ?
+          WHERE product = ? $inactive
           ORDER BY variation, inactive, IF(stocked IS NULL, 1, 0), code";
 
     $items= $db->exec($q, $product['id']);
