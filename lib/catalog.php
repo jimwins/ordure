@@ -102,7 +102,11 @@ class Catalog {
                            JOIN scat_item ON item.code = scat_item.code
                           WHERE item.product = product.id)';
 
-    $products= $product->find(array('department=?', $dept->id),
+    $products= $product->find(array('department = ?' .
+                                    ($f3->get('ADMIN') ?
+                                     '' :
+                                     ' AND inactive != 2'), 
+                                    $dept->id),
                               array('order' =>
                                       'inactive = 2, brand_name, name'));
 
