@@ -61,6 +61,9 @@ class Catalog {
     if (!$page->title) {
       $page->title= $dept->name . ' - Raw Materials Art Supplies';
     }
+    if (!$page->slug) {
+      $page->slug= $slug;
+    }
 
     $f3->set('PAGE', $page);
 
@@ -111,6 +114,9 @@ class Catalog {
 
     if (!$page->title) {
       $page->title= $dept->name . ' - Raw Materials Art Supplies';
+    }
+    if (!$page->slug) {
+      $page->slug= $slug;
     }
 
     $f3->set('PAGE', $page);
