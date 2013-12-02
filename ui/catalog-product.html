@@ -89,7 +89,7 @@
               </thead>
               <tbody>
                 <repeat group="{{ @items }}" value="{{ @item }}">
-                  <check if="{{ @variation == @item.variation }}">
+                  <check if="{{ htmlspecialchars(@variation) == @item.variation }}">
                     <tr data-item="{{ @item.id }}">
                       <td nowrap>{{ @item.code }}</td>
                       <td>{{ @item.short_name }}</td>
