@@ -19,6 +19,13 @@
                       data-bind="value: name">
           </div>
           <div class="form-group">
+            <label for="brand">Brand</label>
+            <select class="form-control" id="brand"
+                    data-bind="value: selectedBrand, foreach: brands">
+              <option data-bind="text: name, value: id"></option>
+            </select>
+          </div>
+          <div class="form-group">
             <label for="slug">Slug</label>
             <input type="text" class="form-control" id="slug"
                    data-bind="value: slug">
@@ -27,6 +34,7 @@
             <label for="description">Description</label>
             <textarea class="form-control" rows="10" id="description"
                       data-bind="value: description"></textarea>
+          </div>
           <div class="form-group">
             <label for="parent">Department</label>
             <select class="form-control" id="department"

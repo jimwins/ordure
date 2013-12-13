@@ -160,7 +160,8 @@ $(function() {
                   department: 0, brand: 0,
                   slug: '', name: '',
                   description: '',
-                  error: '', departments: [] };
+                  error: '',
+                  departments: [], brands: [] };
 
       pageModel= ko.mapping.fromJS(page);
 
@@ -182,6 +183,13 @@ $(function() {
           ko.mapping.fromJS({ departments: data }, pageModel);
           // make sure correct selection is made
           pageModel.department.valueHasMutated();
+        });
+
+      $.getJSON(BASE + 'api/brandFind?callback=?')
+        .done(function (data) {
+          ko.mapping.fromJS({ brands: data }, pageModel);
+          // make sure correct selection is made
+          pageModel.brand.valueHasMutated();
         });
 
       pageModel.saveProduct= function(place, ev) {
@@ -206,6 +214,18 @@ $(function() {
         write: function (value) {
           if (typeof value != 'undefined' && value != '') {
             this.department(value);
+          }
+        },
+        owner: pageModel
+      }).extend({ notify: 'always' });
+
+      pageModel.selectedBrand= ko.computed({
+        read: function () {
+          return this.brand();
+        },
+        write: function (value) {
+          if (typeof value != 'undefined' && value != '') {
+            this.brand(value);
           }
         },
         owner: pageModel
