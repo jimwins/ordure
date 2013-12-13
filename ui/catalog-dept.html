@@ -31,6 +31,10 @@
     </check>
 
     <div data-slug="{{ @PAGE.slug }}">
+      <check if="{{ @ADMIN && isset(@subdept) }}">
+        <a id="product-add" data-parent="{{ @subdept.id }}"
+           class="pull-right btn btn-primary btn-xs"><span class="fa fa-lg fa-plus-circle"></span></a>
+      </check>
       <div class="rendered">
         {{ @markdown(@PAGE.content) | raw }}
       </div>

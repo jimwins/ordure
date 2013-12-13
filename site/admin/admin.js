@@ -155,9 +155,11 @@ $(function() {
       });
 
       var product= $(ev.target).closest('[data-product]');
+      var subdept= $(ev.target).closest('[data-parent]');
 
       var page= { id: product.data('product'),
-                  department: 0, brand: 0,
+                  department: subdept.data('parent'),
+                  brand: 0,
                   slug: '', name: '',
                   description: '',
                   error: '',
@@ -238,4 +240,5 @@ $(function() {
   }
 
   $('.edit-product').on('click', productEdit);
+  $('#product-add').on('click', productEdit);
 });
