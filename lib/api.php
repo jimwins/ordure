@@ -119,6 +119,22 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function brandFind($f3) {
+    $db= $f3->get('DBH');
+    $page= new DB\SQL\Mapper($db, 'brand');
+
+    $brands= $page->find(array('1 = 1'),
+                         array('order' => 'name'));
+
+    $cast= function($arg) {
+      return $arg->cast();
+    };
+
+    $ret= array_map($cast, $brands);
+
+    echo jsonp($f3, $ret);
+  }
+
 }
 
 function jsonp($f3, $data) {
