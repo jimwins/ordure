@@ -1,0 +1,13 @@
+MIME-Version: 1.0
+Content-type: text/plain; charset={{ @ENCODING }}
+From: {{ @CONTACT }}
+To: {{ @CONTACT }}
+Subject: {{ @REQUEST.subject }}
+
+Name: {{ @REQUEST.name }}
+Email: {{ @REQUEST.email }}
+Comment: {{ @REQUEST.contact }}
+Invitation Code: {{ @REQUEST.code }}
+
+Time: {{ date('F n, Y at g:i a') }}
+IP Address:  {{ @IP }}

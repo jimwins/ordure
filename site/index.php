@@ -43,6 +43,24 @@ $f3->route('GET /*', function ($f3, $args) {
   echo Template::instance()->render($template);
 });
 
+$f3->route('POST /contact', function ($f3, $args) {
+
+  @mail($f3->get('CONTACT'),
+        $f3->get['REQUEST.subject'],
+        Template::instance()->render('contact-email.txt', 'text/plain'));
+
+  $db= $f3->get('DBH');
+
+  $page= new DB\SQL\Mapper($db, 'page');
+
+  $page->load(array('slug=?', 'contact-thanks'))
+    or $f3->error(404);
+
+  $f3->set('PAGE', $page);
+
+  echo Template::instance()->render('page.html');
+});
+
 /* Handle catalog URLs */
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);
