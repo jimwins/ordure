@@ -47,6 +47,10 @@ $(function() {
     $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
   });
   $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
+  $('.do-popover').popover()
+                  .click(function(ev) {
+    setTimeout(function() { $(ev.target).popover('hide'); }, 10000);
+  });
 });
 </script>
 <check if="{{ isset(@GA_UA) && isset(@GA_DOMAIN) }}">
