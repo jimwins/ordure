@@ -46,8 +46,9 @@ $f3->route('GET /*', function ($f3, $args) {
 $f3->route('POST /contact', function ($f3, $args) {
 
   @mail($f3->get('CONTACT'),
-        $f3->get['REQUEST.subject'],
-        Template::instance()->render('contact-email.txt', 'text/plain'));
+        $f3->get('REQUEST.subject'),
+        Template::instance()->render('contact-email.txt', 'text/plain'),
+        "From: " . $f3->get('CONTACT') . "\r\n");
 
   $db= $f3->get('DBH');
 
