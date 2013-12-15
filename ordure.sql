@@ -40,10 +40,10 @@ DROP TABLE IF EXISTS `department`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `department` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `parent` int(10) unsigned DEFAULT NULL,
+  `parent` int(10) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL,
   `slug` varchar(80) NOT NULL,
-  `pos` tinyint(4) NOT NULL,
+  `pos` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `parent` (`parent`,`slug`),
   KEY `name` (`name`)
