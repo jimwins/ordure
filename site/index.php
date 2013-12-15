@@ -22,6 +22,15 @@ $f3->set('ONERROR', function ($f3) {
   if ($f3->get('AJAX')) {
     echo json_encode($f3->get('ERROR'));
   } else {
+    $db= $f3->get('DBH');
+
+    $redir= new DB\SQL\Mapper($db, 'redirect');
+
+    $path= str_replace($f3->get('BASE'), '', $f3->get('URI'));
+    if ($redir->load(array('source LIKE ?', $path . '%'))) {
+      $f3->reroute($redir->dest); 
+    }
+
     // XXX There is some sort of bug in calling a template within ONERROR
     // related to escaping. Running fast and loose for now.
     $f3->set('ESCAPE', false);

@@ -187,6 +187,20 @@ CREATE TABLE `product` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `redirect`
+--
+
+DROP TABLE IF EXISTS `redirect`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `redirect` (
+  `source` varchar(255) NOT NULL,
+  `dest` varchar(255) NOT NULL,
+  PRIMARY KEY (`source`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `scat_item`
 --
 
@@ -269,4 +283,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-11-23 20:09:14
+-- Dump completed on 2013-12-14 21:32:55
