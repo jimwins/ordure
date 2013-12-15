@@ -1,6 +1,6 @@
 Name: {{ @REQUEST.name }} 
 Email: {{ @REQUEST.email }} 
-Comment: {{ @REQUEST.contact }} 
+Comment: {{ @REQUEST.comment }} 
 Invitation Code: {{ @REQUEST.code }} 
 
 Time: {{ date('F n, Y \a\t g:i a') }} 
