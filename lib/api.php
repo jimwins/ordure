@@ -70,6 +70,29 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function itemLoad($f3) {
+    $db= $f3->get('DBH');
+    $obj= new DB\SQL\Mapper($db, 'item');
+    if (!$obj->load(array('id=?', $f3->get('REQUEST.id')))) {
+      $obj->product= $_REQUEST['product'];
+    }
+    $ret= $obj->cast();
+    echo jsonp($f3, $ret);
+  }
+
+  function itemSave($f3) {
+    $db= $f3->get('DBH');
+    $obj= new DB\SQL\Mapper($db, 'item');
+    $obj->load(array('id=?', $f3->get('REQUEST.id')));
+    foreach ($_REQUEST as $k => $v) {
+      if ($obj->exists($k)) $obj->set($k, $v);
+    }
+    $obj->modified= date('Y-m-d H:i:s', time());
+    $obj->save();
+    $ret= $obj->cast();
+    echo jsonp($f3, $ret);
+  }
+
   function deptFind($f3) {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'department');

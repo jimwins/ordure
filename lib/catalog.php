@@ -171,6 +171,7 @@ class Catalog {
                 sale_price(scat_item.retail_price,
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
+                discount_type, discount,
                 stock stocked,
                 thumbnail, inactive
            FROM item

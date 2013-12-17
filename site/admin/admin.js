@@ -3,6 +3,7 @@ $(function() {
 
   $('[data-department]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-dept" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
+  $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs item-add" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-plus-circle"></span></button>'));
   $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-product" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
   if (typeof slug404 != 'undefined' && slug404) {
@@ -241,4 +242,62 @@ $(function() {
 
   $('.edit-product').on('click', productEdit);
   $('#product-add').on('click', productEdit);
+
+  function itemEdit(ev) {
+    $.get(BASE + 'admin/item-editor.html').done(function (html) {
+      var page_editor= $(html);
+
+      page_editor.on('hidden.bs.modal', function() {
+        $(this).remove();
+      });
+
+      var item= $(ev.target).closest('[data-item]');
+      var product= $(ev.target).closest('[data-product]');
+
+      var page= { id: item.data('item'),
+                  product: product.data('product'),
+                  code: '',
+                  name: '',
+                  short_name: '',
+                  variation: '',
+                  retail_price: 0.00,
+                  error: '',
+                  departments: [], brands: [] };
+
+      pageModel= ko.mapping.fromJS(page);
+
+      if (page.id) {
+        $.getJSON(BASE + 'api/itemLoad?callback=?',
+                  { id: page.id })
+          .done(function (data) {
+            ko.mapping.fromJS(data, pageModel);
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            page.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      pageModel.saveItem= function(place, ev) {
+        var item= ko.mapping.toJS(pageModel);
+
+        $.ajax(BASE + 'api/itemSave',
+               { type: 'POST', data: item })
+          .done(function (data) {
+            $(place).closest('.modal').modal('hide');
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            pageModel.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
+      ko.applyBindings(pageModel, page_editor[0]);
+
+      page_editor.appendTo($('body')).modal();
+    });
+  }
+
+  $('.item-edit').on('click', itemEdit);
+  $('.item-add').on('click', itemEdit);
 });

@@ -26,11 +26,17 @@
         {{ @markdown(@product.description) | raw }}
 
         <check if="count(@items) == 1">
-          <dl class="dl-horizontal">
-            <dt>Description</dt><dd>{{ @items.0.short_name }}</dd>
+          <dl class="dl-horizontal" data-item="{{ @items.0.id }}">
+            <dt>Description</dt>
+            <dd>
+              {{ @items.0.short_name }}
+              <check if="{{ @ADMIN }}">
+                <a class="text-right item-edit fa fa-lg fa-pencil"></a>
+              </check>
+            </dd>
             <dt>Item No.</dt><dd>{{ @items.0.code }}</dd>
             <dt>List Price</dt><dd>${{ @items.0.retail_price }}</dd>
-            <check if="@items.0.sale_price">
+            <check if="@items.0.discount_type">
               <dt class="text-primary"><b>Sale Price</b></dt>
               <dd class="text-primary"><b>${{ @items.0.sale_price }}</b></dd>
             </check>
@@ -110,6 +116,7 @@
                       <check if="{{ @ADMIN }}">
                         <td class="text-center">
                           <a class="item-toggle fa fa-lg {{ @item.inactive > 1 ? 'fa-eye-slash' : 'fa-eye' }} {{ @item.inactive == 1 ? 'text-muted' : '' }}"></a>
+                          <a class="item-edit fa fa-lg fa-pencil"></a>
                         </td>
                       </check>
                     </tr>
