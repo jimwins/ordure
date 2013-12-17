@@ -65,9 +65,9 @@ CREATE TABLE `item` (
   `name` varchar(255) NOT NULL,
   `short_name` varchar(255) DEFAULT NULL,
   `variation` varchar(255) NOT NULL,
-  `unit_of_sale` varchar(16) NOT NULL,
+  `unit_of_sale` varchar(16) NOT NULL DEFAULT '',
   `retail_price` decimal(9,2) NOT NULL,
-  `purchase_qty` int(10) unsigned NOT NULL,
+  `purchase_qty` int(10) unsigned NOT NULL DEFAULT '1',
   `length` decimal(9,2) DEFAULT NULL,
   `width` decimal(9,2) DEFAULT NULL,
   `height` decimal(9,2) DEFAULT NULL,
@@ -283,4 +283,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-12-14 21:32:55
+-- Dump completed on 2013-12-16 18:47:43
