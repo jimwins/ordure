@@ -281,6 +281,12 @@ $(function() {
       pageModel.saveItem= function(place, ev) {
         var item= ko.mapping.toJS(pageModel);
 
+        // Don't even send over 'null' values (can't be encoded for POST)
+        for (prop in item) {
+          if (item[prop] === null)
+            delete item[prop];
+        }
+
         $.ajax(BASE + 'api/itemSave',
                { type: 'POST', data: item })
           .done(function (data) {
