@@ -17,4 +17,7 @@
   <!-- Directa Serif Heavy -->
   <link rel="stylesheet" type="text/css"
         href="//dl6rkcuap9je5.cloudfront.net/font/MyFontsWebfontsKit.css">
+  <check if="{{ isset(@EXTRA_HEAD) }}">
+    {{ @EXTRA_HEAD | raw }}
+  </check>
 </head>

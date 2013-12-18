@@ -9,6 +9,7 @@ class Catalog {
     $f3->route("GET /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
     $f3->route("GET /$CATALOG/search", 'Catalog->search');
+    $f3->route("GET /oembed", 'Catalog->oembed');
   }
 
   function top($f3) {
@@ -189,10 +190,92 @@ class Catalog {
     $f3->set('items', $items);
     $f3->set('variations', $variations);
 
+    $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');
+
     $f3->set('PAGE',
              array('title' => "$product[name] by $product[brand_name] - Raw Materials Art Supplies"));
 
     echo Template::instance()->render('catalog-product.html');
+  }
+
+  function oembed($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $url= $f3->get('REQUEST.url');
+
+    if ($f3->exists('REQUEST.type') && $f3->get('REQUEST.type') != 'json') {
+      $f3->error(501);
+    }
+
+    $cat= $f3->get('CATALOG');
+    $base= $f3->get('BASE');
+    if (preg_match("!^http://[-a-z.]+$base/$cat/([-a-z.]+)/([-a-z.]+)/([-a-z.]+)!i",
+                   $url, $m)) {
+      $f3->set('PARAMS.dept', $m[1]);
+      $f3->set('PARAMS.subdept', $m[2]);
+      $f3->set('PARAMS.product', $m[3]);
+    }
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->products= '(SELECT COUNT(*)
+                         FROM product
+                        WHERE department = department.id)';
+
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
+      or $f3->error(404);
+
+    $f3->set('dept', $dept->cast());
+
+    $departments= $dept->find(array('parent=?', $dept->id),
+                              array('order' => 'name'));
+
+    $f3->set('departments', $departments);
+
+    $dept->load(array('slug=?', $f3->get('PARAMS.subdept')))
+      or $f3->error(404);
+
+    $f3->set('subdept', $dept);
+
+    $product= new DB\SQL\Mapper($db, 'product');
+    $product->brand_name = '(SELECT name
+                               FROM brand
+                              WHERE brand = brand.id)';
+    $product->load(array('slug=?', $f3->get('PARAMS.product')));
+    $f3->set('product', $product);
+
+    $inactive= "";
+    if (!$f3->get('ADMIN')) {
+      $inactive= " AND inactive != 2";
+    }
+
+    $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
+                unit_of_sale,
+                IFNULL(scat_item.retail_price, item.retail_price) retail_price,
+                purchase_qty,
+                length, width, height, weight,
+                sale_price(scat_item.retail_price,
+                           scat_item.discount_type,
+                           scat_item.discount) sale_price,
+                discount_type, discount,
+                stock stocked,
+                thumbnail, inactive
+           FROM item
+           LEFT JOIN scat_item ON scat_item.code = item.code
+          WHERE product = ? $inactive
+          ORDER BY variation, inactive, IF(stocked IS NULL, 1, 0), code";
+
+    $items= $db->exec($q, $product['id']);
+
+    $variations= array();
+    foreach ($items as $item) {
+      @$variations[$item['variation']]++;
+    }
+
+    $f3->set('items', $items);
+    $f3->set('variations', $variations);
+
+    echo Template::instance()->render('catalog-oembed.json',
+                                      'application/json');
   }
 
   function search($f3, $args) {
