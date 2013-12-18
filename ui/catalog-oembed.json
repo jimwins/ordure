@@ -4,14 +4,16 @@
   "products": [{
     "title": "{{ @product.name }}",
     "brand": "{{ @product.brand_name }}",
-    "offers": [{
+    "offers": [
 <repeat group="{{ @items }}" value="{{ @item }}">
-      "title": "{{ @item.name }}",
-      "price": "{{ @item.sale_price }}",
-      "currency_code": "USD",
-      "offer_id": "{{ @item.code }}",
-      "availability": "{{ @item.stocked ? 'in stock' : 'backorder' }}",
+      {
+        "title": "{{ @item.name }}",
+        "price": "{{ @item.sale_price }}",
+        "currency_code": "USD",
+        "offer_id": "{{ @item.code }}",
+        "availability": "{{ @item.stocked ? 'in stock' : 'backorder' }}",
+      },
 </repeat>
-    }]
+    ]
   }]
 }
