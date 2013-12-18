@@ -5,14 +5,17 @@
     "title": "{{ @product.name }}",
     "brand": "{{ @product.brand_name }}",
     "offers": [
-<repeat group="{{ @items }}" value="{{ @item }}">
+<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @ctr }}">
+      <check if="{{ @ctr > 1 }}">
+        ,
+      </check>
       {
         "title": "{{ @item.name }}",
         "price": "{{ @item.sale_price }}",
         "currency_code": "USD",
         "offer_id": "{{ @item.code }}",
-        "availability": "{{ @item.stocked ? 'in stock' : 'backorder' }}",
-      },
+        "availability": "{{ @item.stocked ? 'in stock' : 'backorder' }}"
+      }
 </repeat>
     ]
   }]
