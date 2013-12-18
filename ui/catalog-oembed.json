@@ -11,7 +11,7 @@
       </check>
       {
         "title": "{{ @item.name }}",
-        "price": "{{ @item.sale_price }}",
+        "price": {{ @item.sale_price }},
         "currency_code": "USD",
         "offer_id": "{{ @item.code }}",
         "availability": "{{ @item.stocked ? 'in stock' : 'backorder' }}"
