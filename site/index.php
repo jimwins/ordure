@@ -1,5 +1,5 @@
 <?php
-$f3= require('../externals/fatfree/lib/base.php');
+$f3= require('../vendor/bcosca/fatfree/lib/base.php');
 $f3->config('../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),

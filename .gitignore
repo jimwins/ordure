@@ -3,5 +3,7 @@ item_brands.csv
 Gen_Catalog.txt
 images
 config.ini
+static/
+vendor/
 tmp/
 .htaccess

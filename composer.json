@@ -1,0 +1,9 @@
+{
+  "name": "jimwins/ordure",
+  "description": "Ordure is an online store.",
+  "homepage": "http://trainedmonkey.com/projects/ordure/",
+  "license": "MIT",
+  "require": {
+    "bcosca/fatfree": ">=3.2"
+  }
+}
