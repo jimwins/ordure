@@ -10,8 +10,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css"
         href="{{ @STATIC }}/code/combined.css">
-  <link rel="stylesheet" type="text/css"
-        href="{{ @BASE }}/style.css">
+  <style type="text/css">
+   <include href="style.css" />
+  </style>
+  <check if="{{ isset(@DEBUG) }}">
+    <link rel="stylesheet" type="text/css" href="{{ @BASE }}/debug.css">
+  </check>
   <!-- Directa Serif Heavy -->
   <link rel="stylesheet" type="text/css"
         href="{{ @STATIC }}/fonts/MyFontsWebfontsKit.css">

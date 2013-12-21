@@ -1,0 +1,23 @@
+/* Create room for header */
+body.page {
+  padding-top: 70px;
+}
+
+.page-header, .page-header h1 {
+  margin-top: 0px;
+}
+
+/* Use our font for logotype */
+.brand {
+  font-family: 'Directa Serif', 'DirectaSerifHeavy';
+  color: #cd6a21;
+}
+.navbar-brand a {
+  font-family: 'Directa Serif', 'DirectaSerifHeavy';
+  font-size: 1.2em;
+  color: #cd6a21;
+}
+
+footer {
+  margin-top: 20px;
+}
