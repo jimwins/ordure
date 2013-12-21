@@ -13,7 +13,7 @@
   <style type="text/css">
    <include href="style.css" />
   </style>
-  <check if="{{ isset(@DEBUG) }}">
+  <check if="{{ isset(@DEBUG) && @DEBUG }}">
     <link rel="stylesheet" type="text/css" href="{{ @BASE }}/debug.css">
   </check>
   <!-- Directa Serif Heavy -->
