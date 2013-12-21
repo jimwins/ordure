@@ -9,14 +9,12 @@
   </check>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css"
-        href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css"
-        href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+        href="{{ @STATIC }}/code/combined.css">
   <link rel="stylesheet" type="text/css"
         href="{{ @BASE }}/style.css">
   <!-- Directa Serif Heavy -->
   <link rel="stylesheet" type="text/css"
-        href="//dl6rkcuap9je5.cloudfront.net/font/MyFontsWebfontsKit.css">
+        href="{{ @STATIC }}/fonts/MyFontsWebfontsKit.css">
   <check if="{{ isset(@EXTRA_HEAD) }}">
     {{ @EXTRA_HEAD | raw }}
   </check>
