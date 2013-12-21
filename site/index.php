@@ -8,6 +8,7 @@ $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
 
 // Add @markdown() function for templates
 $f3->set('markdown', function($text) {
+  $text= Template::instance()->resolve($text);
   return Markdown::instance()->convert($text);
 });
 
