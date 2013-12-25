@@ -36,6 +36,11 @@
                       data-bind="value: description"></textarea>
           </div>
           <div class="form-group">
+            <label for="image">Image</label>
+            <input type="text" class="form-control" id="image"
+                   data-bind="value: image">
+          </div>
+          <div class="form-group">
             <label for="parent">Department</label>
             <select class="form-control" id="department"
                     data-bind="value: selectedDepartment, foreach: departments">

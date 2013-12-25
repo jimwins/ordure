@@ -161,7 +161,7 @@ $(function() {
       var page= { id: product.data('product'),
                   department: subdept.data('parent'),
                   brand: 0,
-                  slug: '', name: '',
+                  slug: '', name: '', image: '',
                   description: '',
                   error: '',
                   departments: [], brands: [] };
