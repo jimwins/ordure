@@ -10,7 +10,8 @@ class API {
       $page->format= 'markdown';
     }
     $ret= $page->cast();
-    $ret['rendered']= Markdown::instance()->convert($ret['content']);
+    $text= Template::instance()->resolve($ret['content']);
+    $ret['rendered']= Markdown::instance()->convert($text);
     echo jsonp($f3, $ret);
   }
 
