@@ -278,6 +278,19 @@ $(function() {
           });
       }
 
+      pageModel.loadFromScat= function(place, ev) {
+        var code= pageModel.code();
+        $.getJSON(BASE + 'api/itemLoadFromScat?callback=?',
+                  { code: code })
+          .done(function (data) {
+            ko.mapping.fromJS(data, pageModel);
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var data= $.parseJSON(jqxhr.responseText);
+            page.error(textStatus + ', ' + error + ': ' + data.text)
+          });
+      }
+
       pageModel.saveItem= function(place, ev) {
         var item= ko.mapping.toJS(pageModel);
 

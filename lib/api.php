@@ -94,6 +94,16 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function itemLoadFromScat($f3) {
+    $db= $f3->get('DBH');
+
+    $q= "SELECT name, retail_price FROM scat.item WHERE code = ?";
+
+    $ret= $db->exec($q, $f3->get('REQUEST.code'));
+
+    echo jsonp($f3, $ret[0]);
+  }
+
   function deptFind($f3) {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'department');
