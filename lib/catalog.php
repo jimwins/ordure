@@ -340,9 +340,7 @@ class Catalog {
 
     $f3->set('departments', $departments);
 
-    $slug= substr_replace($f3->get('URI'), '', 0, strlen($f3->get('BASE')) + 1);
-    $page= new DB\SQL\Mapper($db, 'page');
-    $page->load(array('slug=?', $slug));
+    $page= array('title' => "Search results @ Raw Materials Art Supplies");
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-search.html');
