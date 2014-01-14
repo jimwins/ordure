@@ -43,14 +43,24 @@ $f3->route('GET /*', function ($f3, $args) {
   $db= $f3->get('DBH');
 
   $page= new DB\SQL\Mapper($db, 'page');
+  $item= new DB\SQL\Mapper($db, 'item');
 
-  $page->load(array('slug=?', $args[1]))
-    or $f3->error(404);
+  if ($page->load(array('slug=?', $args[1]))) {
+    $f3->set('PAGE', $page);
 
-  $f3->set('PAGE', $page);
+    $template= empty($args[1]) ? 'home.html' : 'page.html';
+    echo Template::instance()->render($template);
+  } elseif ($item->load(array('code=?', $args[1]))) {
+    $slug= Catalog::getProductSlug($f3, $item->product);
+    if ($slug) {
+      $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug); 
+    } else {
+      $f3->error(404);
+    }
+  } else {
+    $f3->error(404);
+  }
 
-  $template= empty($args[1]) ? 'home.html' : 'page.html';
-  echo Template::instance()->render($template);
 });
 
 $f3->route('POST /contact', function ($f3, $args) {

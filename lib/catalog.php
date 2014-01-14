@@ -129,6 +129,24 @@ class Catalog {
     echo Template::instance()->render('catalog-dept.html');
   }
 
+  static function getProductSlug($f3, $id) {
+    $db= $f3->get('DBH');
+
+    $product= new DB\SQL\Mapper($db, 'product');
+    $product->load(array('id=?', $id));
+    if (!$product || $product->inactive > 1) return false;
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->load(array('id=?', $product->department));
+    if (!$dept) return false;
+    $subdept_slug= $dept->slug;
+
+    $dept->load(array('id=?', $dept->parent));
+    if (!$dept) return false;
+
+    return $dept->slug . '/' . $subdept_slug . '/' . $product->slug;
+  }
+
   function product($f3, $args) {
     $db= $f3->get('DBH');
 
