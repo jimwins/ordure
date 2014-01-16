@@ -63,10 +63,10 @@
               <td class="text-center">
                 <check if="@product.stocked === null">
                   <true>
-                    <span class="fa fa-square-o text-muted" title="Available by special order"></span>
+                    <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
                   </true>
                   <false>
-                    <span class="fa fa-check-square-o {{ @product.stocked ? 'text-success' : 'text-warning' }}" title="{{ @product.stocked ? 'Currently available in store' : 'Currently out of stock' }}"></span>
+                    <span class="fa fa-thumbs-up {{ @product.stocked ? 'text-success' : 'text-warning' }}" title="{{ @product.stocked ? 'Currently available in store' : 'Currently out of stock' }}"></span>
                   </false>
                 </check>
               </td>
