@@ -22,4 +22,17 @@
   <check if="{{ isset(@EXTRA_HEAD) }}">
     {{ @EXTRA_HEAD | raw }}
   </check>
+  <check if="{{ isset(@PINGDOM_RUM) }}">
+    <script>
+    var _prum = [['id', '{{ @PINGDOM_ROM }}'],
+                 ['mark', 'firstbyte', (new Date()).getTime()]];
+    (function() {
+        var s = document.getElementsByTagName('script')[0]
+          , p = document.createElement('script');
+        p.async = 'async';
+        p.src = '//rum-static.pingdom.net/prum.min.js';
+        s.parentNode.insertBefore(p, s);
+    })();
+    </script>
+  </check>
 </head>
