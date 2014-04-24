@@ -45,12 +45,15 @@ $f3->route('GET /*', function ($f3, $args) {
   $page= new DB\SQL\Mapper($db, 'page');
   $item= new DB\SQL\Mapper($db, 'item');
 
-  if ($page->load(array('slug=?', $args[1]))) {
+  // f3 includes query string in $args[1], which is an odd choice.
+  $path= preg_replace('/\?.+$/', '', $args[1]);
+
+  if ($page->load(array('slug=?', $path))) {
     $f3->set('PAGE', $page);
 
     $template= empty($args[1]) ? 'home.html' : 'page.html';
     echo Template::instance()->render($template);
-  } elseif ($item->load(array('code=?', $args[1]))) {
+  } elseif ($item->load(array('code=?', $path))) {
     $slug= Catalog::getProductSlug($f3, $item->product);
     if ($slug) {
       $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug); 
