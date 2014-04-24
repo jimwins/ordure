@@ -51,7 +51,7 @@ $f3->route('GET /*', function ($f3, $args) {
   if ($page->load(array('slug=?', $path))) {
     $f3->set('PAGE', $page);
 
-    $template= empty($args[1]) ? 'home.html' : 'page.html';
+    $template= empty($path) ? 'home.html' : 'page.html';
     echo Template::instance()->render($template);
   } elseif ($item->load(array('code=?', $path))) {
     $slug= Catalog::getProductSlug($f3, $item->product);
