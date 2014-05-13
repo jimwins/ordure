@@ -4,7 +4,8 @@ $f3->config('../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
-                           $f3->get('db.password')));
+                           $f3->get('db.password'),
+                           array(\PDO::MYSQL_ATTR_LOCAL_INFILE => true)));
 
 // Add @markdown() function for templates
 $f3->set('markdown', function($text) {
@@ -83,6 +84,39 @@ $f3->route('POST /contact', function ($f3, $args) {
   $f3->set('PAGE', $page);
 
   echo Template::instance()->render('page.html');
+});
+
+// Handle updated pricing
+$f3->route('POST /update-pricing', function ($f3, $args) {
+
+  $db= $f3->get('DBH');
+
+  $fn= $_FILES['prices']['tmp_name'];
+  if (!$fn) {
+    $f3->error(500, 'No file specified');
+  }
+
+  $key= $f3->get('UPLOAD_KEY');
+
+  if ($key != $_REQUEST['key']) {
+    $f3->error(500, 'Wrong key.');
+  }
+
+  $q= "LOAD DATA LOCAL INFILE ?
+         REPLACE
+            INTO TABLE scat_item
+          FIELDS TERMINATED BY '\t'
+          IGNORE 1 LINES
+          (retail_price, @discount_type, @discount, @stock, code)
+             SET discount_type = IF(@discount_type = 'NULL', NULL,
+                                    @discount_type),
+                 discount = IF(@discount = 'NULL', NULL, @discount),
+                 stock = IF(@stock = 'NULL', NULL, @stock)
+      ";
+
+  $rows= $db->exec($q, $fn);
+
+  echo "Loaded $rows prices.";
 });
 
 /* Handle catalog URLs */
