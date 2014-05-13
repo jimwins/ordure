@@ -36,7 +36,7 @@
            class="pull-right btn btn-primary btn-xs"><span class="fa fa-lg fa-plus-circle"></span></a>
       </check>
       <div class="rendered">
-        {{ @markdown(@PAGE.content) | raw }}
+        {{ @PAGE.content ? @markdown(@PAGE.content) : '' | raw }}
       </div>
     </div>
     <check if="isset(@products)">
