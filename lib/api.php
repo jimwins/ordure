@@ -24,7 +24,8 @@ class API {
     }
     $page->save();
     $ret= $page->cast();
-    $ret['rendered']= Markdown::instance()->convert($ret['content']);
+    $content= Template::instance()->resolve($ret['content']);
+    $ret['rendered']= Markdown::instance()->convert($content);
     echo jsonp($f3, $ret);
   }
 
