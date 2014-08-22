@@ -21,19 +21,20 @@ $(function() {
       var page= { id: 0, slug: '', title: '',
                   content: '', description: '',
                   rendered: '', error: '' };
-      pageModel= ko.mapping.fromJS(page);
 
       var rendered= $(ev.target).closest('[data-slug]');
+      page.slug= rendered.data('slug');
 
-      var page_slug= rendered.data('slug');
+      pageModel= ko.mapping.fromJS(page);
+
       $.getJSON(BASE + 'api/pageLoad?callback=?',
-                { slug: page_slug })
+                { slug: page.slug })
         .done(function (data) {
           ko.mapping.fromJS(data, pageModel);
         })
         .fail(function (jqxhr, textStatus, error) {
           var data= $.parseJSON(jqxhr.responseText);
-          page.error(textStatus + ', ' + error + ': ' + data.text)
+          pageModel.error(textStatus + ', ' + error + ': ' + data.text)
         });
 
 
