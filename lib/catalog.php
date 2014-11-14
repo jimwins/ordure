@@ -178,7 +178,11 @@ class Catalog {
     $f3->set('product', $product);
 
     $inactive= "";
+
     if (!$f3->get('ADMIN')) {
+      if ($product->inactive == 2) {
+        $f3->error(404);
+      }
       $inactive= " AND inactive != 2";
     }
 
