@@ -4,6 +4,7 @@
   <title>
     {{ isset(@PAGE.title) ? @PAGE.title : (isset(@title) ? @title : '') }}
   </title>
+  <meta http-equiv="content-language" content="en">
   <check if="isset(@PAGE.description) && @PAGE.description">
     <meta name="description" content="{{ @PAGE.description }}">
   </check>
