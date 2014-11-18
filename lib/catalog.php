@@ -4,12 +4,12 @@ class Catalog {
 
   static function addRoutes($f3) {
     $CATALOG= $f3->get('CATALOG');
-    $f3->route("GET /$CATALOG", 'Catalog->top');
-    $f3->route("GET /$CATALOG/@dept", 'Catalog->dept');
-    $f3->route("GET /$CATALOG/@dept/@subdept", 'Catalog->subdept');
-    $f3->route("GET /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
-    $f3->route("GET /$CATALOG/search", 'Catalog->search');
-    $f3->route("GET /oembed", 'Catalog->oembed');
+    $f3->route("GET|HEAD /$CATALOG", 'Catalog->top');
+    $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
+    $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
   function top($f3) {

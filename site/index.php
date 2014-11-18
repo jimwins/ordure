@@ -15,7 +15,7 @@ $f3->set('markdown', function($text) {
 
 // if DEBUG, allow access to /info
 if ($f3->get('DEBUG')) {
-  $f3->route('GET /info', function ($f3) {
+  $f3->route('GET|HEAD /info', function ($f3) {
     phpinfo();
   });
 }
@@ -40,7 +40,7 @@ $f3->set('ONERROR', function ($f3) {
   }
 });
 
-$f3->route('GET /*', function ($f3, $args) {
+$f3->route('GET|HEAD /*', function ($f3, $args) {
   $db= $f3->get('DBH');
 
   $page= new DB\SQL\Mapper($db, 'page');
