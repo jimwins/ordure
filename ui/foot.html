@@ -79,8 +79,8 @@ $(function() {
   _paq.push(['trackPageView']);
   _paq.push(['enableLinkTracking']);
   (function() {
-    var u=(("https:" == document.location.protocol) ? "https" : "http") + "://{{@PIWIK_ROOT}}/";
-    var st=(("https:" == document.location.protocol) ? "https" : "http") + "://{{@STATIC}}/piwik/";
+    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@PIWIK_ROOT}}/";
+    var st=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@STATIC}}/piwik/";
     _paq.push(['setTrackerUrl', u+'piwik.php']);
     _paq.push(['setSiteId', {{ @PIWIK_SITE }}]);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
