@@ -2,6 +2,7 @@ Name: {{ @REQUEST.name }}
 Email: {{ @REQUEST.email }} 
 Comment: {{ @REQUEST.comment }} 
 Invitation Code: {{ @REQUEST.code }} 
+Easel: {{ @REQUEST.easel }}
 
 Time: {{ date('F n, Y \a\t g:i a') }} 
 IP Address:  {{ @IP }} 
