@@ -4,5 +4,5 @@ Comment: {{ @REQUEST.comment }}
 Invitation Code: {{ @REQUEST.code }} 
 Easel: {{ @REQUEST.easel }}
 
-Time: {{ date('F n, Y \a\t g:i a') }} 
+Time: {{ date('F d, Y \a\t g:i a') }} 
 IP Address:  {{ @IP }} 
