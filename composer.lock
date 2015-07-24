@@ -3,49 +3,99 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "9b5e4b692fc6512cb7834f585981d90b",
+    "hash": "854a769ada28de8f6029377015fc82ac",
     "packages": [
         {
             "name": "bcosca/fatfree",
-            "version": "3.2.0",
+            "version": "3.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bcosca/fatfree.git",
-                "reference": "15cf44a2a8bf84f3588a0ad71db0571f751864e8"
+                "reference": "9cc485be8db3b2b9d7c1f098db24afd05e5259da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bcosca/fatfree/zipball/15cf44a2a8bf84f3588a0ad71db0571f751864e8",
-                "reference": "15cf44a2a8bf84f3588a0ad71db0571f751864e8",
+                "url": "https://api.github.com/repos/bcosca/fatfree/zipball/9cc485be8db3b2b9d7c1f098db24afd05e5259da",
+                "reference": "9cc485be8db3b2b9d7c1f098db24afd05e5259da",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=5.3.6"
             },
             "type": "library",
+            "autoload": {
+                "files": [
+                    "lib/base.php"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],
             "description": "A powerful yet easy-to-use PHP micro-framework designed to help you build dynamic and robust Web applications - fast!",
             "homepage": "http://fatfreeframework.com/",
-            "time": "2013-12-18 09:22:56"
+            "time": "2015-06-02 21:34:13"
+        },
+        {
+            "name": "stripe/stripe-php",
+            "version": "v2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stripe/stripe-php.git",
+                "reference": "9d76444550a09a6f9c55dd98113ba0901908e60a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/9d76444550a09a6f9c55dd98113ba0901908e60a",
+                "reference": "9d76444550a09a6f9c55dd98113ba0901908e60a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.0",
+                "satooshi/php-coveralls": "~0.6.1",
+                "squizlabs/php_codesniffer": "~2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Stripe\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stripe and contributors",
+                    "homepage": "https://github.com/stripe/stripe-php/contributors"
+                }
+            ],
+            "description": "Stripe PHP Library",
+            "homepage": "https://stripe.com/",
+            "keywords": [
+                "api",
+                "payment processing",
+                "stripe"
+            ],
+            "time": "2015-07-07 01:13:32"
         }
     ],
-    "packages-dev": [
-
-    ],
-    "aliases": [
-
-    ],
+    "packages-dev": [],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [
-
-    ],
-    "platform": [
-
-    ],
-    "platform-dev": [
-
-    ]
+    "stability-flags": [],
+    "platform": [],
+    "platform-dev": []
 }
