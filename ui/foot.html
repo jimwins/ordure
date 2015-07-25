@@ -90,9 +90,9 @@ $(function() {
 </script>
 <noscript><p><img src="{{ @PIWIK_ROOT }}/piwik.php?idsite={{ @PIWIK_SITE }}" style="border:0;" alt="" /></p></noscript>
 </check>
+<script>
+var BASE= '{{ @BASE }}/';
+</script>
 <check if="{{ @ADMIN }}">
-  <script>
-  var BASE= '{{ @BASE }}/';
-  </script>
   <script src="{{ @BASE }}/admin/admin.js"></script>
 </check>
