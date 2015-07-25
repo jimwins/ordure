@@ -2,7 +2,7 @@
 {{ @REPORT }} 
 
 Total:   {{ @cans }} 
-Amount: ${{ @amount }} 
+Amount: ${{ @total }} 
 
 Time: {{ date('F d, Y \a\t g:i a') }} 
 IP Address:  {{ @IP }} 
