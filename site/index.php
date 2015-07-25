@@ -1,5 +1,6 @@
 <?php
-require_once('../vendor/autoload.php');
+require_once '../vendor/stripe/stripe-php/init.php';
+
 $f3= require_once('../vendor/bcosca/fatfree/lib/base.php');
 $f3->config('../config.ini');
 
