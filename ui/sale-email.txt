@@ -1,0 +1,8 @@
+
+{{ @REPORT }} 
+
+Total:   {{ @cans }} 
+Amount: ${{ @amount }} 
+
+Time: {{ date('F d, Y \a\t g:i a') }} 
+IP Address:  {{ @IP }} 
