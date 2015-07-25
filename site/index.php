@@ -6,7 +6,10 @@ $f3->config('../config.ini');
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
                            $f3->get('db.password'),
-                           array(\PDO::MYSQL_ATTR_LOCAL_INFILE => true)));
+                           array(
+                             \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+                             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                           )));
 
 // Add @markdown() function for templates
 $f3->set('markdown', function($text) {
@@ -95,6 +98,35 @@ $f3->route('POST /saveOrder', function ($f3, $args) {
                   'publishable_key' => $f3->get('STRIPE_KEY'));
 
   $token= json_decode($_REQUEST['token']);
+  $amount= (int)$_REQUEST['amount'];
+
+  $db= $f3->get('DBH');
+
+  $sale= new DB\SQL\Mapper($db, 'sale');
+  $sale->email= $token->email;
+  $sale->amount= $amount;
+  $sale->token= $_REQUEST['token'];
+  $sale->save();
+
+  $item= new DB\SQL\Mapper($db, 'item');
+
+  $line= new DB\SQL\Mapper($db, 'sale_item');
+
+  $cans= 0;
+  $report= "";
+
+  foreach ($_REQUEST['item'] as $code => $qty) {
+    if ($qty == 0) continue;
+    $cans+= $qty;
+    $item->load(array('code = ?', "MXB-" . $code));
+    $line->sale= $sale->id;
+    $line->item= $item->id;
+    $line->quantity= $qty;
+    $line->save();
+    $line->reset();
+
+    $report.= sprintf("% 4d", $qty) . " " . $item->code . " " . $item->short_name . "\n";
+  }
 
   \Stripe\Stripe::setApiKey($stripe['secret_key']);
 
@@ -105,12 +137,24 @@ $f3->route('POST /saveOrder', function ($f3, $args) {
 
   $charge= \Stripe\Charge::create(array(
     'customer' => $customer->id,
-    'amount' => $_REQUEST['amount'],
+    'amount' => (int)$_REQUEST['amount'],
     'currency' => 'usd',
   ));
 
-  return json_encode($charge);
+  $sale->customer_id= $customer->id;
+  $sale->charge_id= $charge->id;
+  $sale->save();
 
+  $f3->set('REPORT', $report);
+  $f3->set('cans', $cans);
+  $f3->set('total', (int)$_REQUEST['amount'] / 100);
+
+  @mail($f3->get('CONTACT_SALES'),
+        "Black Sale: $cans cans, " . $customer->email,
+        Template::instance()->render('sale-email.txt', 'text/plain'),
+        "From: " . $f3->get('CONTACT_SALES') . "\r\n");
+
+  echo json_encode(array('message' => "Order has been placed."));
 });
 
 $f3->route('POST /contact', function ($f3, $args) {
