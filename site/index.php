@@ -1,6 +1,6 @@
 <?php
 require_once('../vendor/autoload.php');
-$f3= \Base::instance();
+$f3= require_once('../vendor/bcosca/fatfree/lib/base.php');
 $f3->config('../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
