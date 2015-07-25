@@ -1,0 +1,99 @@
+<set title="Sign In @ Raw Materials Art Supplies" />
+<include href="header.html" />
+
+<div class="row">
+
+<form method="POST" action="">
+
+<div class="col-md-6 col-md-push-3">
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Sign In
+      </h3>
+    </div>
+    <div class="panel-body">
+
+      <check if="{{ @LOGIN_FAILED }}">
+        <div class="alert alert-danger" role="alert">
+          <strong>There was a problem with your request.</strong>
+          <!-- XXX should pass in rest of this message from code. -->
+          There was an error with your email / password combination.
+          Please try again.
+        </div>
+      </check>
+
+      <div class="form-group">
+        <label for="email">
+          What is your email address?
+        </label>
+        <input type="email" class="form-control" id="email"
+               data-bind="value: email"
+               placeholder="Email address">
+      </div> 
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="radio">
+          <label>
+            <input type="radio" name="createNew" value="1"
+                   data-bind="checked: createNew">
+            No, I am a new customer.
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="createNew" value="0"
+                   data-bind="checked: createNew">
+            Yes, I have a password:
+            <input type="password" class="form-control" id="password"
+                   data-bind="value: password, disable: createNew() == '1'"
+                   placeholder="Enter your password">
+            <small class="text-warning" data-bind="visible: password().length && password().length < 5">
+              Password must be at least four characters long.
+            </small>
+          </label>
+        </div>
+
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="rememberMe" value="1">
+            Keep me signed in.
+          </label>
+            
+            <a tabindex="0" class="help" role="button" data-toggle="popover" data-trigger="focus" title='"Keep Me Signed In" Checkbox' data-html="true" data-content='When you sign in to our website, you can stay signed in by checking the "Keep me signed in" or "Keep me signed in for future purchases" box on the sign in page. This will keep you signed in to your account for two weeks, or until you attempt to perform a sensitive action such as modifying account information.<br><br>To prevent others from accessing your account, we strongly recommend you do not use this feature on devices and computers that are shared with other people.'>Details.</a>
+        </div>
+      </div> 
+
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary">Sign in using our secure server</button>
+    </div>
+  </div>
+
+  <h4>Sign In Help</h4>
+
+  <p>Forgot your password? <a href="forgotPassword">Get password help.</a>
+
+</div>
+
+</form>
+
+</div>
+
+<include href="foot.html" />
+<script>
+
+var loginModel= {
+  email: ko.observable('{{ @email }}'),
+  password: ko.observable('{{ @password }}'),
+  createNew: ko.observable('{{ @createNew }}'),
+  rememberMe: ko.observable('{{ @rememberMe }}'),
+};
+
+ko.applyBindings(loginModel);
+
+$(".help").popover();
+
+</script>

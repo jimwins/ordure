@@ -210,6 +210,10 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
   echo "Loaded $rows prices.";
 });
 
+/* Handle authentication */
+require '../lib/auth.php';
+Auth::addRoutes($f3);
+
 /* Handle catalog URLs */
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);
