@@ -1,5 +1,6 @@
 <?php
-$f3= require('../vendor/bcosca/fatfree/lib/base.php');
+require_once('../vendor/autoload.php');
+$f3= \Base::instance();
 $f3->config('../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
@@ -64,6 +65,51 @@ $f3->route('GET|HEAD /*', function ($f3, $args) {
   } else {
     $f3->error(404);
   }
+
+});
+
+$f3->route('GET|HEAD /2015-black-sale', function ($f3, $args) {
+  $colors= array();
+
+  $f= fopen('/Users/jimw/rm/ordure/ui/mxb-colors.txt', 'r');
+  while (($line= fgets($f)) !== false) {
+    $details= explode("\t", trim($line));
+    $r= hexdec(substr($details[0], 0, 2));
+    $g= hexdec(substr($details[0], 2, 2));
+    $b= hexdec(substr($details[0], 4, 2));
+    // Calculate whether to use white or black text.
+    $details[]= (($r * 0.2126 + $g * 0.7152 + $b * 0.0722) > 179)
+                ? '000' : 'fff';
+    $colors[]= $details;
+  }
+  fclose($f);
+
+  $f3->set('COLORS', $colors);
+
+  echo Template::instance()->render('2015-black-sale.html');
+});
+
+// Handle 2015 sale
+$f3->route('POST /saveOrder', function ($f3, $args) {
+  $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
+                  'publishable_key' => $f3->get('STRIPE_KEY'));
+
+  $token= json_decode($_REQUEST['token']);
+
+  \Stripe\Stripe::setApiKey($stripe['secret_key']);
+
+  $customer= \Stripe\Customer::create(array(
+    'email' => $token->email,
+    'card' => $token->id
+  ));
+
+  $charge= \Stripe\Charge::create(array(
+    'customer' => $customer->id,
+    'amount' => $_REQUEST['amount'],
+    'currency' => 'usd',
+  ));
+
+  return json_encode($charge);
 
 });
 

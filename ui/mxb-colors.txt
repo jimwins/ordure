@@ -1,0 +1,187 @@
+f4e593	Smash137‘s Potato	1005           
+ffe668	Easter Yellow	1010           
+ffda15	Kicking Yellow	1025           
+fcc000	Yellow	1030           
+f59e01	Melon Yellow	1045           
+d37e0a	Topaz	1050           
+a34c2e	Hazle	1060           
+6f2f23	Pecan Nut	1070           
+612316	Maroon	1080           
+e0a600	Indian Spice	1110           
+b69822	Masala	1120           
+a18114	Delhi	1130           
+6f592a	Bombay	1140           
+f49f24	Juice	2060           
+ef800d	Clockwork Orange	2070           
+ea640c	Pure Orange	2075           
+e85011	Halloween	2085           
+e3001b	Code Red	2093           
+f08c48	Tomorrow	2110           
+eb6a27	Atom‘s Megablast	2120           
+c4091c	Fire Rose	3020           
+6d0827	Cardinal	3062           
+3f2224	Merlot	3065           
+331028	Cherry	3070           
+510029	Winegum	3080           
+f5b8c5	Miss Piggy	3100           
+ef8eb0	Pink Cadillac	3120           
+e7478a	Pink Panther	3130           
+c1005e	Punk Pink	3145           
+e94190	Beast	3148           
+aa0073	Freak	3150           
+981569	Purple Rain	3155           
+ad0f6c	Good Times	3160           
+7e154e	Imperator	3170           
+f7c0b7	Cocktail	3200           
+f29a84	Mr. Crab	3220           
+ee8363	Sushi	3240           
+f3a7b1	Patpong	3305           
+eb727b	Pink Lemonade	3310           
+e74963	Lollipop	3320           
+ba0f3e	Bloody Mary	3330           
+a8438f	Illusion	3920           
+9d197e	Magic	3940           
+c59fc6	Bubble Bath	3995           
+b68fbc	Ms. Jackson	4000           
+8c4a91	Monster	4020           
+6d2c7e	Pimp Violet	4040           
+511b57	Galaxy	4060           
+b1a0ca	Lavender	4115           
+a98dbd	Blue Velvet	4130           
+62579b	Royal Purple	4155           
+554189	Wizard	4160           
+0c0940	Universe	4182           
+aa959c	Gut	4210           
+836976	Kidney	4230           
+664b5c	Liver	4250           
+dbb4c6	Dummy	4260           
+986d81	Plum	4280           
+5b2c40	Amethyst	4290           
+cdd2db	Edelgard	4310           
+a2b0ce	Brunhilde	4320           
+6f89bc	Waltraut	4330           
+4d599a	Irmgard	4340           
+6bc8e7	Baby Blue	5020           
+00a2d3	Light Blue	5030           
+0070b8	Horizon	5070           
+054b90	Royal Blue	5077           
+00326d	Ultramarine	5080           
+00173a	Dark Indigo	5092           
+aec2c0	Dove	5125           
+52676c	Seal	5140           
+364958	Space	5160           
+98b0c6	Trout	5180           
+577492	Marlin	5185           
+264b68	Whale	5190           
+c9e0f2	Ice Blue	5200           
+97c4e1	Lenor	5210           
+5f97c6	Blue Lagoon	5230           
+00579e	Knock Out Blue	5250           
+24327d	Sorrento Blue	5270           
+e3de2a	Pistachio	6000           
+c9d215	Acid	6005           
+a9c707	Slimer	6010           
+a1a324	Oasis 	6012           
+cbd56c	Spring	6013           
+b5cc22	Wild Lime	6015           
+51ab27	Irish Green	6045           
+008132	Boston	6055           
+025a27	Celtic	6060           
+003613	Banknote	6065           
+003c1a	TAG Green	6070           
+28c842	Hippie	6075           
+29b419	Mescaline	6080           
+25900c	Woodstock	6090           
+00752d	Plant	6095           
+91d1da	Tiffany	6110           
+4aadc4	Cool Cologne	6130           
+0086a1	Mermaid	6150           
+013c4a	Neptune	6170           
+002a32	Riffs	6175           
+6bdbcf	Drops	6180           
+3dc6ac	Nappies	6190           
+0c8e76	Surgery	6195           
+9ac776	E2E Green	6210           
+50ae58	Revolt Green	6220           
+007f64	Atlantis	6240           
+c7dbc8	Olymp	6310           
+b0d7be	Hope	6320           
+64b699	Patina	6330           
+007764	Copper Green	6340           
+d1d5bc	Trabi	6410           
+bec695	Beetle	6420           
+a3ac7c	Reseda	6430           
+a5b29c	Fog	6510           
+778b7b	Mist	6520           
+4c6043	Storm	6530           
+d1c782	Bamboo	6610           
+a3903f	Hemp	6620           
+8f8534	Boa	6625           
+705a39	Pan	6630           
+bab526	Pear Green	6710           
+718428	Lost Island	6720           
+565b21	Troops	6725           
+28401c	Toad	6730           
+d6d1af	Face	6905           
+a2a682	Hannibal	6910           
+808460	Murdock	6920           
+3f3e2a	B.A Bosko	6930           
+eef1e6	Jaws	7010           
+c7c8b8	Mouse	7030           
+999a92	Shark	7050           
+5e6460	Rhino	7070           
+48403d	Ant	7080           
+c7bba8	Gambetta	7110           
+9d9283	Lennox	7120           
+7d7268	Lambrate	7130           
+524038	Industriilor	7140           
+a69fa2	Houdini	7210           
+847c82	Morpheus	7220           
+57515a	Nostradamus	7230           
+a89e9f	Ghetto	7320           
+645b5c	Dumbo	7340           
+352c2d	Slate	7360           
+f2e8c4	Ivory	8000           
+b89247	Sand	8010           
+d9b980	Beige	8020           
+daac92	Skin	8030           
+cb916c	Cremino	8040           
+b27a59	Frappé	8050           
+7c5035	Chocolate	8060           
+49201a	Jawa	8070           
+902c2e	Rust	8080           
+c2a875	Arabian	8110           
+ab9269	Gobi	8120           
+90754f	Syrian	8130           
+9f6b5a	After	8210           
+f5ac8c	Snail	8220           
+df5105	Koi	8230           
+b94709	Falling	8240           
+5b2607	Candy Bar	8250           
+512320	Mud	8260           
+030506	Black	9001           
+ffffff	Snow White	9100           
+fbfcf6	White	9105           
+f9e900	Infra Yellow	IN1000           
+f39524	Infra Orange	IN2000           
+e53b18	Infra Red	IN3000           
+ff0060	Infra Pink	IN4000           
+ae01d9	Infra Violet	IN4500           
+81ba49	Infra Green	IN6000           
+f9e900	True Yellow	TR1000           
+fff562	True Yellow 50%	TR1010           
+e51175	True Magenta	TR4000           
+e75d98	True Magenta 50%	TR4010           
+00b8d2	True Cyan	TR5000           
+86cedc	True Cyan 50%	TR5010           
+ffdf00	Power Yellow	P1000           
+ff5a10	Power Orange	P2000           
+e22218	Power Red	P3000           
+e64690	Power Pink	P4000           
+18225b	Power Violet	P4100           
+00549d	Power Blue	P5000           
+67b028	Power Green	P6000           
+806031	Copperchrome	COPPER
+826107	Goldchrome	GOLD
+999999	Outline Silver	OUTLNSLV
+999999	Silverchrome	SILVER
