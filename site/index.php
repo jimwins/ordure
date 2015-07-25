@@ -74,7 +74,7 @@ $f3->route('GET|HEAD /*', function ($f3, $args) {
 $f3->route('GET|HEAD /2015-black-sale', function ($f3, $args) {
   $colors= array();
 
-  $f= fopen('/Users/jimw/rm/ordure/ui/mxb-colors.txt', 'r');
+  $f= fopen($f3->get('UI').'mxb-colors.txt', 'r');
   while (($line= fgets($f)) !== false) {
     $details= explode("\t", trim($line));
     $r= hexdec(substr($details[0], 0, 2));
