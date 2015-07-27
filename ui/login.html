@@ -28,7 +28,8 @@
         <label for="email">
           What is your email address?
         </label>
-        <input type="email" class="form-control" id="email"
+        <input type="email" class="form-control"
+               id="email" name="email"
                data-bind="value: email"
                placeholder="Email address">
       </div> 
@@ -47,7 +48,8 @@
             <input type="radio" name="createNew" value="0"
                    data-bind="checked: createNew">
             Yes, I have a password:
-            <input type="password" class="form-control" id="password"
+            <input type="password" class="form-control"
+                   id="password" name="password"
                    data-bind="value: password, disable: createNew() == '1'"
                    placeholder="Enter your password">
             <small class="text-warning" data-bind="visible: password().length && password().length < 5">
