@@ -57,14 +57,18 @@
 
 <br>
 
+<check if="{{ 0 }}">
 <button id="purchase" class="btn btn-primary btn-lg">Place Order</button>
-
-<script src="https://checkout.stripe.com/checkout.js"></script>
+</check>
+<button class="btn btn-primary btn-lg">Sorry, the sale is over.</button>
 
 </form>
 
 </div>
 <include href="footer.html" />
+<check if="{{ 0 }}">
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
 <script>
 
 var handler = StripeCheckout.configure({
@@ -127,4 +131,5 @@ $(window).on('popstate', function() {
 });
 
 </script>
+</check>
 
