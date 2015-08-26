@@ -43,8 +43,16 @@
     <div id="corner-banner">DEBUG</div>
   </true>
 </check>
-<script src="{{ @STATIC }}/code/combined-2015-08-17.js"></script>
 <script>
+(function() {
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = '{{ @STATIC }}/code/combined-2015-08-17.js';
+    var x = document.getElementsByTagName('script')[0];
+    x.parentNode.insertBefore(s, x);
+})();
+
 $(function() {
   $(window).on('resize', function() {
     $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
