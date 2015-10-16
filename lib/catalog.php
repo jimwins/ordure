@@ -196,6 +196,7 @@ class Catalog {
                            scat_item.discount) sale_price,
                 discount_type, discount,
                 stock stocked,
+                minimum_quantity,
                 thumbnail, inactive
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code

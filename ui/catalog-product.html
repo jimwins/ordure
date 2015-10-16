@@ -40,7 +40,7 @@
               <dt class="text-primary"><b>Sale Price</b></dt>
               <dd class="text-primary"><b>${{ @items.0.sale_price }}</b></dd>
             </check>
-            <check if="isset(@items.0.stocked)">
+            <check if="@items.0.minimum_quantity">
               <true>
                 <dd class="{{ @items.0.stocked ? 'text-primary' : 'text-muted' }}" title="{{ @items.0.stocked ? @items.0.stocked . ' currently in stock' : 'Currently out of stock' }}">Available in store.</dd>
               </true>
@@ -107,7 +107,7 @@
                         </strong>
                       </td>
                       <td class="text-center">
-                        <check if="@item.stocked === null">
+                        <check if="!(@item.minimum_quantity)">
                           <true>
                             <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
                           </true>
