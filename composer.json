@@ -4,7 +4,8 @@
   "homepage": "http://trainedmonkey.com/projects/ordure/",
   "license": "MIT",
   "require": {
-    "bcosca/fatfree": "3.2.0",
-    "stripe/stripe-php": "2.*"
+    "bcosca/fatfree": "3.5.1",
+    "stripe/stripe-php": "2.*",
+    "respect/validation": "^0.9.3"
   }
 }
