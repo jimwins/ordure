@@ -33,9 +33,10 @@ $f3->set('ONERROR', function ($f3) {
 
     $redir= new DB\SQL\Mapper($db, 'redirect');
 
-    $path= str_replace($f3->get('BASE'), '', $f3->get('URI'));
+    $path= $f3->get('PATH');
     if ($redir->load(array('source LIKE ?', $path . '%'))) {
-      $f3->reroute($redir->dest); 
+      $q= $f3->get('QUERY');
+      $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
     }
 
     // XXX There is some sort of bug in calling a template within ONERROR
