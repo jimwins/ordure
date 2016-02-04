@@ -46,32 +46,39 @@ $f3->set('ONERROR', function ($f3) {
   }
 });
 
-$f3->route('GET|HEAD /*', function ($f3, $args) {
-  $db= $f3->get('DBH');
+class Page {
 
-  $page= new DB\SQL\Mapper($db, 'page');
-  $item= new DB\SQL\Mapper($db, 'item');
+  function getPage($f3, $args) {
+    $db= $f3->get('DBH');
 
-  // f3 includes query string in $args[1], which is an odd choice.
-  $path= preg_replace('/\?.+$/', '', $args[1]);
+    $page= new DB\SQL\Mapper($db, 'page');
+    $item= new DB\SQL\Mapper($db, 'item');
 
-  if ($page->load(array('slug=?', $path))) {
-    $f3->set('PAGE', $page);
+    // f3 includes query string in $args[1], which is an odd choice.
+    $path= preg_replace('/\?.+$/', '', $args[1]);
 
-    $template= empty($path) ? 'home.html' : 'page.html';
-    echo Template::instance()->render($template);
-  } elseif ($item->load(array('code=?', $path))) {
-    $slug= Catalog::getProductSlug($f3, $item->product);
-    if ($slug) {
-      $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug); 
+    if ($page->load(array('slug=?', $path))) {
+      $f3->set('PAGE', $page);
+
+      $template= empty($path) ? 'home.html' : 'page.html';
+      echo Template::instance()->render($template);
+    } elseif ($item->load(array('code=?', $path))) {
+      $slug= Catalog::getProductSlug($f3, $item->product);
+      if ($slug) {
+        $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug); 
+      } else {
+        $f3->error(404);
+      }
     } else {
       $f3->error(404);
     }
-  } else {
-    $f3->error(404);
+
   }
 
-});
+}
+
+$f3->route('GET|HEAD /*', 'Page->getPage');
+$f3->route('GET|HEAD /', 'Page->getPage');
 
 $f3->route('GET|HEAD /2015-black-sale', function ($f3, $args) {
   $colors= array();
