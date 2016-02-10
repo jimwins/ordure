@@ -43,12 +43,28 @@ class API {
     $db= $f3->get('DBH');
     $obj= new DB\SQL\Mapper($db, 'product');
     $obj->load(array('id=?', $f3->get('REQUEST.id')));
+
+    // Handle rename
+    $old_slug= "";
+    if ($_REQUEST['slug'] != $obj->slug) {
+      $old_slug= Catalog::getProductSlug($f3, $obj->id);
+    }
+
     foreach ($_REQUEST as $k => $v) {
       if ($obj->exists($k)) $obj->set($k, $v);
     }
     $obj->modified= date('Y-m-d H:i:s', time());
     $obj->save();
     $ret= $obj->cast();
+
+    if ($old_slug) {
+      $new_slug= Catalog::getProductSlug($f3, $obj->id);
+
+      $redir= new DB\SQL\Mapper($db, 'redirect');
+      $redir->source= '/art-supplies/' . $old_slug;
+      $redir->dest= '/art-supplies/' . $new_slug;
+      $redir->save();
+    }
     echo jsonp($f3, $ret);
   }
 
