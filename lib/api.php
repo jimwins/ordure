@@ -46,7 +46,7 @@ class API {
 
     // Handle rename
     $old_slug= "";
-    if ($_REQUEST['slug'] != $obj->slug) {
+    if ($obj->slug && $_REQUEST['slug'] != $obj->slug) {
       $old_slug= Catalog::getProductSlug($f3, $obj->id);
     }
 
