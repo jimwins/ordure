@@ -98,7 +98,7 @@ class Catalog {
     $product->brand_name= '(SELECT name
                               FROM brand
                              WHERE brand = brand.id)';
-    $product->stocked= '(SELECT SUM(stock)
+    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
                            FROM item
                            JOIN scat_item ON item.code = scat_item.code
                           WHERE item.product = product.id)';
