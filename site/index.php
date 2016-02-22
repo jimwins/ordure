@@ -168,10 +168,14 @@ $f3->route('POST /saveOrder', function ($f3, $args) {
 
 $f3->route('POST /contact', function ($f3, $args) {
 
+  $headers= array();
+  $headers[]= "From: " . $f3->get('CONTACT');
+  $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+
   @mail($f3->get('CONTACT'),
         $f3->get('REQUEST.subject'),
         Template::instance()->render('contact-email.txt', 'text/plain'),
-        "From: " . $f3->get('CONTACT') . "\r\n");
+        implode("\r\n", $headers));
 
   $db= $f3->get('DBH');
 
