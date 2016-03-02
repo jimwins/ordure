@@ -210,7 +210,8 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
             INTO TABLE scat_item
           FIELDS TERMINATED BY '\t'
           IGNORE 1 LINES
-          (retail_price, @discount_type, @discount, @stock, code)
+          (retail_price, @discount_type, @discount, @stock,
+           code, minimum_quantity)
              SET discount_type = IF(@discount_type = 'NULL', NULL,
                                     @discount_type),
                  discount = IF(@discount = 'NULL', NULL, @discount),
