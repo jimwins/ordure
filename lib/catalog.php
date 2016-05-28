@@ -8,7 +8,14 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
-    $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
+
+    /* Use Sphinx if it is configured */
+    if ($f3->get('sphinx.dsn')) {
+      $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->sphinx_search');
+    } else {
+      $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
+    }
+
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
@@ -350,6 +357,76 @@ class Catalog {
             -- ORDER BY inactive, brand.name, name";
       
       $products= $db->exec($q, $term);
+
+      $f3->set('products', $products);
+    }
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->products= '(SELECT COUNT(*)
+                         FROM product
+                        WHERE department = department.id)';
+    $departments= $dept->find(array('parent = 0'),
+                              array('order' => 'name'));
+
+    $f3->set('departments', $departments);
+
+    $page= array('title' => "Search results @ Raw Materials Art Supplies");
+    $f3->set('PAGE', $page);
+
+    echo Template::instance()->render('catalog-search.html');
+  }
+
+  function sphinx_search($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $term= '';
+    if ($f3->exists('REQUEST.q')) {
+      $term= $f3->get('REQUEST.q');
+    }
+
+    /* Check if this a direct match for an item code */
+    if ($term && preg_match('!^[-A-Z0-9/]+$!i', $term)) {
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->load(array('code=?', $term));
+
+      if (!$item->dry()) {
+        $product= new DB\SQL\Mapper($db, 'product');
+        $product->load(array('id=?', $item->product));
+
+        if (!$product->dry()) {
+          $dept= new DB\SQL\Mapper($db, 'department');
+          $dept->load(array('id=?', $product->department));
+
+          if (!$dept->dry()) {
+            $subdept_slug= $dept->slug;
+            $dept->load(array('id=?', $dept->parent));
+            if (!$dept->dry()) {
+              $f3->reroute('/'. $f3->get('CATALOG') . '/' .
+                           $dept->slug . '/' . $subdept_slug . '/' .
+                           $product->slug, false);
+            }
+          }
+        }
+      }
+    }
+
+    if ($term) {
+      $sph= new DB\SQL($f3->get('sphinx.dsn'),
+                       $f3->get('sphinx.user'),
+                       $f3->get('sphinx.password'),
+                       array(
+                         \PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+                         \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
+                       ));
+
+      $q= "select * from ordure where match(?)"; 
+      
+      $products= $sph->exec($q, $term);
+
+      /* XXX sphinx doesn't have full slug stored */
+      foreach ($products as &$product) {
+        $product['slug']= Catalog::getProductSlug($f3, $product['id']);
+      }
 
       $f3->set('products', $products);
     }

@@ -28,8 +28,8 @@
               <tr class="">
                 <td>{{ @product.brand_name }}</td>
                 <td>
-                  <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.dept . '/' . @product.subdept . '/' . @product.slug }}">
-                    {{ @product.name }}
+                  <a href="{{ @BASE . '/' . @CATALOG . '/' . (@product.dept ? @product.dept . '/' : '') . (@product.subdept ? @product.subdept . '/' : '') . @product.slug }}">
+                    {{ @product.name }}{{ @product.title }}
                   </a>
                 </td>
               </tr>
