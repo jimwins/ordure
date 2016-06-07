@@ -1,0 +1,114 @@
+<set title="Paint and Sip at The Overflow @ Raw Materials Art Supplies" />
+<include href="header.html" />
+<div class="container">
+
+<form id="order" class="form-inline">
+
+<div class="page-header">
+  <h1>
+    Paint and Sip at The Overflow
+    <small>$30</small>
+  </h1>
+</div>
+
+<div class="row">
+  <div class="col-sm-8">
+    <p class="lead">
+      Kale chips tote bag man bun farm-to-table, heirloom taxidermy messenger bag humblebrag asymmetrical kogi. Flexitarian marfa pitchfork mixtape.
+    </p>
+
+    <p class="text-danger">
+      Fanny pack listicle typewriter butcher celiac mumblecore. Listicle meggings fanny pack ethical yr. Fingerstache PBR&amp;B flannel, chillwave small batch craft beer microdosing swag synth roof party forage authentic pour-over gentrify intelligentsia.
+    </p>
+
+    <p>
+      Vegan fashion axe austin, PBR&amp;B banjo roof party lomo. Actually ennui authentic, tousled godard paleo gentrify single-origin coffee tofu vegan sartorial.
+    </p>
+
+  </div>
+
+  <div class="col-sm-4">
+    <img class="img-rounded" src="{{ @STATIC }}/catimg/mxb-2070_x.jpg" width="181" height="240" alt="Montana Black Spray Can">
+  </div>
+</div>
+
+<br>
+
+<div class="input-group input-group-lg">
+  <span class="input-group-addon">#</span>
+  <input id="people" type="text" class="form-control" placeholder="How many attendees?">
+  <span class="input-group-btn">
+    <button id="purchase" class="btn btn-primary btn-lg">Register &amp; Pay</button>
+  </span>
+</div>
+
+</form>
+
+</div>
+<include href="footer.html" />
+
+<script src="https://checkout.stripe.com/checkout.js"></script>
+
+<script>
+
+var handler = StripeCheckout.configure({
+  key: '{{ @STRIPE_KEY }}',
+  image: '{{ @STATIC }}/images/wonton-logo-128x128.jpg',
+  token: function(token) {
+    // Use the token to create the charge with a server-side script.
+    // You can access the token ID with `token.id`
+
+    var data= $('#order').serialize();
+    var tok= JSON.stringify(token);
+
+    $.ajax(BASE + 'saveRegistration',
+           { type : 'POST',
+             data : data + '&token=' + tok + '&amount=' + total } )
+          .done(function (data) {
+            window.location.href= BASE + 'registration-confirmed';
+          })
+          .fail(function (jqxhr, textStatus, error) {
+            var err= error;
+            alert(error);
+          });
+
+  }
+});
+
+$('#purchase').on('click', function(e) {
+  e.preventDefault();
+
+  // Get total number of people and work out total
+  var people= 0;
+  $('input#people').each(function() {
+    people+= Number($(this).val());
+  });
+
+  if (people == 0) {
+    alert("You have to tell us how many people are coming.");
+    return;
+  }
+
+  total= (people * 3000);
+
+  // Open Checkout with further options
+  handler.open({
+    name: 'Raw Materials Art Supplies',
+    description: people + (people > 1 ? ' people' : ' person'),
+    zipCode: true,
+    amount: total
+  });
+});
+
+$('#order').on('submit', function(e) {
+  // XXX write better error message
+  alert("Sorry, something is wrong with checking out.");
+  e.preventDefault();
+});
+
+// Close Checkout on page navigation
+$(window).on('popstate', function() {
+  handler.close();
+});
+
+</script>

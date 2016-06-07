@@ -101,6 +101,61 @@ $f3->route('GET|HEAD /2015-black-sale', function ($f3, $args) {
   echo Template::instance()->render('2015-black-sale.html');
 });
 
+$f3->route('GET|HEAD /to-paint-and-sip', function ($f3, $args) {
+  echo Template::instance()->render('workshop-registration.html');
+});
+
+// Handle registration
+$f3->route('POST /saveRegistration', function ($f3, $args) {
+  $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
+                  'publishable_key' => $f3->get('STRIPE_KEY'));
+
+  $token= json_decode($_REQUEST['token']);
+  $amount= (int)$_REQUEST['amount'];
+
+  $db= $f3->get('DBH');
+
+  $sale= new DB\SQL\Mapper($db, 'sale');
+  $sale->email= $token->email;
+  $sale->amount= $amount;
+  $sale->token= $_REQUEST['token'];
+  $sale->save();
+
+  $item= new DB\SQL\Mapper($db, 'item');
+
+  $people= (int)$_REQUEST['people'];
+  $report= sprintf("% 4d", $people) . " People\n";
+
+  \Stripe\Stripe::setApiKey($stripe['secret_key']);
+
+  $customer= \Stripe\Customer::create(array(
+    'email' => $token->email,
+    'card' => $token->id
+  ));
+
+  $charge= \Stripe\Charge::create(array(
+    'customer' => $customer->id,
+    'amount' => (int)$_REQUEST['amount'],
+    'currency' => 'usd',
+  ));
+
+  $sale->customer_id= $customer->id;
+  $sale->charge_id= $charge->id;
+  $sale->save();
+
+  $f3->set('REPORT', $report);
+  $f3->set('people', $people);
+  $f3->set('total', (int)$_REQUEST['amount'] / 100);
+
+  @mail($f3->get('CONTACT_SALES'),
+        "Registration: $people people, " . $customer->email,
+        Template::instance()->render('sale-email.txt', 'text/plain'),
+        "From: " . $f3->get('CONTACT_SALES') . "\r\n");
+
+  echo json_encode(array('message' => "Order has been placed."));
+});
+
+
 // Handle 2015 sale
 $f3->route('POST /saveOrder', function ($f3, $args) {
   $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
