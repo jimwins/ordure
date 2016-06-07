@@ -1,0 +1,20 @@
+#!/bin/sh
+
+HOST=`sed -n -e 's/deploy_host=\(.*\)/\1/p' config.ini`
+
+if [ -z "$HOST" ]; then
+  echo "Need to configure deploy_host in config.ini"
+  exit 1
+fi
+
+mysqldump --opt ordure \
+          --ignore-table=ordure.mac_catalog \
+          --ignore-table=ordure.sale \
+          --ignore-table=ordure.sale_item \
+          --ignore-table=ordure.scat_item \
+          --ignore-table=ordure.person \
+          --ignore-table=ordure.auth \
+          --ignore-table=ordure.mac_item_brands | \
+  gzip -9 > ~/rm/tmp/ordure.sql.gz; scp ~/rm/tmp/ordure.sql.gz $HOST:
+
+ssh indra "zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure"
