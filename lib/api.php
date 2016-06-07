@@ -186,6 +186,20 @@ class API {
     echo jsonp($f3, $ret);
   }
 
+  function generateSlug($f3) {
+    $db= $f3->get('DBH');
+
+    $brand_id= (int)$_REQUEST['brand'];
+    $name= (string)$_REQUEST['name'];
+
+    $brand= new DB\SQL\Mapper($db, 'brand');
+    $brand->load(array('id=?', $brand_id));
+
+    $slug= $db->exec('SELECT SLUG(?) AS slug', $name);
+
+    echo jsonp($f3, array('slug' => $brand->slug . '-' . $slug[0]['slug']));
+  }
+
 }
 
 function jsonp($f3, $data) {

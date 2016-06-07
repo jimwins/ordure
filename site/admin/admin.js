@@ -149,7 +149,7 @@ $(function() {
   $('.edit-dept').on('click', deptEdit);
 
   function productEdit(ev) {
-    $.get(BASE + 'admin/product-editor.html').done(function (html) {
+    $.ajax({ url: BASE + 'admin/product-editor.html', cache: false }).done(function (html) {
       var page_editor= $(html);
 
       page_editor.on('hidden.bs.modal', function() {
@@ -234,6 +234,15 @@ $(function() {
         },
         owner: pageModel
       }).extend({ notify: 'always' });
+
+      pageModel.generateSlug= function(place, ev) {
+        $.ajax(BASE + 'api/generateSlug',
+               { type: 'POST', data: {
+                 brand: pageModel.brand(), name: pageModel.name() }})
+          .done(function (data) {
+            pageModel.slug(data.slug);
+          })
+      }
 
       ko.applyBindings(pageModel, page_editor[0]);
 
