@@ -1,0 +1,4 @@
+#!/bin/sh
+mysqldump --routines --no-data ordure | \
+  sed -e 's/ AUTO_INCREMENT=[0-9]*//' \
+  > ordure.sql
