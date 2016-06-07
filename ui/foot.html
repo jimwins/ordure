@@ -44,6 +44,9 @@
   </true>
 </check>
 <script>
+
+window.environmentLoaded= false;
+
 function loadScript(url, callback){
   var script= document.createElement("script")
   script.type= "text/javascript";
@@ -72,7 +75,20 @@ function loadScript(url, callback){
   document.getElementsByTagName("head")[0].appendChild(script);
 }
 
+function afterLoad(func) {
+  if (window.environmentLoaded) {
+    func();
+  } else {
+    document.body.addEventListener('envloaded', func);
+  }
+}
+
 loadScript('{{ @STATIC }}/code/combined-2015-08-17.js', function() {
+
+  window.environmentLoaded= true;
+  var envLoaded= new Event('envloaded');
+  document.body.dispatchEvent(envLoaded);
+
   $(window).on('resize', function() {
     $('body').css('padding-top', $('.navbar-fixed-top').height() + 20)
   });
@@ -127,6 +143,6 @@ var BASE= '{{ @BASE }}/';
 </script>
 <check if="{{ @ADMIN }}">
   <script>
-    loadScript('{{ @BASE }}/admin/admin.js');
+    afterLoad(function() { loadScript('{{ @BASE }}/admin/admin.js') });
   </script>
 </check>
