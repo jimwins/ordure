@@ -86,6 +86,7 @@
 
 <include href="foot.html" />
 <script>
+afterLoad(function () {
 
 var loginModel= {
   email: ko.observable('{{ @email }}'),
@@ -98,4 +99,5 @@ ko.applyBindings(loginModel);
 
 $(".help").popover();
 
+});
 </script>

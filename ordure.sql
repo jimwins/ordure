@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.11, for osx10.6 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.10, for osx10.9 (x86_64)
 --
 -- Host: localhost    Database: ordure
 -- ------------------------------------------------------
--- Server version	5.6.11
+-- Server version	5.7.10
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,23 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `auth`
+--
+
+DROP TABLE IF EXISTS `auth`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth` (
+  `person` int(10) unsigned NOT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `otp_key` varchar(255) DEFAULT NULL,
+  `last_auth` datetime DEFAULT NULL,
+  `failures` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`person`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `brand`
@@ -156,6 +173,25 @@ CREATE TABLE `page` (
   `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `person`
+--
+
+DROP TABLE IF EXISTS `person`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `person` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `role` enum('customer','employee','vendor') DEFAULT 'customer',
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `active` tinyint(4) NOT NULL DEFAULT '1',
+  `deleted` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
