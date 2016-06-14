@@ -76,7 +76,7 @@
                 <check if="{{ htmlspecialchars(@variation) == @item.variation }}">
                   <tr data-item="{{ @item.id }}">
                     <td nowrap>{{ @item.code }}</td>
-                    <td>{{ @item.short_name }}</td>
+                    <td>{{ strlen(@item.short_name) ? @item.short_name : @item.name }}</td>
                     <td>${{ @item.retail_price }}</td>
                     <td class="text-primary">
                       <strong>
