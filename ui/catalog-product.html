@@ -84,7 +84,7 @@
                       </strong>
                     </td>
                     <td class="text-center">
-                      <check if="!(@item.minimum_quantity)">
+                      <check if="!(@item.minimum_quantity || @item.stocked)">
                         <true>
                           <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
                         </true>
