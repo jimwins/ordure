@@ -172,7 +172,9 @@ class Catalog {
 
     $f3->set('departments', $departments);
 
-    $dept->load(array('slug=?', $f3->get('PARAMS.subdept')))
+    $dept->load(array('slug = ? AND parent = ?',
+                      $f3->get('PARAMS.subdept'),
+                      $dept->id))
       or $f3->error(404);
 
     $f3->set('subdept', $dept);
@@ -181,7 +183,9 @@ class Catalog {
     $product->brand_name = '(SELECT name
                                FROM brand
                               WHERE brand = brand.id)';
-    $product->load(array('slug=?', $f3->get('PARAMS.product')));
+    $product->load(array('slug = ? AND department = ?',
+                         $f3->get('PARAMS.product'),
+                         $dept->id));
     $f3->set('product', $product);
 
     $inactive= "";
