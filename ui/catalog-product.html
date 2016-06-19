@@ -55,7 +55,7 @@
       </ul>
     </check>
 
-    <div class="{{ @product.variation_style == 'tabs' ? 'tab-content' : 'container'">
+    <div class="{{ @product.variation_style == 'tabs' ? 'tab-content' : '' }}">
       <repeat group="{{ @variations }}"
               key="{{ @variation }}"
               value="{{ @num }}"
