@@ -192,6 +192,7 @@ CREATE TABLE `scat_item` (
   `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
   `discount` decimal(9,2) DEFAULT NULL,
   `stock` int(11) DEFAULT NULL,
+  `minimum_quantity` int(11) DEFAULT '0',
   `code` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
