@@ -41,7 +41,8 @@
       </div>
     </div>
 
-    <check if="{{ count(@variations) > 1 }}">
+    <check if="{{ count(@variations) > 1 &&
+               @product.variation_style == 'tabs' }}">
       <ul class="nav nav-tabs">
         <repeat group="{{ @variations }}"
                 key="{{ @variation }}"
@@ -53,11 +54,15 @@
         </repeat>
       </ul>
     </check>
-    <div class="tab-content">
+
+    <div class="{{ @product.variation_style == 'tabs' ? 'tab-content' : 'container'">
       <repeat group="{{ @variations }}"
               key="{{ @variation }}"
               value="{{ @num }}"
               counter="{{ @ctr }}">
+        <check if="{{ @product.variation_style == 'flat' }}">
+          <h4>{{ @variation }}</h4>
+        </check>
         <div class="tab-pane {{ @ctr == 1 ? 'active' : '' }}"
              id="v{{ @ctr }}">
           <table class="table table-condensed table-striped">
