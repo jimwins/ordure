@@ -163,6 +163,7 @@ $(function() {
                   department: subdept.data('parent'),
                   brand: 0,
                   slug: '', name: '', image: '',
+                  variation_style: '',
                   description: '',
                   error: '',
                   departments: [], brands: [] };

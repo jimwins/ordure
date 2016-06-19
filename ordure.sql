@@ -210,6 +210,7 @@ CREATE TABLE `product` (
   `description` text,
   `slug` varchar(255) NOT NULL,
   `image` varchar(255) NOT NULL DEFAULT '',
+  `variation_style` enum('tabs','flat') DEFAULT 'tabs',
   `from_item_no` varchar(255) DEFAULT NULL,
   `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
