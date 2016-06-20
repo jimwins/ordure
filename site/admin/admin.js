@@ -11,7 +11,7 @@ $(function() {
   }
 
   $('.edit-slug').on('click', function(ev) {
-    $.get(BASE + 'admin/page-editor.html').done(function (html) {
+    $.ajax({ url: BASE + 'admin/page-editor.html', cache: false }).done(function (html) {
       var page_editor= $(html);
 
       page_editor.on('hidden.bs.modal', function() {
@@ -90,7 +90,7 @@ $(function() {
   });
 
   function deptEdit(ev) {
-    $.get(BASE + 'admin/dept-editor.html').done(function (html) {
+    $.ajax({ url: BASE + 'admin/dept-editor.html', cache: false }).done(function (html) {
       var page_editor= $(html);
 
       page_editor.on('hidden.bs.modal', function() {
@@ -255,7 +255,7 @@ $(function() {
   $('#product-add').on('click', productEdit);
 
   function itemEdit(ev) {
-    $.get(BASE + 'admin/item-editor.html').done(function (html) {
+    $.ajax({ url: BASE + 'admin/item-editor.html', cache: false }).done(function (html) {
       var page_editor= $(html);
 
       page_editor.on('hidden.bs.modal', function() {
