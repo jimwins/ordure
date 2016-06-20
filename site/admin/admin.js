@@ -19,7 +19,7 @@ $(function() {
       });
 
       var page= { id: 0, slug: '', title: '',
-                  content: '', description: '',
+                  content: '', description: '', script: '',
                   rendered: '', error: '' };
 
       var rendered= $(ev.target).closest('[data-slug]');
