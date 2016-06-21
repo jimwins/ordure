@@ -39,7 +39,9 @@ loadScript('https://checkout.stripe.com/checkout.js',
       return;
     }
 
-    total= (people * 1000);
+    var cost= $('input#cost').val();
+
+    total= (people * cost);
 
     // Open Checkout with further options
     handler.open({
