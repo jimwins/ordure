@@ -3,6 +3,7 @@ Email: {{ @REQUEST.email }}
 Comment: {{ @REQUEST.comment }} 
 Invitation Code: {{ @REQUEST.code }} 
 Easel: {{ @REQUEST.easel }}
+Attendees: {{ @REQUEST.people }}
 
 Time: {{ date('F d, Y \a\t g:i a') }} 
 IP Address:  {{ @IP }} 

@@ -1,7 +1,7 @@
 
 {{ @REPORT }} 
 
-Total:   {{ @cans }} 
+Total:   {{ @people }} 
 Amount: ${{ @total }} 
 
 Time: {{ date('F d, Y \a\t g:i a') }} 
