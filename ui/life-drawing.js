@@ -51,12 +51,6 @@ loadScript('https://checkout.stripe.com/checkout.js',
     });
   });
 
-  $('#order').on('submit', function(e) {
-    // XXX write better error message
-    alert("Sorry, something is wrong with checking out.");
-    e.preventDefault();
-  });
-
   // Close Checkout on page navigation
   $(window).on('popstate', function() {
     handler.close();
