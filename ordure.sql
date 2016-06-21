@@ -113,6 +113,7 @@ CREATE TABLE `page` (
   `slug` varchar(255) NOT NULL,
   `format` enum('markdown','html') NOT NULL DEFAULT 'markdown',
   `content` mediumtext,
+  `script` varchar(255) DEFAULT NULL,
   `description` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `slug` (`slug`)
