@@ -148,7 +148,7 @@ $f3->route('POST /saveRegistration', function ($f3, $args) {
   $f3->set('total', (int)$_REQUEST['amount'] / 100);
 
   @mail($f3->get('CONTACT_SALES'),
-        "Registration: $people people, " . $customer->email,
+        $f3->get('REQUEST.subject'),
         Template::instance()->render('sale-email.txt', 'text/plain'),
         "From: " . $f3->get('CONTACT_SALES') . "\r\n");
 

@@ -1,3 +1,6 @@
+Name: {{ @REQUEST.name }} 
+Email: {{ @REQUEST.email }} 
+Comment: {{ @REQUEST.comment }} 
 
 {{ @REPORT }} 
 
