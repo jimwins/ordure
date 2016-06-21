@@ -141,6 +141,11 @@ loadScript('{{ @STATIC }}/code/combined-2016-06-10.js', function() {
 <script>
 var BASE= '{{ @BASE }}/';
 </script>
+<check if="{{ @PAGE.script }}">
+  <script>
+    afterLoad(function() { loadScript('{{ @BASE . '/' . @PAGE.script }}') });
+  </script>
+</check>
 <check if="{{ @ADMIN }}">
   <script>
     afterLoad(function() { loadScript('{{ @BASE }}/admin/admin.js') });
