@@ -105,6 +105,10 @@ $f3->route('GET|HEAD /to-paint-and-sip', function ($f3, $args) {
   echo Template::instance()->render('workshop-registration.html');
 });
 
+$f3->route('GET|HEAD /life-drawing.js', function ($f3, $args) {
+  echo Template::instance()->render('life-drawing.js');
+});
+
 // Handle registration
 $f3->route('POST /saveRegistration', function ($f3, $args) {
   $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
