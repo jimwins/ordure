@@ -94,7 +94,7 @@
                           <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
                         </true>
                         <false>
-                          <span class="fa fa-thumbs-up {{ (@item.minimum_quantity || @item.stocked > 0) ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked > 0 ? @item.stocked . ' currently in stock' : 'Currently out of stock' }}"></span>
+                          <span class="fa fa-thumbs-up {{ @item.stocked > 0 ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked > 0 ? @item.stocked . ' currently in stock' : 'Currently out of stock' }}"></span>
                         </false>
                       </check>
                     </td>
