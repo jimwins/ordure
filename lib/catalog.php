@@ -221,6 +221,8 @@ class Catalog {
       @$variations[$item['variation']]++;
     }
 
+    uksort($variations, 'strnatcasecmp');
+
     $f3->set('items', $items);
     $f3->set('variations', $variations);
 
