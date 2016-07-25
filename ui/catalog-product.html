@@ -1,10 +1,7 @@
 <include href="header.html" />
 <include href="catalog-header.html" />
 <div class="row">
-  <div class="col-sm-3">
-    <include href="catalog-sidebar.html" />
-  </div>
-  <div class="col-sm-9">
+  <div class="col-sm-9 col-sm-push-3">
     <ol class="breadcrumb">
       <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
       <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
@@ -112,6 +109,9 @@
         </div>
       </repeat>
     </div>
+  </div>
+  <div class="col-sm-3 col-sm-pull-9">
+    <include href="catalog-sidebar.html" />
   </div>
 </div>
 <include href="footer.html" />
