@@ -67,7 +67,7 @@
               <tr>
                 <th>Item No.</th><th>Description</th>
                 <th>List</th><th>Sale</th>
-                <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
+                <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Availability</th>
                 <check if="{{ @ADMIN }}">
                   <th>Active</th>
                 </check>
@@ -88,10 +88,17 @@
                     <td class="text-center">
                       <check if="!(@item.minimum_quantity || @item.stocked > 0)">
                         <true>
-                          <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
+                          <small class="text-muted">Special order</small>
                         </true>
                         <false>
-                          <span class="fa fa-thumbs-up {{ @item.stocked > 0 ? 'text-success' : 'text-warning' }}" title="{{ @item.stocked > 0 ? @item.stocked . ' currently in stock' : 'Currently out of stock' }}"></span>
+                          <check if="@item.stocked > 0">
+                            <true>
+                             <small class="text-success">In stock</small>
+                            </true>
+                            <false>
+                             <small class="text-warning">Out of stock</small>
+                            </false>
+                          </check>
                         </false>
                       </check>
                     </td>
