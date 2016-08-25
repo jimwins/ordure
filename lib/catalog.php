@@ -323,7 +323,7 @@ class Catalog {
       $term= $f3->get('REQUEST.q');
     }
 
-    if ($term && preg_match('!^[-A-Z0-9/]+$!i', $term)) {
+    if ($term && preg_match('!^[-A-Z0-9/.]+$!i', $term)) {
       $item= new DB\SQL\Mapper($db, 'item');
       $item->load(array('code=?', $term));
 
@@ -392,7 +392,7 @@ class Catalog {
     }
 
     /* Check if this a direct match for an item code */
-    if ($term && preg_match('!^[-A-Z0-9/]+$!i', $term)) {
+    if ($term && preg_match('!^[-A-Z0-9/.]+$!i', $term)) {
       $item= new DB\SQL\Mapper($db, 'item');
       $item->load(array('code=?', $term));
 
