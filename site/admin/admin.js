@@ -272,6 +272,7 @@ $(function() {
                   short_name: '',
                   variation: '',
                   retail_price: 0.00,
+                  thumbnail: '',
                   error: '',
                   departments: [], brands: [] };
 
