@@ -18,6 +18,19 @@ $f3->set('markdown', function($text) {
   return Markdown::instance()->convert($text);
 });
 
+$f3->set('item_style_color', function($text) {
+  if (preg_match('/^color:(.+)/', $text, $m)) {
+    $r= hexdec(substr($m[1], 0, 2));
+    $g= hexdec(substr($m[1], 2, 2));
+    $b= hexdec(substr($m[1], 4, 2));
+    // Calculate whether to use black or white text for bgcolor
+    return 'background: #' . $m[1] . '; color: #' .
+      ((($r * 0.2126 + $g * 0.7152 + $b * 0.0722) > 179) ? '000' : 'fff');
+  } else {
+    return '';
+  }
+});
+
 // if DEBUG, allow access to /info
 if ($f3->get('DEBUG')) {
   $f3->route('GET|HEAD /info', function ($f3) {
