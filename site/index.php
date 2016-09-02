@@ -236,6 +236,10 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
   echo "Loaded $rows prices.";
 });
 
+$f3->route('GET /track/ups/@code', function ($f3, $args) {
+  $f3->reroute('http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&track.x=38&track.y=9&InquiryNumber1=' . $f3->get('PARAMS.code'));
+});
+
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
