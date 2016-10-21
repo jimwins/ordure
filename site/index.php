@@ -244,6 +244,10 @@ $f3->route('GET /track/usps/@code', function ($f3, $args) {
   $f3->reroute('https://tools.usps.com/go/TrackConfirmAction.action?tLabels=' . $f3->get('PARAMS.code'));
 });
 
+$f3->route('GET /track/ontrac/@code', function ($f3, $args) {
+  $f3->reroute('http://www.ontrac.com/trackingres.asp?tracking_number=' . $f3->get('PARAMS.code'));
+});
+
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
