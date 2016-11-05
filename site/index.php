@@ -248,6 +248,10 @@ $f3->route('GET /track/ontrac/@code', function ($f3, $args) {
   $f3->reroute('http://www.ontrac.com/trackingres.asp?tracking_number=' . $f3->get('PARAMS.code'));
 });
 
+$f3->route('GET /track/fedex/@code', function ($f3, $args) {
+  $f3->reroute('https://www.fedex.com/apps/fedextrack/?cntry_code=us&tracknumbers=' . $f3->get('PARAMS.code'));
+});
+
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
