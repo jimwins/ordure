@@ -12,6 +12,7 @@ fi
 mysqldump --opt ordure \
           --ignore-table=ordure.mac_catalog \
           --ignore-table=ordure.sale \
+          --ignore-table=ordure.sale_address \
           --ignore-table=ordure.sale_item \
           --ignore-table=ordure.scat_item \
           --ignore-table=ordure.person \
