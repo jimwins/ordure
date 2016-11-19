@@ -1,0 +1,8 @@
+#!/bin/sh
+URL=$1
+FILE=`basename "$URL"`
+if [ ! -z "$2" ]; then FILE=$2; fi
+
+curl -o tmp.jpg "$URL" && /opt/libjpeg-turbo/bin/jpegtran -copy none -optimize -outfile static/catimg/$FILE tmp.jpg
+rm tmp.jpg
+echo /catimg/$FILE
