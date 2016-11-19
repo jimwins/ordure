@@ -21,4 +21,4 @@ mysqldump --opt ordure \
 
 scp ~/rm/tmp/ordure.sql.gz $HOST:
 
-ssh indra "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
+ssh $HOST "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
