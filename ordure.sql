@@ -84,7 +84,7 @@ CREATE TABLE `item` (
   `variation` varchar(255) NOT NULL,
   `unit_of_sale` varchar(16) NOT NULL DEFAULT '',
   `retail_price` decimal(9,2) NOT NULL,
-  `purchase_qty` int(10) unsigned NOT NULL DEFAULT '1',
+  `purchase_quantity` int(10) unsigned NOT NULL DEFAULT '1',
   `length` decimal(9,2) DEFAULT NULL,
   `width` decimal(9,2) DEFAULT NULL,
   `height` decimal(9,2) DEFAULT NULL,
