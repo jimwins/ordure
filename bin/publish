@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 HOST=`sed -n -e 's/deploy_host=\(.*\)/\1/p' config.ini`
 
 if [ -z "$HOST" ]; then
@@ -15,6 +17,8 @@ mysqldump --opt ordure \
           --ignore-table=ordure.person \
           --ignore-table=ordure.auth \
           --ignore-table=ordure.mac_item_brands | \
-  gzip -9 > ~/rm/tmp/ordure.sql.gz; scp ~/rm/tmp/ordure.sql.gz $HOST:
+  gzip -9 > ~/rm/tmp/ordure.sql.gz
+
+scp ~/rm/tmp/ordure.sql.gz $HOST:
 
 ssh indra "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
