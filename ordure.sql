@@ -194,6 +194,7 @@ CREATE TABLE `scat_item` (
   `discount` decimal(9,2) DEFAULT NULL,
   `stock` int(11) DEFAULT NULL,
   `minimum_quantity` int(11) DEFAULT '0',
+  `purchase_quantity` int(11) DEFAULT '1',
   `code` varchar(255) NOT NULL,
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -265,4 +266,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-12-16 18:47:43
+-- Dump completed on 2016-12-10 11:44:26
