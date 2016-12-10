@@ -81,10 +81,15 @@
                     <td style="{{ @item_style_color(@item.thumbnail) }}">
                       {{ strlen(@item.short_name) ? @item.short_name : @item.name }}
                     </td>
-                    <td>${{ @item.retail_price }}</td>
+                    <td>
+                      {{ Catalog::amount(@item.retail_price * @item.purchase_quantity) }}
+                      <check if="{{ @item.purchase_quantity > 1 }}">
+                        <br><small>({{ @item.purchase_quantity }} pieces)</small>
+                      </check>
+                    </td>
                     <td class="text-primary">
                       <strong>
-                        {{ @item.sale_price ? ('$' . @item.sale_price) : '' }}
+                        {{ @item.sale_price ? Catalog::amount(@item.sale_price * @item.purchase_quantity) : '' }}
                       </strong>
                     </td>
                     <td class="text-center">

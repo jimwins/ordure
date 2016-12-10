@@ -19,6 +19,11 @@ class Catalog {
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
+
+  static function amount($d) {
+    return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
+  }
+
   function top($f3) {
     $db= $f3->get('DBH');
 
