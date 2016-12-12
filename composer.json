@@ -6,6 +6,7 @@
   "require": {
     "bcosca/fatfree": "3.5.1",
     "stripe/stripe-php": "2.*",
-    "respect/validation": "^0.9.3"
+    "respect/validation": "^0.9.3",
+    "paragonie/random_compat": "^2.0"
   }
 }
