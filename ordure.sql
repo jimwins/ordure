@@ -78,7 +78,6 @@ CREATE TABLE `item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `product` int(10) unsigned NOT NULL,
   `code` varchar(32) NOT NULL,
-  `mac_sku` char(6) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `short_name` varchar(255) DEFAULT NULL,
   `variation` varchar(255) NOT NULL,
@@ -95,7 +94,6 @@ CREATE TABLE `item` (
   `inactive` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
-  UNIQUE KEY `mac_sku` (`mac_sku`),
   KEY `product` (`product`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
