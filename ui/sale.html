@@ -94,7 +94,9 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">
-          <i class="fa fa-address-card-o"></i>
+          <a data-bind="click:function() { editAddress(billing_address) }">
+            <i class="fa fa-address-card-o"></i>
+          </a>
           Billing Address
         </h3>
       </div>
@@ -155,6 +157,30 @@ afterLoad(function() {
      .done(function (data) {
        viewModel.load(data);
      });
+  }
+
+  viewModel.editAddress= function(address) {
+    $.ajax({ url: '../ui/address.html', cache: false })
+      .done(function (html) {
+        var panel= $(html);
+
+        panel.on('hidden.bs.modal', function() {
+          $(this).remove();
+        });
+
+        var model= ko.mapping.toJS(address);
+        model.error= '';
+
+        var personModel= ko.mapping.fromJS(model);
+
+        personModel.save= function(place, ev) {
+          $(place).closest('.modal').modal('hide');
+        }
+
+        ko.applyBindings(personModel, panel[0]);
+
+        panel.appendTo($('body')).modal();
+      });
   }
 
   ko.applyBindings(viewModel);
