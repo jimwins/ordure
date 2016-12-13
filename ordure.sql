@@ -89,6 +89,7 @@ CREATE TABLE `item` (
   `height` decimal(9,2) DEFAULT NULL,
   `weight` decimal(9,2) DEFAULT NULL,
   `thumbnail` varchar(255) DEFAULT NULL,
+  `tic` char(5) NOT NULL DEFAULT '00000',
   `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `inactive` tinyint(4) NOT NULL DEFAULT '1',
@@ -180,6 +181,90 @@ CREATE TABLE `redirect` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `sale`
+--
+
+DROP TABLE IF EXISTS `sale`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(50) DEFAULT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `status` enum('new','unpaid','paid','shipped','cancelled','onhold') NOT NULL DEFAULT 'new',
+  `person_id` int(10) unsigned NOT NULL,
+  `billing_address_id` int(10) unsigned DEFAULT NULL,
+  `shipping_address_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sale_address`
+--
+
+DROP TABLE IF EXISTS `sale_address`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale_address` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `address1` varchar(255) NOT NULL,
+  `address2` varchar(255) NOT NULL DEFAULT '',
+  `city` varchar(255) NOT NULL,
+  `state` char(2) NOT NULL,
+  `zip5` char(5) NOT NULL,
+  `zip4` char(4) NOT NULL DEFAULT '0000',
+  `verified` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sale_item`
+--
+
+DROP TABLE IF EXISTS `sale_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale_item` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sale_id` int(10) unsigned NOT NULL,
+  `item_id` int(10) unsigned NOT NULL,
+  `quantity` int(10) unsigned NOT NULL,
+  `retail_price` decimal(9,2) NOT NULL,
+  `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
+  `discount` decimal(9,2) DEFAULT NULL,
+  `discount_manual` tinyint(4) NOT NULL DEFAULT '0',
+  `tic` char(5) NOT NULL DEFAULT '00000',
+  `tax` decimal(9,2) NOT NULL DEFAULT '0.00',
+  PRIMARY KEY (`id`),
+  KEY `sale` (`sale_id`),
+  KEY `item` (`item_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sale_payment`
+--
+
+DROP TABLE IF EXISTS `sale_payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale_payment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sale_id` int(10) unsigned NOT NULL,
+  `method` enum('credit','gift') NOT NULL,
+  `amount` decimal(9,3) NOT NULL,
+  `processed` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sale_id` (`sale_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `scat_item`
 --
 
@@ -264,4 +349,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-10 11:44:26
+-- Dump completed on 2016-12-12 22:34:18

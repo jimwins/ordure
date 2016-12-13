@@ -177,6 +177,12 @@ Auth::addRoutes($f3);
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);
 
+/* Handle sale URLs (not live yet) */
+if ($f3->get('DEBUG')) {
+require '../lib/sale.php';
+Sale::addRoutes($f3);
+}
+
 /* Handle API calls */
 if ($f3->get('ADMIN')) {
   require '../lib/api.php';

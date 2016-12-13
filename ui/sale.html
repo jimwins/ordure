@@ -1,0 +1,173 @@
+<include href="header.html" />
+<div class="row">
+  <div class="col-md-9">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Sale <!--ko text: sale.id -->#<!--/ko--></h3>
+        <p>
+          <small>
+            Created: <!--ko text: sale.created --><!--/ko--> /
+            Last Modified: <!--ko text: sale.modified --><!--/ko-->
+          </small>
+        </p>
+        <p><i class="fa fa-user-o"></i><span data-bind="text: person.name"></span></p>
+      </div>
+      <div class="panel-body" data-bind="visible: admin">
+        <form class="form" data-bind="submit: function() { addItem(sale, search()) }">
+          <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-barcode"></i></span>
+            <input type="text" class="form-control"
+                   name="search" data-bind="value: search"
+                   autocomplete="off" autocorrect="off" autocapitalize="off"
+                   placeholder="Enter item code or barcode"
+                   value="">
+            <span class="input-group-btn">
+              <input type="submit" class="btn btn-primary" value="Add">
+            </span>
+          </div>
+        </form>
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="text-right">Qty</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Ext</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th colspan="4"></th>
+            <th class="text-right">Subtotal:</th>
+            <td class="text-right" data-bind="text: amount(sale.subtotal())"></td>
+          </tr>
+          <tr>
+            <th colspan="4"></th>
+            <th class="text-right">Shipping &amp; Handling:</th>
+            <td class="text-right" data-bind="text: amount(sale.shipping())"></td>
+          </tr>
+          <tr>
+            <th colspan="4"></th>
+            <th class="text-right">Sales Tax:</th>
+            <td class="text-right" data-bind="text: amount(sale.tax())"></td>
+          </tr>
+          <tr>
+            <th colspan="4"></th>
+            <th class="text-right">Total:</th>
+            <td class="text-right" data-bind="text: amount(sale.total())"></td>
+          </tr>
+          <tr>
+            <th colspan="4"></th>
+            <th class="text-right">Due:</th>
+            <td class="text-right">$0.00</td>
+          </tr>
+        </tfoot>
+        <tbody data-bind="foreach: items">
+          <tr valign="top">
+            <td></td><!-- delete button -->
+            <td class="text-right" data-bind="text: $data.quantity"></td>
+            <td><small data-bind="text: $data.code"></small></td>
+            <td>
+              <span data-bind="text: $data.name"></span>
+              <!-- <br><small>MSRP $19.35</small> -->
+            </td>
+            <td class="text-right" data-bind="text: amount($data.sale_price())"></td>
+            <td class="text-right" data-bind="text: amount($data.sale_price() * $data.quantity())"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="panel-footer text-right">
+        <button class="btn btn-primary">Pay</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <i class="fa fa-address-card-o"></i>
+          Billing Address
+        </h3>
+      </div>
+      <div class="panel-body" data-bind="with: billing_address">
+        <div data-bind="text: name"></div>
+        <div data-bind="text: address1"></div>
+        <div data-bind="text: address2"></div>
+        <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
+      </div>
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <i class="fa fa-address-card-o"></i>
+          Shipping Address
+        </h3>
+      </div>
+      <div class="panel-body" data-bind="with: shipping_address">
+        <div data-bind="if: id() == $parent.billing_address.id()">
+          Same as shipping.
+        </div>
+        <div data-bind="ifnot: id() == $parent.billing_address.id()">
+          <div data-bind="text: name"></div>
+          <div data-bind="text: address1"></div>
+          <div data-bind="text: address2"></div>
+          <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
+        </div>
+      </div>
+      <div class="panel-footer text-right">
+        <button class="btn btn-primary">Pay</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<include href="footer.html" />
+<script>
+afterLoad(function() {
+
+  var model= {
+    admin: {{ @ADMIN }},
+    search: '',
+    sale: {{ json_encode(@sale) }},
+    person: {{ json_encode(@person) }},
+    billing_address: {{ json_encode(@billing_address) }},
+    shipping_address: {{ json_encode(@shipping_address) }},
+    items: {{ json_encode(@items) }},
+    payments: {{ json_encode(@payments) }},
+  };
+
+  var viewModel= ko.mapping.fromJS(model);
+
+  viewModel.load= function(sale) {
+    ko.mapping.fromJS(sale, viewModel);
+  }
+
+  viewModel.addItem= function(sale, item) {
+    $.ajax({ dataType: 'json', method: 'POST', url: sale.uuid() + '/add-item',
+             data: { item: item } })
+     .done(function (data) {
+       viewModel.load(data);
+     });
+  }
+
+  ko.applyBindings(viewModel);
+
+});
+
+// format number as $3.00 or ($3.00)
+function amount(amount) {
+  if (typeof(amount) == 'undefined' || amount == null) {
+    return '';
+  }
+  if (typeof(amount) == 'string') {
+    amount= parseFloat(amount);
+  }
+  if (amount < 0.0) {
+    return '($' + Math.abs(amount).toFixed(2) + ')';
+  } else {
+    return '$' + amount.toFixed(2);
+  }
+}
+</script>
