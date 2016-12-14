@@ -8,6 +8,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
+    $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
   }
 
   function create($f3, $args) {
@@ -161,6 +162,36 @@ class Sale {
       $sale->billing_address_id= $address->id;
     }
 
+    $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function set_person($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $person= new DB\SQL\Mapper($db, 'person');
+    if (($person_id= $f3->get('REQUEST.id'))) {
+      $person->load(array('id = ?', $person_id))
+        or $f3->error(404);
+    } else {
+      $person->load(array('email = ?', $f3->get('REQUEST.email')));
+    }
+    if ($person->dry()) {
+      $person->role= 'customer';
+    }
+    
+    $person->name= $f3->get('REQUEST.name');
+    $person->email= $f3->get('REQUEST.email');
+    $person->save();
+
+    $sale->person_id= $person->id;
     $sale->save();
 
     return $this->json($f3, $args);

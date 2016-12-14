@@ -20,7 +20,11 @@
             Last Modified: <!--ko text: sale.modified --><!--/ko-->
           </small>
         </p>
-        <p><i class="fa fa-user-o"></i><span data-bind="text: person.name"></span></p>
+        <p>
+          <a data-bind="click: function() { editPerson(person) }"><i class="fa fa-user-o fa-border"></i></a>
+          <!--ko text: person.name --><!--/ko-->
+          &lt;<!--ko text: person.email --><!--/ko-->&gt;
+        </p>
       </div>
       <div class="panel-body" data-bind="visible: admin">
         <form class="form" data-bind="submit: function() { addItem(sale, search()) }">
@@ -171,6 +175,36 @@ afterLoad(function() {
      });
   }
 
+  viewModel.editPerson= function(person) {
+    $.ajax({ url: '../ui/person.html', cache: false })
+      .done(function (html) {
+        var panel= $(html);
+
+        panel.on('hidden.bs.modal', function() {
+          $(this).remove();
+        });
+
+        var model= ko.mapping.toJS(person);
+        model.error= '';
+
+        var personModel= ko.mapping.fromJS(model);
+
+        personModel.save= function(place, ev) {
+          $.ajax({ dataType: 'json', method: 'POST',
+                   url: window.location.href + '/set-person',
+                   data: ko.mapping.toJS(personModel) })
+           .done(function (data) {
+             viewModel.load(data);
+          });
+          $(place).closest('.modal').modal('hide');
+        }
+
+        ko.applyBindings(personModel, panel[0]);
+
+        panel.appendTo($('body')).modal();
+      });
+  }
+
   viewModel.editAddress= function(type, address) {
     $.ajax({ url: '../ui/address.html', cache: false })
       .done(function (html) {
@@ -183,13 +217,12 @@ afterLoad(function() {
         var model= ko.mapping.toJS(address);
         model.error= '';
         model.type= type;
-        model.sale_id= viewModel.sale.id();
 
         var personModel= ko.mapping.fromJS(model);
 
         personModel.save= function(place, ev) {
           $.ajax({ dataType: 'json', method: 'POST',
-                   url: viewModel.sale.uuid() + '/set-address',
+                   url: window.location.href + '/set-address',
                    data: ko.mapping.toJS(personModel) })
            .done(function (data) {
              viewModel.load(data);
