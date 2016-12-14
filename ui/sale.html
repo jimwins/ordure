@@ -118,7 +118,7 @@
         <div data-bind="text: name"></div>
         <div data-bind="text: address1"></div>
         <div data-bind="text: address2"></div>
-        <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
+        <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip5() + (zip4() ? '-' + zip4() : '')"></div>
       </div>
       <div class="panel-heading">
         <h3 class="panel-title">
