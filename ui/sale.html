@@ -27,7 +27,7 @@
         </p>
       </div>
       <div class="panel-body" data-bind="visible: admin">
-        <form class="form" data-bind="submit: function() { addItem(sale, search()) }">
+        <form class="form" data-bind="submit: addItem">
           <div class="input-group">
             <span class="input-group-addon"><i class="fa fa-barcode"></i></span>
             <input type="text" class="form-control"
@@ -167,9 +167,10 @@ afterLoad(function() {
     ko.mapping.fromJS(sale, viewModel);
   }
 
-  viewModel.addItem= function(sale, item) {
-    $.ajax({ dataType: 'json', method: 'POST', url: sale.uuid() + '/add-item',
-             data: { item: item } })
+  viewModel.addItem= function(form) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: window.location.href + '/add-item',
+             data: { item: this.search() } })
      .done(function (data) {
        viewModel.load(data);
      });
