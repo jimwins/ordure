@@ -86,7 +86,7 @@
         </tfoot>
         <tbody data-bind="foreach: items">
           <tr valign="top">
-            <td></td><!-- delete button -->
+            <td><a data-bind="if: $parent.admin, click: $parent.removeItem"><i class="fa fa-trash-o"></i></a></td>
             <td class="text-right" data-bind="text: $data.quantity"></td>
             <td><small data-bind="text: $data.code"></small></td>
             <td>
@@ -171,6 +171,15 @@ afterLoad(function() {
     $.ajax({ dataType: 'json', method: 'POST',
              url: window.location.href + '/add-item',
              data: { item: this.search() } })
+     .done(function (data) {
+       viewModel.load(data);
+     });
+  }
+
+  viewModel.removeItem= function(item) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: window.location.href + '/remove-item',
+             data: { item: item.id() } })
      .done(function (data) {
        viewModel.load(data);
      });

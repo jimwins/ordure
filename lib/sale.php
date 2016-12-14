@@ -7,6 +7,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale", 'Sale->display');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
+    $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
   }
@@ -125,6 +126,24 @@ class Sale {
     $line->tax= 0.00;
 
     $line->insert();
+
+    return $this->json($f3, $args);
+  }
+
+  function remove_item($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+    $sale_item_id= $f3->get('REQUEST.item');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $line= new DB\SQL\Mapper($db, 'sale_item');
+    $line->load(array('id = ?', $sale_item_id))
+      or $f3->error(404);
+    $line->erase();
 
     return $this->json($f3, $args);
   }
