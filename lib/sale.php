@@ -7,6 +7,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale", 'Sale->display');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
+    $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
   }
 
   function create($f3, $args) {
@@ -123,6 +124,44 @@ class Sale {
     $line->tax= 0.00;
 
     $line->insert();
+
+    return $this->json($f3, $args);
+  }
+
+  function set_address($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $type= $f3->get('REQUEST.type');
+
+    $address= new DB\SQL\Mapper($db, 'sale_address');
+    if (($address_id= $f3->get('REQUEST.id'))) {
+      $address->load(array('id = ?', $address_id))
+        or $f3->error(404);
+    }
+    
+    $address->name= $f3->get('REQUEST.name');
+    $address->address1= $f3->get('REQUEST.address1');
+    $address->address2= $f3->get('REQUEST.address2');
+    $address->city= $f3->get('REQUEST.city');
+    $address->state= $f3->get('REQUEST.state');
+    $address->zip5= $f3->get('REQUEST.zip5');
+    $address->zip4= $f3->get('REQUEST.zip4');
+
+    $address->save();
+
+    if ($type == 'shipping') {
+      $sale->shipping_address_id= $address->id;
+    } else {
+      $sale->billing_address_id= $address->id;
+    }
+
+    $sale->save();
 
     return $this->json($f3, $args);
   }

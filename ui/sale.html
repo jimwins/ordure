@@ -94,7 +94,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">
-          <a data-bind="click:function() { editAddress(billing_address) }">
+          <a data-bind="click: function() { editAddress('billing', billing_address) }">
             <i class="fa fa-address-card-o"></i>
           </a>
           Billing Address
@@ -108,12 +108,14 @@
       </div>
       <div class="panel-heading">
         <h3 class="panel-title">
-          <i class="fa fa-address-card-o"></i>
+          <a data-bind="click: function() { editAddress('shipping', shipping_address ) }">
+            <i class="fa fa-address-card-o"></i>
+          </a>
           Shipping Address
         </h3>
       </div>
       <div class="panel-body" data-bind="with: shipping_address">
-        <div data-bind="if: id() == $parent.billing_address.id()">
+        <div data-bind="if: !id() || id() == $parent.billing_address.id()">
           Same as shipping.
         </div>
         <div data-bind="ifnot: id() == $parent.billing_address.id()">
@@ -159,7 +161,7 @@ afterLoad(function() {
      });
   }
 
-  viewModel.editAddress= function(address) {
+  viewModel.editAddress= function(type, address) {
     $.ajax({ url: '../ui/address.html', cache: false })
       .done(function (html) {
         var panel= $(html);
@@ -170,10 +172,18 @@ afterLoad(function() {
 
         var model= ko.mapping.toJS(address);
         model.error= '';
+        model.type= type;
+        model.sale_id= viewModel.sale.id();
 
         var personModel= ko.mapping.fromJS(model);
 
         personModel.save= function(place, ev) {
+          $.ajax({ dataType: 'json', method: 'POST',
+                   url: viewModel.sale.uuid() + '/set-address',
+                   data: ko.mapping.toJS(personModel) })
+           .done(function (data) {
+             viewModel.load(data);
+          });
           $(place).closest('.modal').modal('hide');
         }
 
