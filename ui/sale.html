@@ -114,6 +114,12 @@
         </h3>
       </div>
       <div class="panel-body" data-bind="with: billing_address">
+        <div class="pull-right" data-bind="if: id">
+          <button class="btn btn-default btn-xs"
+                  data-bind="click: $parent.verifyAddress">
+            Verify
+          </button>
+        </div>
         <div data-bind="text: name"></div>
         <div data-bind="text: address1"></div>
         <div data-bind="text: address2"></div>
@@ -130,6 +136,13 @@
       <div class="panel-body" data-bind="with: shipping_address">
         <div data-bind="if: !id() || id() == $parent.billing_address.id()">
           Same as shipping.
+        </div>
+        <div class="pull-right"
+             data-bind="if: id() && iod() != $parent.billing_address.id()">
+          <button class="btn btn-default btn-xs"
+                  data-bind="click: $parent.verifyAddress">
+            Verify
+          </button>
         </div>
         <div data-bind="ifnot: id() == $parent.billing_address.id()">
           <div data-bind="text: name"></div>
@@ -245,6 +258,15 @@ afterLoad(function() {
 
         panel.appendTo($('body')).modal();
       });
+  }
+
+  viewModel.verifyAddress= function(data) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: window.location.href + '/verify-address',
+             data: ko.mapping.toJS(data) })
+     .done(function (data) {
+       viewModel.load(data);
+    });
   }
 
   ko.applyBindings(viewModel);

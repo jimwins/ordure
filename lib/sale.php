@@ -9,6 +9,8 @@ class Sale {
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
+    $f3->route("POST /sale/@sale/verify-address [ajax]",
+               'Sale->verify_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
   }
 
@@ -172,6 +174,7 @@ class Sale {
     $address->state= $f3->get('REQUEST.state');
     $address->zip5= $f3->get('REQUEST.zip5');
     $address->zip4= $f3->get('REQUEST.zip4');
+    $address->verified= 0;
 
     $address->save();
 
@@ -182,6 +185,76 @@ class Sale {
     }
 
     $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function verify_address($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $type= $f3->get('REQUEST.type');
+
+    $address= new DB\SQL\Mapper($db, 'sale_address');
+    $address_id= $f3->get('REQUEST.id');
+    $address->load(array('id = ?', $address_id))
+      or $f3->error(404);
+
+    $data= array(
+      'Zip4' => $address->zip4,
+      'Zip5' => $address->zip5,
+      'State' => $address->state,
+      'City' => $address->city,
+      'Address2' => $address->address2,
+      'Address1' => $address->address1,
+      'apiLoginID' => $f3->get("TAXCLOUD_ID")
+    );
+
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://api.taxcloud.net/1.0/taxcloud/VerifyAddress?apiKey=" . $f3->get('TAXCLOUD_KEY'),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($data),
+      CURLOPT_HTTPHEADER => array(
+        "accept: application/json",
+        "content-type: application/json"
+      ),
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      // XXX blah
+      echo "cURL Error #:" . $err;
+      return;
+    }
+
+    $data= json_decode($response);
+
+    if ($data->ErrNumber == "0") {
+      $address->zip4= $data->Zip4;
+      $address->zip5= $data->Zip5;
+      $address->state= $data->State;
+      $address->city= $data->City;
+      $address->address2= $data->Address2;
+      $address->address1= $data->Address1;
+      $address->verified= 1;
+      $address->save();
+    }
 
     return $this->json($f3, $args);
   }
