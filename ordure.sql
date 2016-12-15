@@ -196,6 +196,9 @@ CREATE TABLE `sale` (
   `person_id` int(10) unsigned NOT NULL,
   `billing_address_id` int(10) unsigned DEFAULT NULL,
   `shipping_address_id` int(10) unsigned DEFAULT NULL,
+  `shipping` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `shipping_tax` decimal(9,3) DEFAULT '0.000',
+  `shipping_manual` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

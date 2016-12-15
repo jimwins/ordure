@@ -39,10 +39,11 @@ class Sale {
                                              discount_type,
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
-    $sale->shipping= 0.00;
-    $sale->tax= '(SELECT SUM(quantity * tax)
+    $sale->tax= 'shipping_tax +
+                 (SELECT SUM(quantity * tax)
                     FROM sale_item WHERE sale_id = sale.id)';
-    $sale->total= '(SELECT SUM(quantity *
+    $sale->total= 'shipping + shipping_tax +
+                   (SELECT SUM(quantity *
                                (sale_price(retail_price,
                                            discount_type,
                                            discount) +
@@ -131,6 +132,8 @@ class Sale {
 
     $line->insert();
 
+    $this->update_shipping($f3, $args);
+
     return $this->json($f3, $args);
   }
 
@@ -149,7 +152,40 @@ class Sale {
       or $f3->error(404);
     $line->erase();
 
+    $this->update_shipping($f3, $args);
+
     return $this->json($f3, $args);
+  }
+
+  function update_shipping($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->subtotal= '(SELECT SUM(quantity *
+                                  sale_price(retail_price,
+                                             discount_type,
+                                             discount))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    if ($sale->shipping_manual)
+      return;
+
+    if ($sale->subtotal >= 150.00) {
+      $sale->shipping= 0.00;
+    } else if ($sale->subtotal >= 100.00) {
+      $sale->shipping= 13.95;
+    } else if ($sale->subtotal >= 50.00) {
+      $sale->shipping= 11.95;
+    } else {
+      $sale->shipping= 7.95;
+    }
+    $sale->shipping_tax= 0;
+
+    $sale->save();
   }
 
   function set_address($f3, $args) {
