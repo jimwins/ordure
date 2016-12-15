@@ -382,7 +382,15 @@ class Sale {
       );
     }
 
-    // XXX add fake shipping cartItem
+    if ($sale->shipping) {
+      $data['cartItems'][]= array(
+        'Index' => 0,
+        'ItemID' => 'shipping',
+        'TIC' => '11000',
+        'Price' => $sale->shipping,
+        'Qty' => 1,
+      );
+    }
 
     $curl = curl_init();
 
@@ -417,6 +425,12 @@ class Sale {
     $data= json_decode($response);
 
     foreach ($data->CartItemsResponse as $response) {
+      if ($response->CartItemIndex == 0) {
+        $sale->shipping_tax= $response->TaxAmount;
+        $sale->save();
+        continue;
+      }
+
       $item->load(array('id = ?', $response->CartItemIndex))
         or $f3->error(404);
       $item->tax= $response->TaxAmount;
