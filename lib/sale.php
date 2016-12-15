@@ -11,9 +11,9 @@ class Sale {
                'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
+    $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
                'Sale->verify_address');
-    $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
   }
 
   function create($f3, $args) {
