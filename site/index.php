@@ -194,6 +194,10 @@ Auth::addRoutes($f3);
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);
 
+/* Handle buying gift card */
+require '../lib/gift-card.php';
+GiftCard::addRoutes($f3);
+
 /* Handle sale URLs (not live yet) */
 if ($f3->get('DEBUG')) {
 require '../lib/sale.php';

@@ -1,0 +1,19 @@
+Name: {{ @REQUEST.name }} 
+Email: {{ @REQUEST.email }} 
+
+Amount: {{ @REQUEST.amount }}
+
+{{ @REQUEST.comment }} 
+
+Recipient Name: {{ @REQUEST.recipient_name }}
+Recipient Email: {{ @REQUEST.recipient_email }}
+
+Address:
+{{ @REQUEST.address1 }}
+{{ @REQUEST.address2 }}
+{{ @REQUEST.city }}, {{ @REQUEST.state }} {{ @REQUEST.zip }}
+
+Time: {{ date('F d, Y \a\t g:i a') }} 
+IP Address:  {{ @IP }} 
+
+
