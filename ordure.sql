@@ -242,7 +242,7 @@ CREATE TABLE `sale_item` (
   `discount` decimal(9,2) DEFAULT NULL,
   `discount_manual` tinyint(4) NOT NULL DEFAULT '0',
   `tic` char(5) NOT NULL DEFAULT '00000',
-  `tax` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `tax` decimal(9,3) NOT NULL DEFAULT '0.000',
   PRIMARY KEY (`id`),
   KEY `sale` (`sale_id`),
   KEY `item` (`item_id`)
