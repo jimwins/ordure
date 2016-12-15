@@ -62,7 +62,12 @@
             <td class="text-right" data-bind="text: amount(sale.shipping())"></td>
           </tr>
           <tr>
-            <th colspan="5" class="text-right">Sales Tax:</th>
+            <th colspan="5" class="text-right">
+              <a data-bind="if: admin(), click: calculateSalesTax">
+                <i class="fa fa-calculator"></i>
+              </a>
+              Sales Tax:
+            </th>
             <td class="text-right" data-bind="text: amount(sale.tax())"></td>
           </tr>
           <tr>
@@ -264,6 +269,15 @@ afterLoad(function() {
     $.ajax({ dataType: 'json', method: 'POST',
              url: window.location.href + '/verify-address',
              data: ko.mapping.toJS(data) })
+     .done(function (data) {
+       viewModel.load(data);
+    });
+  }
+
+  viewModel.calculateSalesTax= function(data) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: window.location.href + '/calculate-sales-tax',
+             data: { } })
      .done(function (data) {
        viewModel.load(data);
     });

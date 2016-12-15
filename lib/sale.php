@@ -7,6 +7,8 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale", 'Sale->display');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
+    $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
+               'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
@@ -285,6 +287,105 @@ class Sale {
 
     $sale->person_id= $person->id;
     $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function calculate_sales_tax($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $address= new DB\SQL\Mapper($db, 'sale_address');
+    $address->load(array('id = ?',
+                         $sale->shipping_address_id ?
+                         $sale->shipping_address_id :
+                         $sale->billing_address_id))
+      or $f3->error(404);
+
+    $data= array(
+      'apiLoginID' => $f3->get("TAXCLOUD_ID"),
+      'customerID' => $sale->person_id,
+      'cartID' => $sale->uuid,
+      'deliveredBySeller' => false,
+      'origin' => array(
+        'Zip4' => '1320',
+        'Zip5' => '90013',
+        'State' => 'CA',
+        'City' => 'Los Angeles',
+        'Address2' => '',
+        'Address1' => '436 S Main St',
+      ),
+      'destination' => array(
+        'Zip4' => $address->zip4,
+        'Zip5' => $address->zip5,
+        'State' => $address->state,
+        'City' => $address->city,
+        'Address2' => $address->address2,
+        'Address1' => $address->address1,
+      ),
+      'cartItems' => array(),
+    );
+
+    $item= new DB\SQL\Mapper($db, 'sale_item');
+    $item->sale_price= "sale_price(retail_price, discount_type, discount)";
+    $items= $item->find(array('sale_id = ?', $sale->id),
+                         // XXX force shipping items to end?
+                         array('order' => 'id'));
+    foreach ($items as $i) {
+      $data['cartItems'][]= array(
+        'Index' => $i->id,
+        'ItemID' => $i->item_id,
+        'TIC' => $i->tic,
+        'Price' => $i->sale_price,
+        'Qty' => $i->quantity,
+      );
+    }
+
+    // XXX add fake shipping cartItem
+
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://api.taxcloud.net/1.0/taxcloud/Lookup?apiKey=" .
+                     $f3->get('TAXCLOUD_KEY'),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($data),
+      CURLOPT_HTTPHEADER => array(
+        "accept: application/json",
+        "content-type: application/json"
+      ),
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      // XXX blah
+      echo "cURL Error #:" . $err;
+      return;
+    }
+
+    error_log($response);
+    $data= json_decode($response);
+
+    foreach ($data->CartItemsResponse as $response) {
+      $item->load(array('id = ?', $response->CartItemIndex))
+        or $f3->error(404);
+      $item->tax= $response->TaxAmount;
+      $item->save();
+    }
 
     return $this->json($f3, $args);
   }
