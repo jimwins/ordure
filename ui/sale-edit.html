@@ -190,11 +190,15 @@ afterLoad(function() {
   }
 
   viewModel.addItem= function(form) {
+    $('.input-group', form).removeClass('has-error');
     $.ajax({ dataType: 'json', method: 'POST',
              url: 'add-item',
              data: { item: this.search() } })
      .done(function (data) {
        viewModel.load(data);
+     })
+     .fail(function (jqXHR, textStatus, errorThrown) {
+       $('.input-group', form).addClass('has-error');
      });
   }
 
