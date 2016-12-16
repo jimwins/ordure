@@ -1,0 +1,175 @@
+<include href="header.html" />
+<div class="row">
+  <div class="col-md-8">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Sale {{ sprintf("%07d", @sale.id) }}
+        </h3>
+        <p>
+          <small>
+            Created: {{ @sale.created }}
+            Last Modified: {{ @sale.modified }}
+          </small>
+        </p>
+        <p>
+          <i class="fa fa-user-o fa-border"></i>
+          {{ @person.name }}
+          &lt;{{ @person.email }}&gt;
+        </p>
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="text-right">Qty</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Ext</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th colspan="5" class="text-right">Subtotal:</th>
+            <td class="text-right">{{ @amount(@sale.subtotal) }}</td>
+          </tr>
+          <tr>
+            <th colspan="5" class="text-right">
+              Shipping &amp; handling:
+            </th>
+            <td class="text-right">{{ @amount(@sale.shipping) }}</td>
+          </tr>
+          <tr>
+            <th colspan="5" class="text-right">
+              Estimated tax to be collected:
+            </th>
+            <td class="text-right">{{ @amount(@sale.tax) }}</td>
+          </tr>
+          <tr>
+            <th colspan="5" class="text-right">Total:</th>
+            <td class="text-right">{{ @amount(@sale.total) }}</td>
+          </tr>
+          <repeat group="{{ @payments }}" value="{{ @data }}">
+          <tr>
+            <th colspan="5" class="text-right">{{ @data.method }}</th>
+            <th colspan="5" class="text-right">{{ @amount(@data.amount) }}</th>
+          </tr>
+          </repeat>
+          <!--
+          <tr>
+            <th colspan="5" class="text-right">Due:</th>
+            <td class="text-right">$0.00</td>
+          </tr>
+          -->
+        </tfoot>
+        <tbody>
+        <repeat group="{{ @items }}" value="{{ @data }}">
+          <tr valign="top">
+            <td></td>
+            <td class="text-right">{{ @data.quantity }}</td>
+            <td><small>{{ @data.code }}</small></td>
+            <td>
+              <span>{{ @data.name }}</span>
+              <!-- <br><small>MSRP $19.35</small> -->
+            </td>
+            <td class="text-right">{{ @amount(@data.sale_price) }}</td>
+            <td class="text-right">
+              {{ @amount(@data.sale_price * @data.quantity) }}
+            </td>
+          </tr>
+        </repeat>
+        </tbody>
+      </table>
+      <div class="panel-footer text-right">
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <i class="fa fa-address-card-o"></i>
+          Billing Address
+        </h3>
+      </div>
+      <div class="panel-body">
+        <div>{{ @billing_address.name }}</div>
+        <div>{{ @billing_address.address1 }}</div>
+        <div>{{ @billing_address.address2 }}</div>
+        <div>
+          {{ @billing_address.city }}, {{ @billing_address.state }}
+          {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
+        </div>
+      </div>
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <i class="fa fa-address-card-o"></i>
+          Shipping Address
+        </h3>
+      </div>
+      <div class="panel-body">
+        <check if="{{ !@shipping_address.id ||
+                      @shipping_address.id == @billing_address.id }}">
+          <true>
+            <div>
+              Same as billing address.
+            </div>
+          </true>
+          <false>
+            <div>{{ @shipping_address.name }}</div>
+            <div>{{ @shipping_address.address1 }}</div>
+            <div>{{ @shipping_address.address2 }}</div>
+            <div>
+              {{ @shipping_address.city }}, {{ @shipping_address.state }}
+              {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
+            </div>
+          </false>
+        </check>
+      </div>
+      <div class="panel-footer">
+        <form method="POST" action="process-payment" id="payment-form">
+          <div class="payment-errors alert alert-danger hidden"></div>
+
+          <div class="form-group">
+            <label>
+              <span>Card number</span>
+              <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Expiration (MM/YY)</span>
+              <div>
+                <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-month"  data-stripe="exp_month" placeholder="MM">
+                <span> / </span>
+                <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-year"  data-stripe="exp_year" placeholder="YY">
+              </div>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Security code (CVC):</span>
+              <input type="text" class="form-control" autocomplete="cc-csc"  size="4" data-stripe="cvc" placeholder="XXX">
+            </label>
+          </div>
+
+          <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
+
+          <div class="text-right">
+            <input type="hidden" name="amount" value="1"><!-- dummy -->
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-credit-card fa-lg"></i>
+              Pay with Credit Card
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+<set script="handle-payment.js" />
+<include href="footer.html" />

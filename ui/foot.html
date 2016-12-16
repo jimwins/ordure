@@ -142,10 +142,10 @@ loadScript('{{ @STATIC }}/code/combined-2016-11-19.js', function() {
 <script>
 var BASE= '{{ @BASE }}/';
 </script>
-<check if="{{ @PAGE.script }}">
+<check if="{{ @PAGE.script || @script }}">
   <script>
     afterLoad(function() {
-      <include href="{{ @PAGE.script }}" />          
+      <include href="{{ @PAGE.script ? @PAGE.script : @script }}" />
     });
   </script>
 </check>

@@ -141,7 +141,7 @@
       </div>
       <div class="panel-body" data-bind="with: shipping_address">
         <div data-bind="if: !id() || id() == $parent.billing_address.id()">
-          Same as shipping.
+          Same as billing address.
         </div>
         <div class="pull-right"
              data-bind="if: id() && iod() != $parent.billing_address.id()">
@@ -158,8 +158,8 @@
         </div>
       </div>
       <div class="panel-footer text-right">
-        <button class="btn btn-primary">
-          <i class="fa fa-cc-stripe"></i> Pay
+        <button class="btn btn-primary" data-bind="click: prepareForPayment">
+          Prepare for payment &raquo;
         </button>
       </div>
     </div>
@@ -281,6 +281,15 @@ afterLoad(function() {
              data: { } })
      .done(function (data) {
        viewModel.load(data);
+    });
+  }
+
+  viewModel.prepareForPayment= function(data) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'set-status',
+             data: { status: 'unpaid' } })
+     .done(function (data) {
+       window.location.href= './';
     });
   }
 

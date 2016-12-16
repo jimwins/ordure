@@ -1,18 +1,28 @@
 <?php
 
+$f3->set('amount', function ($d) {
+  return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
+});
+
 class Sale {
 
   static function addRoutes($f3) {
     $f3->route("GET|HEAD /sale/new", 'Sale->create');
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
+    $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
+    $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status'); // XXX thanks
+    $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
                'Sale->calculate_sales_tax');
+    $f3->route("POST /sale/@sale/process-payment",
+               'Sale->process_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
+    $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
                'Sale->verify_address');
   }
@@ -102,10 +112,12 @@ class Sale {
     case 'new':
       return $f3->reroute($sale->uuid . '/edit');
     case 'unpaid':
+      return $f3->reroute($sale->uuid . '/pay');
     case 'paid':
     case 'shipped':
     case 'cancelled':
     case 'onhold':
+      return $f3->reroute($sale->uuid . '/status');
     default:
       $f3->error(404);
     }
@@ -123,6 +135,34 @@ class Sale {
     $this->load($f3, $sale->id);
 
     echo Template::instance()->render('sale-edit.html');
+  }
+
+  function pay($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $this->load($f3, $sale->id);
+
+    echo Template::instance()->render('sale-pay.html');
+  }
+
+  function status($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $this->load($f3, $sale->id);
+
+    echo Template::instance()->render('sale-status.html');
   }
 
   function add_item($f3, $args) {
@@ -350,6 +390,30 @@ class Sale {
     return $this->json($f3, $args);
   }
 
+  function set_status($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $status= $f3->get('REQUEST.status');
+
+    if (!in_array($status, array('new','unpaid','paid','shipped',
+                                 'cancelled','onhold'))) {
+      // XXX better error handling
+      $f3->error(500);
+    }
+
+    $sale->status= $status;
+
+    $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
   function calculate_sales_tax($f3, $args) {
     $db= $f3->get('DBH');
 
@@ -480,5 +544,80 @@ class Sale {
                             'shipping_address' => $f3->get('shipping_address'),
                             'items' => $f3->get('items'),
                             'payments' => $f3->get('payments')));
+  }
+
+  function process_payment($f3, $args) {
+    $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
+                    'publishable_key' => $f3->get('STRIPE_KEY'));
+
+    $token= json_decode($_REQUEST['token']);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->subtotal= '(SELECT SUM(quantity *
+                                  sale_price(retail_price,
+                                             discount_type,
+                                             discount))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->tax= 'shipping_tax +
+                 (SELECT SUM(quantity * tax)
+                    FROM sale_item WHERE sale_id = sale.id)';
+    $sale->total= 'shipping + shipping_tax +
+                   (SELECT SUM(quantity *
+                               (sale_price(retail_price,
+                                           discount_type,
+                                           discount) +
+                                tax))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $person= new DB\SQL\Mapper($db, 'person');
+    $person->load(array('id = ?', $sale->person_id));
+
+    $amount= (int)($sale->total * 100);
+
+    \Stripe\Stripe::setApiKey($stripe['secret_key']);
+
+    $token= $f3->get('REQUEST.stripeToken');
+
+    try {
+      $charge= \Stripe\Charge::create(array(
+        "amount" => $amount,
+        "currency" => "usd",
+        "source" => $token,
+        "receipt_email" => $person->email,
+      ));
+    } catch (\Stripe\Error\Card $e) {
+      // The card has been declined!
+      $f3->error(500);
+    }
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'stripe';
+    $payment->amount= $charge->amount / 100;
+    $payment->data= $charge->id;
+    $payment->save();
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    /*
+    $headers= array();
+    $headers[]= "From: " . $f3->get('CONTACT');
+    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+
+    @mail($f3->get('CONTACT'),
+          "Sale: Gift Card",
+          Template::instance()->render('email-gift-card-sale.txt',
+                                       'text/plain'),
+          implode("\r\n", $headers));
+    */
+
+    $f3->reroute('paid');
   }
 }
