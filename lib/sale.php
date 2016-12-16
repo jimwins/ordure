@@ -4,7 +4,8 @@ class Sale {
 
   static function addRoutes($f3) {
     $f3->route("GET|HEAD /sale/new", 'Sale->create');
-    $f3->route("GET|HEAD /sale/@sale", 'Sale->display');
+    $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
+    $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
@@ -88,7 +89,29 @@ class Sale {
     $f3->set('payments', $payments_out);
   }
 
-  function display($f3, $args) {
+  function dispatch($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    switch ($sale->status) {
+    case 'new':
+      return $f3->reroute($sale->uuid . '/edit');
+    case 'unpaid':
+    case 'paid':
+    case 'shipped':
+    case 'cancelled':
+    case 'onhold':
+    default:
+      $f3->error(404);
+    }
+  }
+
+  function edit($f3, $args) {
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -99,7 +122,7 @@ class Sale {
 
     $this->load($f3, $sale->id);
 
-    echo Template::instance()->render('sale.html');
+    echo Template::instance()->render('sale-edit.html');
   }
 
   function add_item($f3, $args) {

@@ -189,7 +189,7 @@ afterLoad(function() {
 
   viewModel.addItem= function(form) {
     $.ajax({ dataType: 'json', method: 'POST',
-             url: window.location.href + '/add-item',
+             url: 'add-item',
              data: { item: this.search() } })
      .done(function (data) {
        viewModel.load(data);
@@ -198,7 +198,7 @@ afterLoad(function() {
 
   viewModel.removeItem= function(item) {
     $.ajax({ dataType: 'json', method: 'POST',
-             url: window.location.href + '/remove-item',
+             url: 'remove-item',
              data: { item: item.id() } })
      .done(function (data) {
        viewModel.load(data);
@@ -206,7 +206,7 @@ afterLoad(function() {
   }
 
   viewModel.editPerson= function(person) {
-    $.ajax({ url: '../ui/person.html', cache: false })
+    $.ajax({ url: '{{ @BASE }}/ui/person.html', cache: false })
       .done(function (html) {
         var panel= $(html);
 
@@ -221,7 +221,7 @@ afterLoad(function() {
 
         personModel.save= function(place, ev) {
           $.ajax({ dataType: 'json', method: 'POST',
-                   url: window.location.href + '/set-person',
+                   url: 'set-person',
                    data: ko.mapping.toJS(personModel) })
            .done(function (data) {
              viewModel.load(data);
@@ -236,7 +236,7 @@ afterLoad(function() {
   }
 
   viewModel.editAddress= function(type, address) {
-    $.ajax({ url: '../ui/address.html', cache: false })
+    $.ajax({ url: '{{ @BASE }}/ui/address.html', cache: false })
       .done(function (html) {
         var panel= $(html);
 
@@ -252,7 +252,7 @@ afterLoad(function() {
 
         personModel.save= function(place, ev) {
           $.ajax({ dataType: 'json', method: 'POST',
-                   url: window.location.href + '/set-address',
+                   url: 'set-address',
                    data: ko.mapping.toJS(personModel) })
            .done(function (data) {
              viewModel.load(data);
@@ -268,7 +268,7 @@ afterLoad(function() {
 
   viewModel.verifyAddress= function(data) {
     $.ajax({ dataType: 'json', method: 'POST',
-             url: window.location.href + '/verify-address',
+             url: 'verify-address',
              data: ko.mapping.toJS(data) })
      .done(function (data) {
        viewModel.load(data);
@@ -277,7 +277,7 @@ afterLoad(function() {
 
   viewModel.calculateSalesTax= function(data) {
     $.ajax({ dataType: 'json', method: 'POST',
-             url: window.location.href + '/calculate-sales-tax',
+             url: 'calculate-sales-tax',
              data: { } })
      .done(function (data) {
        viewModel.load(data);
