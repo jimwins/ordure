@@ -122,7 +122,8 @@
       <div class="panel-body" data-bind="with: billing_address">
         <div class="pull-right" data-bind="if: id">
           <button class="btn btn-default btn-xs"
-                  data-bind="click: $parent.verifyAddress">
+                  data-bind="text: verified() ? 'Verified' : 'Verify',
+                             click: $parent.verifyAddress">
             Verify
           </button>
         </div>
