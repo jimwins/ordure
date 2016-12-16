@@ -199,6 +199,8 @@ CREATE TABLE `sale` (
   `shipping` decimal(9,2) NOT NULL DEFAULT '0.00',
   `shipping_tax` decimal(9,3) DEFAULT '0.000',
   `shipping_manual` tinyint(1) NOT NULL DEFAULT '0',
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

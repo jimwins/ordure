@@ -369,22 +369,8 @@ class Sale {
     $sale->load(array('uuid = ?', $sale_uuid))
       or $f3->error(404);
 
-    $person= new DB\SQL\Mapper($db, 'person');
-    if (($person_id= $f3->get('REQUEST.id'))) {
-      $person->load(array('id = ?', $person_id))
-        or $f3->error(404);
-    } else {
-      $person->load(array('email = ?', $f3->get('REQUEST.email')));
-    }
-    if ($person->dry()) {
-      $person->role= 'customer';
-    }
-    
-    $person->name= $f3->get('REQUEST.name');
-    $person->email= $f3->get('REQUEST.email');
-    $person->save();
-
-    $sale->person_id= $person->id;
+    $sale->name= $f3->get('REQUEST.name');
+    $sale->email= $f3->get('REQUEST.email');
     $sale->save();
 
     return $this->json($f3, $args);
