@@ -158,7 +158,9 @@
         </div>
       </div>
       <div class="panel-footer text-right">
-        <button class="btn btn-primary" data-bind="click: prepareForPayment">
+        <button class="btn btn-primary"
+                data-bind="enable: sale.billing_address_id && sale.total,
+                           click: prepareForPayment">
           Prepare for payment &raquo;
         </button>
       </div>
