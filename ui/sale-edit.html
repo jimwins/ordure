@@ -99,7 +99,7 @@
             <td><small data-bind="text: $data.code"></small></td>
             <td>
               <span data-bind="text: $data.name"></span>
-              <!-- <br><small>MSRP $19.35</small> -->
+              <div class="small" data-bind="text: $data.detail"></div>
             </td>
             <td class="text-right" data-bind="text: amount($data.sale_price())"></td>
             <td class="text-right" data-bind="text: amount($data.sale_price() * $data.quantity())"></td>
