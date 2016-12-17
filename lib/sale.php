@@ -598,7 +598,7 @@ class Sale {
                    (SELECT SUM(quantity * sale_price(retail_price,
                                                      discount_type,
                                                      discount)
-                               + tax))
+                               + tax)
                       FROM sale_item WHERE sale_id = sale.id)';
     $sale->load(array('uuid = ?', $sale_uuid))
       or $f3->error(404);
