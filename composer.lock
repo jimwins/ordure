@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b9b9e9de05133a8ee8a7f15b024a8e44",
-    "content-hash": "96647ab0d745c6104a6f1846eabb45bd",
+    "hash": "2e5158b7adea8fc58e6595c985e57834",
+    "content-hash": "50fb0bc678a47c6885d2b03056756f77",
     "packages": [
         {
             "name": "bcosca/fatfree",
@@ -150,16 +150,16 @@
         },
         {
             "name": "stripe/stripe-php",
-            "version": "v2.3.0",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stripe/stripe-php.git",
-                "reference": "9d76444550a09a6f9c55dd98113ba0901908e60a"
+                "reference": "234bcbd7483873c8762a67dfbdf2e6594b0a2ecc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/9d76444550a09a6f9c55dd98113ba0901908e60a",
-                "reference": "9d76444550a09a6f9c55dd98113ba0901908e60a",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/234bcbd7483873c8762a67dfbdf2e6594b0a2ecc",
+                "reference": "234bcbd7483873c8762a67dfbdf2e6594b0a2ecc",
                 "shasum": ""
             },
             "require": {
@@ -201,7 +201,7 @@
                 "payment processing",
                 "stripe"
             ],
-            "time": "2015-07-07 01:13:32"
+            "time": "2016-11-30 19:16:32"
         }
     ],
     "packages-dev": [],
