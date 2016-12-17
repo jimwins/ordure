@@ -180,13 +180,14 @@ class Sale {
     $item->retail_price= "IFNULL((SELECT retail_price FROM scat_item WHERE scat_item.code = item.code), retail_price)";
     $item->discount_type= "(SELECT discount_type FROM scat_item WHERE scat_item.code = item.code)";
     $item->discount= "(SELECT discount FROM scat_item WHERE scat_item.code = item.code)";
+    $item->purchase_quantity= "IFNULL((SELECT purchase_quantity FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
     $item->load(array('code = ?', $item_code))
       or $f3->error(404);
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
     $line->sale_id= $sale->id;
     $line->item_id= $item->id;
-    $line->quantity= 1;
+    $line->quantity= $item->purchase_quantity;
     $line->retail_price= $item->retail_price;
     $line->discount_type= $item->discount_type;
     $line->discount= $item->discount;
