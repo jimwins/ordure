@@ -20,6 +20,7 @@ class Sale {
     $f3->route("POST /sale/@sale/process-payment",
                'Sale->process_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
+    $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
@@ -214,6 +215,31 @@ class Sale {
     $line->load(array('id = ?', $sale_item_id))
       or $f3->error(404);
     $line->erase();
+
+    $this->update_shipping($f3, $args);
+
+    return $this->json($f3, $args);
+  }
+
+  function update_item($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+    $sale_item_id= $f3->get('REQUEST.item');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $line= new DB\SQL\Mapper($db, 'sale_item');
+    $line->load(array('id = ?', $sale_item_id))
+      or $f3->error(404);
+
+    if ($f3->exists('REQUEST.quantity')) {
+      $line->quantity= (int)$f3->get('REQUEST.quantity');
+    }
+
+    $line->save();
 
     $this->update_shipping($f3, $args);
 

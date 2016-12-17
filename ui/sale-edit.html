@@ -93,7 +93,9 @@
         <tbody data-bind="foreach: items">
           <tr valign="top">
             <td><a data-bind="if: $parent.admin, click: $parent.removeItem"><i class="fa fa-trash-o"></i></a></td>
-            <td class="text-right" data-bind="text: $data.quantity"></td>
+            <td class="text-right editable">
+             <span data-key="quantity" data-bind="text: $data.quantity"></span>
+            </td>
             <td><small data-bind="text: $data.code"></small></td>
             <td>
               <span data-bind="text: $data.name"></span>
@@ -212,6 +214,17 @@ afterLoad(function() {
      });
   }
 
+  viewModel.updateItem= function(item, key, value) {
+    var data= { item: item.id() }
+    data[key]= value;
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'update-item',
+             data: data })
+     .done(function (data) {
+       viewModel.load(data);
+     });
+  }
+
   viewModel.editPerson= function(person) {
     $.ajax({ url: '{{ @BASE }}/ui/person.html', cache: false })
       .done(function (html) {
@@ -301,6 +314,48 @@ afterLoad(function() {
   }
 
   ko.applyBindings(viewModel);
+
+  $(document).on('dblclick', '.editable', function(ev) {
+    var val= $(this).children('span').eq(0);
+    var key= val.data("key");
+    var fld= $('<input type="text">');
+    fld.val(val.text());
+    fld.data("key", key);
+    fld.width($(this).width());
+    fld.data("default", fld.val());
+    var line= ko.dataFor(ev.target);
+
+    fld.on('keyup blur', function(ev) {
+      // Handle ESC key
+      if (ev.type == 'keyup' && ev.which == 27) {
+        var val=$('<span>');
+        val.text($(this).data('default'));
+        val.data("key", $(this).data("key"));
+        $(this).replaceWith(val);
+        return false;
+      }
+
+      // Everything else but RETURN just gets passed along
+      if (ev.type == 'keyup' && ev.which != '13') {
+        return true;
+      }
+
+      var key= $(this).data('key');
+      var value= $(this).val();
+      var val= $('<span><i class="fa fa-spinner fa-spin"></i></span>');
+      val.data("key", key);
+      $(this).replaceWith(val);
+
+      // Update the value
+      viewModel.updateItem(line, key, value);
+
+      return false;
+    });
+
+    val.replaceWith(fld);
+    fld.focus().select();
+  });
+
 
 });
 
