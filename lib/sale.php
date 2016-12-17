@@ -52,14 +52,13 @@ class Sale {
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
     $sale->tax= 'shipping_tax +
-                 (SELECT SUM(quantity * tax)
+                 (SELECT SUM(tax)
                     FROM sale_item WHERE sale_id = sale.id)';
     $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity *
-                               (sale_price(retail_price,
-                                           discount_type,
-                                           discount) +
-                                tax))
+                   (SELECT SUM(quantity * sale_price(retail_price,
+                                                     discount_type,
+                                                     discount)
+                               + tax)
                       FROM sale_item WHERE sale_id = sale.id)';
     $sale->load(array('id = ?', $sale_id))
       or $f3->error(404);
@@ -81,6 +80,23 @@ class Sale {
     $item->code= "(SELECT code FROM item WHERE id = item_id)";
     $item->name= "(SELECT name FROM item WHERE id = item_id)";
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
+    $item->detail= "(SELECT IFNULL(CONCAT(IF(item.retail_price,
+                                             'MSRP $', 'List $'),
+                                          sale_item.retail_price,
+                                          CASE sale_item.discount_type
+                                            WHEN 'percentage' THEN
+                                              CONCAT(' / Sale: ',
+                                                     ROUND(sale_item.discount),
+                                                     '% off')
+                                            WHEN 'relative' THEN
+                                              CONCAT(' / Sale: $',
+                                                     sale_item.discount,
+                                                     ' off')
+                                            WHEN 'fixed' THEN
+                                              ''
+                                            END), '')
+                       FROM item WHERE id = item_id)";
+
     $items= $item->find(array('sale_id = ?', $sale->id),
                          // XXX force shipping items to end?
                          array('order' => 'id'));
@@ -576,14 +592,13 @@ class Sale {
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
     $sale->tax= 'shipping_tax +
-                 (SELECT SUM(quantity * tax)
+                 (SELECT SUM(tax)
                     FROM sale_item WHERE sale_id = sale.id)';
     $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity *
-                               (sale_price(retail_price,
-                                           discount_type,
-                                           discount) +
-                                tax))
+                   (SELECT SUM(quantity * sale_price(retail_price,
+                                                     discount_type,
+                                                     discount)
+                               + tax))
                       FROM sale_item WHERE sale_id = sale.id)';
     $sale->load(array('uuid = ?', $sale_uuid))
       or $f3->error(404);
