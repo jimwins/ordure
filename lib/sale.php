@@ -12,13 +12,18 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
     $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status'); // XXX thanks
+    $f3->route("GET|HEAD /sale/@sale/thanks", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
                'Sale->calculate_sales_tax');
+    $f3->route("POST /sale/@sale/generate-bitcoin-address [ajax]",
+               'Sale->generate_bitcoin_address');
     $f3->route("POST /sale/@sale/process-payment",
                'Sale->process_payment');
+    $f3->route("POST /sale/@sale/process-bitcoin-payment [ajax]",
+               'Sale->process_bitcoin_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
@@ -575,6 +580,52 @@ class Sale {
                             'payments' => $f3->get('payments')));
   }
 
+  function generate_bitcoin_address($f3, $args) {
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->subtotal= '(SELECT SUM(quantity *
+                                  sale_price(retail_price,
+                                             discount_type,
+                                             discount))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->tax= 'shipping_tax +
+                 (SELECT SUM(tax)
+                    FROM sale_item WHERE sale_id = sale.id)';
+    $sale->total= 'shipping + shipping_tax +
+                   (SELECT SUM(quantity * sale_price(retail_price,
+                                                     discount_type,
+                                                     discount)
+                               + tax)
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $amount= (int)($sale->total * 100);
+
+    \Stripe\Stripe::setApiKey($f3->get('STRIPE_SECRET_KEY'));
+
+    $source= \Stripe\Source::create(array(
+      "type" => "bitcoin",
+      "amount" => $amount,
+      "currency" => "usd",
+      "owner" => array(
+        "email" => $sale->email
+      )
+    ));
+
+    echo json_encode(array(
+      'bitcoin_amount' => $source->bitcoin->amount,
+      'receiver_address' => $source->receiver->address,
+      'bitcoin_uri' => $source->bitcoin->uri,
+      'source_id' => $source->id,
+      'source_client_secret' => $source->client_secret,
+    ));
+  }
+
   function process_payment($f3, $args) {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
@@ -647,5 +698,88 @@ class Sale {
     */
 
     $f3->reroute('paid');
+  }
+
+  function process_bitcoin_payment($f3, $args) {
+    $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
+                    'publishable_key' => $f3->get('STRIPE_KEY'));
+
+    $token= json_decode($_REQUEST['token']);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->subtotal= '(SELECT SUM(quantity *
+                                  sale_price(retail_price,
+                                             discount_type,
+                                             discount))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->tax= 'shipping_tax +
+                 (SELECT SUM(tax)
+                    FROM sale_item WHERE sale_id = sale.id)';
+    $sale->total= 'shipping + shipping_tax +
+                   (SELECT SUM(quantity * sale_price(retail_price,
+                                                     discount_type,
+                                                     discount)
+                               + tax)
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $person= new DB\SQL\Mapper($db, 'person');
+    $person->load(array('id = ?', $sale->person_id));
+
+    $amount= (int)($sale->total * 100);
+
+    \Stripe\Stripe::setApiKey($stripe['secret_key']);
+
+    $token= $f3->get('REQUEST.stripeToken');
+
+    $source= \Stripe\Source::create(array(
+      "type" => "bitcoin",
+      "amount" => $amount,
+      "currency" => "usd",
+      "owner" => array(
+        "email" => $sale->email
+      )
+    ));
+
+    try {
+      $charge= \Stripe\Charge::create(array(
+        "amount" => $source->amount,
+        "currency" => $source->currency,
+        "source" => $source->id,
+        "receipt_email" => $person->email,
+      ));
+    } catch (\Stripe\Error\Card $e) {
+      // The card has been declined!
+      $f3->error(500);
+    }
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'stripe';
+    $payment->amount= $charge->amount / 100;
+    $payment->data= $charge->id;
+    $payment->save();
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    /*
+    $headers= array();
+    $headers[]= "From: " . $f3->get('CONTACT');
+    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+
+    @mail($f3->get('CONTACT'),
+          "Sale: Gift Card",
+          Template::instance()->render('email-gift-card-sale.txt',
+                                       'text/plain'),
+          implode("\r\n", $headers));
+    */
+
+    echo json_encode(array());
   }
 }

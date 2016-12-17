@@ -81,94 +81,158 @@
         </repeat>
         </tbody>
       </table>
-      <div class="panel-footer text-right">
+      <div class="panel-footer">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                  <i class="fa fa-address-card-o"></i>
+                  Billing Address
+                </h3>
+              </div>
+              <div class="panel-body">
+                <div>{{ @billing_address.name }}</div>
+                <div>{{ @billing_address.address1 }}</div>
+                <div>{{ @billing_address.address2 }}</div>
+                <div>
+                  {{ @billing_address.city }}, {{ @billing_address.state }}
+                  {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                  <i class="fa fa-address-card-o"></i>
+                  Shipping Address
+                </h3>
+              </div>
+              <div class="panel-body">
+                <check if="{{ !@shipping_address.id ||
+                              @shipping_address.id == @billing_address.id }}">
+                  <true>
+                    <div>
+                      Same as billing address.
+                    </div>
+                  </true>
+                  <false>
+                    <div>{{ @shipping_address.name }}</div>
+                    <div>{{ @shipping_address.address1 }}</div>
+                    <div>{{ @shipping_address.address2 }}</div>
+                    <div>
+                      {{ @shipping_address.city }}, {{ @shipping_address.state }}
+                      {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
+                    </div>
+                  </false>
+                </check>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">
-          <i class="fa fa-address-card-o"></i>
-          Billing Address
-        </h3>
-      </div>
-      <div class="panel-body">
-        <div>{{ @billing_address.name }}</div>
-        <div>{{ @billing_address.address1 }}</div>
-        <div>{{ @billing_address.address2 }}</div>
-        <div>
-          {{ @billing_address.city }}, {{ @billing_address.state }}
-          {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
-        </div>
-      </div>
-      <div class="panel-heading">
-        <h3 class="panel-title">
-          <i class="fa fa-address-card-o"></i>
-          Shipping Address
-        </h3>
-      </div>
-      <div class="panel-body">
-        <check if="{{ !@shipping_address.id ||
-                      @shipping_address.id == @billing_address.id }}">
-          <true>
-            <div>
-              Same as billing address.
-            </div>
-          </true>
-          <false>
-            <div>{{ @shipping_address.name }}</div>
-            <div>{{ @shipping_address.address1 }}</div>
-            <div>{{ @shipping_address.address2 }}</div>
-            <div>
-              {{ @shipping_address.city }}, {{ @shipping_address.state }}
-              {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
-            </div>
-          </false>
-        </check>
-      </div>
-      <div class="panel-footer">
-        <form method="POST" action="process-payment" id="payment-form">
-          <div class="payment-errors alert alert-danger hidden"></div>
-
-          <div class="form-group">
-            <label>
-              <span>Card number</span>
-              <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
-            </label>
-          </div>
-          <div class="form-group">
-            <label>
-              <span>Expiration (MM/YY)</span>
-              <div>
-                <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-month"  data-stripe="exp_month" placeholder="MM">
-                <span> / </span>
-                <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-year"  data-stripe="exp_year" placeholder="YY">
-              </div>
-            </label>
-          </div>
-          <div class="form-group">
-            <label>
-              <span>Security code (CVC):</span>
-              <input type="text" class="form-control" autocomplete="cc-csc"  size="4" data-stripe="cvc" placeholder="XXX">
-            </label>
-          </div>
-
-          <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
-
-          <div class="text-right">
-            <input type="hidden" name="amount" value="1"><!-- dummy -->
-            <button type="submit" class="btn btn-primary">
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="pay-credit-card-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse"
+               data-parent="#accordion" href="#pay-credit-card"
+               aria-expanded="true" area-controls="pay-credit-card">
               <i class="fa fa-credit-card fa-lg"></i>
               Pay with Credit Card
+            </a>
+          </h4>
+        </div>
+        <div id="pay-credit-card" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-credit-card-heading">
+          <div class="panel-body">
+            <form method="POST" action="process-payment" id="payment-form">
+              <div class="payment-errors alert alert-danger hidden"></div>
+
+              <div class="form-group">
+                <label>
+                  <span>Card number</span>
+                  <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <span>Expiration (MM/YY)</span>
+                  <div>
+                    <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-month"  data-stripe="exp_month" placeholder="MM">
+                    <span> / </span>
+                    <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-year"  data-stripe="exp_year" placeholder="YY">
+                  </div>
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
+                  <span>Security code (CVC):</span>
+                  <input type="text" class="form-control" autocomplete="cc-csc"  size="4" data-stripe="cvc" placeholder="XXX">
+                </label>
+              </div>
+
+              <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
+
+              <div class="text-right">
+                <input type="hidden" name="amount" value="1"><!-- dummy -->
+                <button type="submit" class="btn btn-primary">
+                  Pay
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="pay-bitcoin-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse"
+               data-parent="#accordion" href="#pay-bitcoin"
+               aria-expanded="true" area-controls="pay-bitcoin">
+              <i class="fa fa-bitcoin fa-lg"></i>
+              Pay with Bitcoin
+            </a>
+          </h4>
+        </div>
+        <div id="pay-bitcoin" class="panel-collapse collapse" role="tabpanel" aria-labelledby="pay-bitcoin-heading">
+          <div class="panel-body">
+            <div id="bitcoin-details" class="hidden">
+              <p>To complete your payment, please send bitcoins to the address below.</p>
+              <div class="form-group">
+                <label>
+                  Amount
+                  <input type="text" name="amount" class="form-control" disabled>
+                </label>
+              </div>
+                         
+              <div class="form-group">
+                <label>
+                  Address
+                  <input type="text" name="receiver" class="form-control" disabled>
+                </label>
+              </div>
+
+              <a class="uri btn btn-primary" href="#">Open Wallet</a>
+
+            </div>
+
+            <button id="generate-bitcoin-address" class="btn btn-primary">
+              Generate Address
             </button>
           </div>
-
-        </form>
+        </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /.panel-group -->
+  </div><!-- /.col-sm-4 -->
 
 </div>
 <set script="handle-payment.js" />

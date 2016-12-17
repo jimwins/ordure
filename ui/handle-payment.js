@@ -49,4 +49,34 @@ loadScript('https://js.stripe.com/v2/',
     }
   };
 
+  $("#generate-bitcoin-address").on("click", function (ev) {
+    $(ev.target).prop('disabled', true);
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'generate-bitcoin-address',
+             data: { } })
+     .done(function (data) {
+       // Show details
+       var bc= $('#bitcoin-details');
+       $('[name="amount"]', bc).val(data.bitcoin_amount / 100000);
+       $('[name="receiver"]', bc).val(data.receiver_address);
+       $('.uri', bc).attr('href',data.bitcoin_uri);
+       bc.removeClass('hidden');
+       $(ev.target).addClass('hidden');
+
+       Stripe.source.poll(data.source_id, data.source_client_secret,
+                          function (status, source) {
+         $.ajax({ dataType: 'json', method: 'POST',
+                  url: 'process-bitcoin-payment',
+                  data: { } })
+          .done(function (data) {
+            window.location.href= "./thanks";
+          });
+       });
+     })
+     .fail(function (jqXHR, textStatus, errorThrown) {
+       $(ev.target).prop('disabled', false);
+     });
+
+  });
+
 });
