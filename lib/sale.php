@@ -56,16 +56,24 @@ class Sale {
                                              discount_type,
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'shipping_tax +
-                 (SELECT SUM(tax)
-                    FROM sale_item WHERE sale_id = sale.id)';
-    $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity * sale_price(retail_price,
-                                                     discount_type,
-                                                     discount)
-                               + tax)
-                      FROM sale_item WHERE sale_id = sale.id)';
     $sale->load(array('id = ?', $sale_id))
+    $sale->tax= 'CAST(
+                   ROUND_TO_EVEN(shipping_tax +
+                                 (SELECT SUM(tax)
+                                    FROM sale_item WHERE sale_id = sale.id),
+                                 2)
+                   AS DECIMAL(9,2))';
+    $sale->total= 'CAST(
+                     ROUND_TO_EVEN(shipping + shipping_tax +
+                                   (SELECT SUM(quantity *
+                                               sale_price(retail_price,
+                                                          discount_type,
+                                                          discount)
+                                               + tax)
+                                      FROM sale_item WHERE sale_id = sale.id),
+                                   2)
+                     AS DECIMAL(9,2))';
+
       or $f3->error(404);
     $sale->copyTo('sale');
 
