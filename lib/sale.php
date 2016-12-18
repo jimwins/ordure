@@ -590,7 +590,7 @@ class Sale {
         "amount" => $amount,
         "currency" => "usd",
         "source" => $token,
-        "receipt_email" => $person->email,
+        "receipt_email" => $sale->email,
       ));
     } catch (\Stripe\Error\Card $e) {
       // The card has been declined!
