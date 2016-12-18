@@ -551,7 +551,7 @@ class Sale {
   function generate_bitcoin_address($f3, $args) {
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
-    $amount= (int)($sale->total * 100);
+    $amount= (int)(($sale->total - $sale->paid) * 100);
 
     \Stripe\Stripe::setApiKey($f3->get('STRIPE_SECRET_KEY'));
 
@@ -583,7 +583,7 @@ class Sale {
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
-    $amount= (int)($sale->total * 100);
+    $amount= (int)(($sale->total - $sale->paid) * 100);
 
     \Stripe\Stripe::setApiKey($stripe['secret_key']);
 
