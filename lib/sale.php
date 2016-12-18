@@ -124,7 +124,9 @@ class Sale {
                          array('order' => 'id'));
     $payments_out= array();
     foreach ($payments as $i) {
-      $payments_out[]= $i->cast();
+      $pay= $i->cast();
+      $pay['data']= json_decode($pay['data'], true);
+      $payments_out[]= $pay;
     }
     $f3->set('payments', $payments_out);
 
@@ -599,9 +601,13 @@ class Sale {
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
-    $payment->method= 'stripe';
+    $payment->method= 'credit';
     $payment->amount= $charge->amount / 100;
-    $payment->data= $charge->id;
+    $payment->data= json_encode(array(
+      'charge_id' => $charge->id,
+      'cc_brand' => $charge->source->brand,
+      'cc_last4' => $charge->source->last4,
+    ));
     $payment->save();
 
     $sale->status= 'paid';
@@ -661,9 +667,11 @@ class Sale {
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
-    $payment->method= 'stripe';
+    $payment->method= 'bitcoin';
     $payment->amount= $charge->amount / 100;
-    $payment->data= $charge->id;
+    $payment->data= json_encode(array(
+      'charge_id' => $charge->id,
+    ));
     $payment->save();
 
     $sale->status= 'paid';

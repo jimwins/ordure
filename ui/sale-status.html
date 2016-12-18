@@ -52,8 +52,16 @@
           </tr>
           <repeat group="{{ @payments }}" value="{{ @data }}">
           <tr>
-            <th colspan="5" class="text-right">{{ @data.method }}</th>
-            <th colspan="5" class="text-right">{{ @amount(@data.amount) }}</th>
+            <th colspan="5" class="text-right">
+              <check if="{{ @data.method == 'credit' }}">
+                {{ @data.data.cc_brand }} ending in {{ @data.data.cc_last4 }}
+              </check>
+              <check if="{{ @data.method == 'bitcoin' }}">
+                Bitcoin
+              </check>
+              ({{ @data.processed }}):
+            </th>
+            <td colspan="5" class="text-right">{{ @amount(@data.amount) }}</td>
           </tr>
           </repeat>
           <!--

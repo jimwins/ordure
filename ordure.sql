@@ -261,9 +261,10 @@ DROP TABLE IF EXISTS `sale_payment`;
 CREATE TABLE `sale_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
-  `method` enum('credit','gift') NOT NULL,
+  `method` enum('credit','stripe','gift') NOT NULL,
   `amount` decimal(9,3) NOT NULL,
-  `processed` datetime NOT NULL,
+  `processed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `data` mediumblob,
   PRIMARY KEY (`id`),
   KEY `sale_id` (`sale_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -354,4 +355,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-12 22:34:18
+-- Dump completed on 2016-12-16 13:57:33
