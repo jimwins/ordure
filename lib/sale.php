@@ -20,8 +20,8 @@ class Sale {
                'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/generate-bitcoin-address [ajax]",
                'Sale->generate_bitcoin_address');
-    $f3->route("POST /sale/@sale/process-payment",
-               'Sale->process_payment');
+    $f3->route("POST /sale/@sale/process-creditcard-payment",
+               'Sale->process_creditcard_payment');
     $f3->route("POST /sale/@sale/process-bitcoin-payment [ajax]",
                'Sale->process_bitcoin_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
@@ -626,7 +626,7 @@ class Sale {
     ));
   }
 
-  function process_payment($f3, $args) {
+  function process_creditcard_payment($f3, $args) {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
 
