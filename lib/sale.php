@@ -47,7 +47,7 @@ class Sale {
     $f3->reroute("./" . $sale->uuid);
   }
 
-  function load($f3, $sale_id) {
+  function load($f3, $sale_id, $type= 'id') {
     $db= $f3->get('DBH');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
@@ -56,7 +56,6 @@ class Sale {
                                              discount_type,
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
-    $sale->load(array('id = ?', $sale_id))
     $sale->tax= 'CAST(
                    ROUND_TO_EVEN(shipping_tax +
                                  (SELECT SUM(tax)
@@ -74,6 +73,7 @@ class Sale {
                                    2)
                      AS DECIMAL(9,2))';
 
+    $sale->load(array($type . ' = ?', $sale_id))
       or $f3->error(404);
     $sale->copyTo('sale');
 
@@ -127,6 +127,8 @@ class Sale {
       $payments_out[]= $i->cast();
     }
     $f3->set('payments', $payments_out);
+
+    return $sale;
   }
 
   function dispatch($f3, $args) {
@@ -154,44 +156,17 @@ class Sale {
   }
 
   function edit($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $this->load($f3, $sale->id);
-
+    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
   }
 
   function pay($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $this->load($f3, $sale->id);
-
+    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-pay.html');
   }
 
   function status($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $this->load($f3, $sale->id);
-
+    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-status.html');
   }
 
@@ -277,18 +252,7 @@ class Sale {
   }
 
   function update_shipping($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->subtotal= '(SELECT SUM(quantity *
-                                  sale_price(retail_price,
-                                             discount_type,
-                                             discount))
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     if ($sale->shipping_manual)
       return;
@@ -570,15 +534,7 @@ class Sale {
   }
 
   function json($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $this->load($f3, $sale->id);
+    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     echo json_encode(array( 'sale' => $f3->get('sale'),
                             'person' => $f3->get('person'),
@@ -589,28 +545,7 @@ class Sale {
   }
 
   function generate_bitcoin_address($f3, $args) {
-
-    $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->subtotal= '(SELECT SUM(quantity *
-                                  sale_price(retail_price,
-                                             discount_type,
-                                             discount))
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'shipping_tax +
-                 (SELECT SUM(tax)
-                    FROM sale_item WHERE sale_id = sale.id)';
-    $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity * sale_price(retail_price,
-                                                     discount_type,
-                                                     discount)
-                               + tax)
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     $amount= (int)($sale->total * 100);
 
@@ -642,28 +577,7 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->subtotal= '(SELECT SUM(quantity *
-                                  sale_price(retail_price,
-                                             discount_type,
-                                             discount))
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'shipping_tax +
-                 (SELECT SUM(tax)
-                    FROM sale_item WHERE sale_id = sale.id)';
-    $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity * sale_price(retail_price,
-                                                     discount_type,
-                                                     discount)
-                               + tax)
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $person= new DB\SQL\Mapper($db, 'person');
-    $person->load(array('id = ?', $sale->person_id));
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     $amount= (int)($sale->total * 100);
 
@@ -716,28 +630,7 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->subtotal= '(SELECT SUM(quantity *
-                                  sale_price(retail_price,
-                                             discount_type,
-                                             discount))
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'shipping_tax +
-                 (SELECT SUM(tax)
-                    FROM sale_item WHERE sale_id = sale.id)';
-    $sale->total= 'shipping + shipping_tax +
-                   (SELECT SUM(quantity * sale_price(retail_price,
-                                                     discount_type,
-                                                     discount)
-                               + tax)
-                      FROM sale_item WHERE sale_id = sale.id)';
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
-
-    $person= new DB\SQL\Mapper($db, 'person');
-    $person->load(array('id = ?', $sale->person_id));
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     $amount= (int)($sale->total * 100);
 
