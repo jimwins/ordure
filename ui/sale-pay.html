@@ -55,12 +55,11 @@
 
               <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
 
-              <div class="text-right">
-                <input type="hidden" name="amount" value="1"><!-- dummy -->
-                <button type="submit" class="btn btn-primary">
-                  Pay
-                </button>
-              </div>
+              <input type="hidden" name="amount" value="1000"><!-- dummy -->
+
+              <button type="submit" class="btn btn-primary">
+                Pay {{ @amount(@sale.total - @sale.due) }}
+              </button>
 
             </form>
           </div>
