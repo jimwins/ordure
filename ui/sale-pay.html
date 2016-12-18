@@ -25,6 +25,13 @@
 
               <div class="form-group">
                 <label>
+                  <span>Amount to be paid</span>
+                  <input type="text" class="form-control" disabled
+                         value="{{ @amount(@sale.total - @sale.due) }}">
+                </label>
+              </div>
+              <div class="form-group">
+                <label>
                   <span>Card number</span>
                   <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
                 </label>
@@ -93,6 +100,13 @@
 
             </div>
 
+            <div class="form-group">
+              <label>
+                <span>Amount to be paid</span>
+                <input type="text" class="form-control" disabled
+                       value="{{ @amount(@sale.total - @sale.due) }}">
+              </label>
+            </div>
             <button id="generate-bitcoin-address" class="btn btn-primary">
               Generate Address
             </button>
