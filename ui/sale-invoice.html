@@ -53,12 +53,10 @@
         <th colspan="5" class="text-right">{{ @amount(@data.amount) }}</th>
       </tr>
       </repeat>
-      <!--
       <tr>
         <th colspan="5" class="text-right">Due:</th>
-        <td class="text-right">$0.00</td>
+        <td class="text-right">{{ @amount(@sale.total - @sale.paid) }}</td>
       </tr>
-      -->
     </tfoot>
     <tbody>
     <repeat group="{{ @items }}" value="{{ @data }}">

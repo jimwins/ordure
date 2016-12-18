@@ -72,7 +72,9 @@ class Sale {
                                       FROM sale_item WHERE sale_id = sale.id),
                                    2)
                      AS DECIMAL(9,2))';
-
+    $sale->paid= '(SELECT SUM(amount)
+                     FROM sale_payment
+                    WHERE sale_id = sale.id)';
     $sale->load(array($type . ' = ?', $sale_id))
       or $f3->error(404);
     $sale->copyTo('sale');
