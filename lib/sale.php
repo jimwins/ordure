@@ -658,9 +658,13 @@ class Sale {
         "source" => $source->id,
         "receipt_email" => $person->email,
       ));
-    } catch (\Stripe\Error\Card $e) {
-      // The card has been declined!
-      $f3->error(500);
+    } catch (\Stripe\Error\Base $e) {
+      $body= $e->getJsonBody();
+      $err= $body['error'];
+
+      // XXX Send email to admin
+
+      $f3->error(500, $err['message']);
     }
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');

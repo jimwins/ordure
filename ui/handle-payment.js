@@ -64,6 +64,7 @@ loadScript('https://js.stripe.com/v2/',
 
        // Hide prompt
        $('#bitcoin-prompt').addClass('hidden');
+       $(ev.target).prop('disabled', false); // hidden, so go ahead and enable
 
        Stripe.source.poll(data.source_id, data.source_client_secret,
                           function (status, source) {
@@ -72,6 +73,12 @@ loadScript('https://js.stripe.com/v2/',
                   data: { } })
           .done(function (data) {
             window.location.href= "./thanks";
+          })
+          .fail(function (jqXHR, textStatus, errorThrown) {
+            alert(jqXHR.responseJSON.text ?
+                    jqXHR.responseJSON.text : textStatus); 
+            $('#bitcoin-prompt').removeClass('hidden');
+            $('#bitcoin-details').addClass('hidden');
           });
        });
      })
