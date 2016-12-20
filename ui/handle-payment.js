@@ -61,7 +61,9 @@ loadScript('https://js.stripe.com/v2/',
        $('[name="receiver"]', bc).val(data.receiver_address);
        $('.uri', bc).attr('href',data.bitcoin_uri);
        bc.removeClass('hidden');
-       $(ev.target).addClass('hidden');
+
+       // Hide prompt
+       $('#bitcoin-prompt').addClass('hidden');
 
        Stripe.source.poll(data.source_id, data.source_client_secret,
                           function (status, source) {
