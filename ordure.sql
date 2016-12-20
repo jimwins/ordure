@@ -280,7 +280,7 @@ DROP TABLE IF EXISTS `sale_payment`;
 CREATE TABLE `sale_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
-  `method` enum('credit','stripe','gift') NOT NULL,
+  `method` enum('credit','bitcoin','gift') NOT NULL,
   `amount` decimal(9,3) NOT NULL,
   `processed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data` mediumblob,
