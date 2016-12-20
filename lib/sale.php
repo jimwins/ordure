@@ -511,9 +511,7 @@ class Sale {
     curl_close($curl);
 
     if ($err) {
-      // XXX blah
-      echo "cURL Error #:" . $err;
-      return;
+      $f3->fail(500, "cURL Error #:" . $err);
     }
 
     error_log($response);

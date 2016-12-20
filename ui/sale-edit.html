@@ -302,7 +302,10 @@ afterLoad(function() {
              data: { } })
      .done(function (data) {
        viewModel.load(data);
-    });
+     })
+     .fail(function (jqXHR, textStatus, errorThrown) {
+       alert(jqXHR.responseJSON.text ? jqXHR.responseJSON.text : textStatus);
+     });
   }
 
   viewModel.prepareForPayment= function(data) {
