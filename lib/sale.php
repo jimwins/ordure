@@ -113,7 +113,6 @@ class Sale {
                        FROM item WHERE id = item_id)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
-                         // XXX force shipping items to end?
                          array('order' => 'id'));
     $items_out= array();
     foreach ($items as $i) {
@@ -467,7 +466,6 @@ class Sale {
     $item= new DB\SQL\Mapper($db, 'sale_item');
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
     $items= $item->find(array('sale_id = ?', $sale->id),
-                         // XXX force shipping items to end?
                          array('order' => 'id'));
     foreach ($items as $i) {
       $data['cartItems'][]= array(
