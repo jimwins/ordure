@@ -57,7 +57,7 @@ loadScript('https://js.stripe.com/v2/',
      .done(function (data) {
        // Show details
        var bc= $('#bitcoin-details');
-       $('[name="amount"]', bc).val(data.bitcoin_amount / 100000);
+       $('[name="amount"]', bc).val((data.bitcoin_amount / 100000000) + ' BTC');
        $('[name="receiver"]', bc).val(data.receiver_address);
        $('.uri', bc).attr('href',data.bitcoin_uri);
        bc.removeClass('hidden');
