@@ -23,12 +23,31 @@ DROP TABLE IF EXISTS `auth`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `auth` (
-  `person` int(10) unsigned NOT NULL,
+  `person_id` int(10) unsigned NOT NULL,
   `password_hash` varchar(255) DEFAULT NULL,
   `otp_key` varchar(255) DEFAULT NULL,
   `last_auth` datetime DEFAULT NULL,
   `failures` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`person`)
+  PRIMARY KEY (`person_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `auth_token`
+--
+
+DROP TABLE IF EXISTS `auth_token`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_token` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `selector` char(12) DEFAULT NULL,
+  `token` char(64) DEFAULT NULL,
+  `person_id` int(10) unsigned NOT NULL,
+  `expires` datetime DEFAULT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -355,4 +374,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-16 13:57:33
+-- Dump completed on 2016-12-20 15:11:21

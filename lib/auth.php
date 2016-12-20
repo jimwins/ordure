@@ -7,10 +7,61 @@ class Auth {
     $f3->route("POST /login", 'Auth->login');
     $f3->route("GET|HEAD /register", 'Auth->viewRegisterForm');
     $f3->route("POST /register", 'Auth->register');
+    $f3->route("GET|HEAD /account", 'Auth->account');
   }
 
   static function prehash($password) {
     return base64_encode(hash('sha256', $password, true));
+  }
+
+  function authenticated_user($f3) {
+    if (($login_token= $f3->get('COOKIE.loginToken'))) {
+      list($selector, $validator)= explode(':', $login_token);
+      if (!$selector || !$validator) {
+        return false;
+      }
+
+      $db= $f3->get('DBH');
+      $auth_token= new DB\SQL\Mapper($db, 'auth_token');
+      $auth_token->load(array('selector = ?', $selector));
+      if ($auth_token->dry()) {
+        return false;
+      }
+
+      if ($auth_token->expires &&
+          new \Datetime() > new \Datetime($auth_token->expires)) {
+        // XXX delete token
+        return false; // expired
+      }
+
+      if (hash_equals($auth_token->token, hash('sha256', $validator))) {
+        return $auth_token->person_id;
+      }
+    }
+    return false;
+  }
+
+  function issue_auth_token($f3, $person_id) {
+    $selector= bin2hex(random_bytes(6));
+    $validator= base64_encode(random_bytes(24));
+    $token= hash('sha256', $validator);
+
+    $expires= new \Datetime('+14 days');
+
+    $db= $f3->get('DBH');
+    $auth_token= new DB\SQL\Mapper($db, 'auth_token');
+    $auth_token->selector= $selector;
+    $auth_token->token= $token;
+    $auth_token->person_id= $person_id;
+    $auth_token->expires= $expires->format('Y-m-d H:i:s');
+
+    $auth_token->save();
+
+    $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+              $_SERVER['HTTP_HOST'] : false);
+
+    SetCookie('loginToken', "$selector:$validator", $expires->format('U'),
+              '/', $domain, true, true);
   }
 
   function viewLoginForm($f3) {
@@ -51,7 +102,7 @@ class Auth {
 
     if (!$email || !$password ||
         !$person->load(array('email=?', $email)) ||
-        !$auth->load(array('person=?', $person->id)))
+        !$auth->load(array('person_id=?', $person->id)))
     {
       $f3->set('LOGIN_FAILED', true);
     }
@@ -71,8 +122,9 @@ class Auth {
         $auth->last_auth= date("Y-m-d H:i:s");
         $auth->save();
 
-        // XXX do something
-
+        self::issue_auth_token($f3, $auth->person_id);
+        // XXX redirect to where we're told
+        $f3->reroute('/account');
       }
     }
 
@@ -141,7 +193,7 @@ class Auth {
       $hash= password_hash(self::prehash($password), PASSWORD_DEFAULT);
 
       $auth= new DB\SQL\Mapper($db, 'auth');
-      $auth->copyfrom(array('person' => $person->get('id'),
+      $auth->copyfrom(array('person_id' => $person->get('id'),
                             'password_hash' => $hash));
       $auth->save();
 
@@ -151,4 +203,19 @@ class Auth {
     echo Template::instance()->render('register.html');
   }
 
+  function account($f3, $args) {
+    $person_id= self::authenticated_user($f3);
+
+    if (!$person_id) {
+      $f3->reroute('/login');
+    }
+
+    $db= $f3->get('DBH');
+
+    $person= new DB\SQL\Mapper($db, 'person');
+    $person->load(array('id = ?', $person_id));
+    $person->copyTo('person');
+
+    echo Template::instance()->render('account.html');
+  }
 }
