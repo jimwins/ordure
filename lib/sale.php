@@ -573,8 +573,6 @@ class Sale {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
 
-    $token= json_decode($_REQUEST['token']);
-
     $db= $f3->get('DBH');
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
@@ -594,7 +592,12 @@ class Sale {
       ));
     } catch (\Stripe\Error\Card $e) {
       // The card has been declined!
-      $f3->error(500);
+      $body= $e->getJsonBody();
+      $err= $body['error'];
+
+      // XXX Send email to admin
+
+      $f3->error(500, $err['message']);
     }
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
@@ -623,7 +626,11 @@ class Sale {
           implode("\r\n", $headers));
     */
 
-    $f3->reroute('paid');
+    if ($f3->get('AJAX')) {
+      echo json_encode(array('message' => 'Success!'));
+    } else {
+      $f3->reroute('thanks');
+    }
   }
 
   function process_bitcoin_payment($f3, $args) {
