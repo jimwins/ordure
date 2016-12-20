@@ -7,8 +7,18 @@
   <div class="col-md-4">
     <div class="panel panel-default">
       <div class="panel-heading">
+        <h3 class="panel-title">Status</h3>
       </div>
       <div class="panel-body">
+        <check if="{{ @sale.status = 'paid' }}">
+          <p class="text-success">
+            <strong>Thanks for your order!</strong> We will let you know when
+            your order has shipped, or contact you if there are any troubles.
+          </p>
+        </check>
+        <p>
+          Feel free to <a href="mailto:info@rawmaterialsla.com">contact us
+          with any questions or concerns</a>.
       </div>
       <div class="panel-footer">
       </div>
