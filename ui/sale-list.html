@@ -1,0 +1,68 @@
+<set title="Sales @ Raw Materials Art Supplies">
+<include href="header.html" />
+<div class="row">
+  <div class="col-md-8">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Sales
+        </h3>
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Created</th>
+            <th>Modified</th>
+            <th>Status</th>
+            <th>Customer</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tfoot>
+        </tfoot>
+        <tbody>
+          <repeat group="{{ @sales }}" value="{{ @sale }}">
+            <tr valign="top">
+              <td>
+                <a href="{{ @sale.uuid }}">{{ sprintf("%07d", @sale.id) }}</a>
+              </td>
+              <td>
+                {{ @sale.created }}
+              </td>
+              <td>
+                {{ @sale.modified }}
+              </td>
+              <td>
+                {{ @sale.status }}
+              </td>
+              <td>
+                <a href="mailto:{{ @sale.email }}">{{ @sale.name }}</a>
+              </td>
+              <td>
+                {{ @amount(@sale.total) }}
+              </td>
+            </tr>
+          </repeat>
+        </tbody>
+      </table>
+      <div class="panel-footer text-right">
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+        </h3>
+      </div>
+      <div class="panel-body">
+      </div>
+      <div class="panel-footer">
+      </div>
+    </div>
+  </div>
+
+</div>
+<include href="footer.html" />

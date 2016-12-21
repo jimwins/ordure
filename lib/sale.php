@@ -8,6 +8,7 @@ class Sale {
 
   static function addRoutes($f3) {
     $f3->route("GET|HEAD /sale/new", 'Sale->create');
+    $f3->route("GET|HEAD /sale/list", 'Sale->showList');
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
@@ -51,6 +52,37 @@ class Sale {
     $sale->insert();
 
     $f3->reroute("./" . $sale->uuid);
+  }
+
+  function showList($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
+    $db= $f3->get('DBH');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->total= 'CAST(
+                     ROUND_TO_EVEN(shipping + shipping_tax +
+                                   (SELECT SUM(quantity *
+                                               sale_price(retail_price,
+                                                          discount_type,
+                                                          discount)
+                                               + tax)
+                                      FROM sale_item WHERE sale_id = sale.id),
+                                   2)
+                     AS DECIMAL(9,2))';
+    $sale->paid= '(SELECT SUM(amount)
+                     FROM sale_payment
+                    WHERE sale_id = sale.id)';
+    $sales= $sale->find(array(),
+                        array('order' => 'id'));
+    $sales_out= array();
+    foreach ($sales as $i) {
+      $sales_out[]= $i->cast();
+    }
+    $f3->set('sales', $sales_out);
+
+    echo Template::instance()->render('sale-list.html');
   }
 
   function load($f3, $sale_id, $type= 'id') {
