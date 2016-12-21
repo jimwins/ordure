@@ -853,11 +853,13 @@ class Sale {
                            array('order' => 'id'));
 
       foreach ($items as $i) {
-        echo "  <LineItemID>", $i->id, "</LineItemID>\n";
-        echo "  <SKU><![CDATA[", $i->code, "]]></SKU>\n";
-        echo "  <Name><![CDATA[", $i->name, "]]></Name>\n";
-        echo "  <Quantity>", $i->quantity, "</Quantity>\n";
-        echo "  <UnitPrice>", $i->sale_price, "</UnitPrice>\n";
+        echo "  <Item>\n";
+        echo "   <LineItemID>", $i->id, "</LineItemID>\n";
+        echo "   <SKU><![CDATA[", $i->code, "]]></SKU>\n";
+        echo "   <Name><![CDATA[", $i->name, "]]></Name>\n";
+        echo "   <Quantity>", $i->quantity, "</Quantity>\n";
+        echo "   <UnitPrice>", $i->sale_price, "</UnitPrice>\n";
+        echo "  </Item>\n";
       }
       echo " </Items>\n";
     }
