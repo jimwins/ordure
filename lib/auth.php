@@ -8,6 +8,7 @@ class Auth {
     $f3->route("GET|HEAD /register", 'Auth->viewRegisterForm');
     $f3->route("POST /register", 'Auth->register');
     $f3->route("GET|HEAD /account", 'Auth->account');
+    $f3->route("GET|HEAD /logout", 'Auth->logout');
   }
 
   static function prehash($password) {
@@ -217,5 +218,14 @@ class Auth {
     $person->copyTo('person');
 
     echo Template::instance()->render('account.html');
+  }
+
+  function logout($f3, $args) {
+    $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+              $_SERVER['HTTP_HOST'] : false);
+
+    SetCookie('loginToken', "", (new \Datetime("-24 hours"))->format("U"),
+              '/', $domain, true, true);
+    $f3->reroute('/login');
   }
 }
