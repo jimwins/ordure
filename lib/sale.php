@@ -249,6 +249,9 @@ class Sale {
 
     $this->update_shipping($f3, $args);
 
+    $sale->tax_calculated= null;
+    $sale->save();
+
     return $this->json($f3, $args);
   }
 
@@ -271,6 +274,9 @@ class Sale {
     $line->erase();
 
     $this->update_shipping($f3, $args);
+
+    $sale->tax_calculated= null;
+    $sale->save();
 
     return $this->json($f3, $args);
   }
@@ -299,6 +305,9 @@ class Sale {
     $line->save();
 
     $this->update_shipping($f3, $args);
+
+    $sale->tax_calculated= null;
+    $sale->save();
 
     return $this->json($f3, $args);
   }
@@ -596,6 +605,9 @@ class Sale {
       $item->tax= $response->TaxAmount;
       $item->save();
     }
+
+    $sale->tax_calculated= date('Y-m-d H:i:s');
+    $sale->save();
 
     return $this->json($f3, $args);
   }

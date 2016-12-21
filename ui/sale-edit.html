@@ -70,7 +70,7 @@
                 <i class="fa fa-calculator"></i></a>
               Estimated tax to be collected:
             </th>
-            <td class="text-right" data-bind="text: amount(sale.tax())"></td>
+            <td class="text-right" data-bind="css: { 'text-danger' : !sale.tax_calculated() }, text: sale.tax_calculated() ? amount(sale.tax()) : '$--.--'"></td>
           </tr>
           <tr>
             <th colspan="5" class="text-right">Total:</th>
@@ -163,7 +163,8 @@
       </div>
       <div class="panel-footer text-right">
         <button class="btn btn-primary"
-                data-bind="enable: sale.billing_address_id && sale.total,
+                data-bind="enable: sale.billing_address_id && sale.total &&
+                                   sale.tax_calculated,
                            click: prepareForPayment">
           Prepare for payment &raquo;
         </button>
