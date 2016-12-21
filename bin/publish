@@ -10,7 +10,7 @@ if [ -z "$HOST" ]; then
 fi
 
 mysqldump --opt ordure \
-          brand department item page product redirect \
+          brand department item page product redirect | \
   gzip -9 > ~/rm/tmp/ordure.sql.gz
 
 scp ~/rm/tmp/ordure.sql.gz $HOST:
