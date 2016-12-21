@@ -15,7 +15,7 @@ class Auth {
     return base64_encode(hash('sha256', $password, true));
   }
 
-  function authenticated_user($f3) {
+  static function authenticated_user($f3) {
     if (($login_token= $f3->get('COOKIE.loginToken'))) {
       list($selector, $validator)= explode(':', $login_token);
       if (!$selector || !$validator) {
