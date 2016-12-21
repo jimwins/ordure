@@ -803,7 +803,6 @@ class Sale {
       echo " <LastModified>",
            (new \Datetime($order->modified))->format("m/d/Y H:i"),
            "</LastModified>\n";
-      echo "</Order>\n";
       echo " <OrderTotal>", $order->total, "</OrderTotal>\n";
       echo " <TaxAmount>", $order->tax, "</TaxAmount>\n";
       echo " <ShippingAmount>", $order->shipping, "</ShippingAmount>\n";
@@ -862,6 +861,7 @@ class Sale {
         echo "  </Item>\n";
       }
       echo " </Items>\n";
+      echo "</Order>\n";
     }
     echo "</Orders>\n";
   }
