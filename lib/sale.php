@@ -39,7 +39,7 @@ class Sale {
 
   function create($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -56,7 +56,7 @@ class Sale {
 
   function showList($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -198,7 +198,7 @@ class Sale {
 
   function edit($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
   }
@@ -215,7 +215,7 @@ class Sale {
 
   function add_item($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -254,7 +254,7 @@ class Sale {
 
   function remove_item($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -277,7 +277,7 @@ class Sale {
 
   function update_item($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -305,7 +305,7 @@ class Sale {
 
   function update_shipping($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
@@ -328,7 +328,7 @@ class Sale {
 
   function set_address($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -370,7 +370,7 @@ class Sale {
 
   function verify_address($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -443,7 +443,7 @@ class Sale {
 
   function set_person($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -462,7 +462,7 @@ class Sale {
 
   function set_status($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -489,7 +489,7 @@ class Sale {
 
   function calculate_sales_tax($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->fail(403);
+      $f3->error(403);
 
     $db= $f3->get('DBH');
 
@@ -578,7 +578,7 @@ class Sale {
     curl_close($curl);
 
     if ($err) {
-      $f3->fail(500, "cURL Error #:" . $err);
+      $f3->error(500, "cURL Error #:" . $err);
     }
 
     error_log($response);
@@ -774,7 +774,7 @@ class Sale {
 
     if ($user != $f3->get("SHIPSTATION_USER") ||
         $password != $f3->get("SHIPSTATION_PASSWORD")) {
-      $f3->fail(403);
+      $f3->error(403);
     }
   }
 
@@ -787,7 +787,7 @@ class Sale {
     $page= $f3->get('REQUEST.page');
 
     if ($action != 'export') {
-      $f3->fail(500, "I don't know how to do that.");
+      $f3->error(500, "I don't know how to do that.");
     }
 
     $db= $f3->get('DBH');
@@ -908,7 +908,7 @@ class Sale {
     $tracking_number= $f3->get('REQUEST.tracking_number');
 
     if ($action != 'shipnotify') {
-      $f3->fail(500, "I don't know how to do that.");
+      $f3->error(500, "I don't know how to do that.");
     }
 
     $db= $f3->get('DBH');
