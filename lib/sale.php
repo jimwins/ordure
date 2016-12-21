@@ -34,6 +34,9 @@ class Sale {
   }
 
   function create($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
@@ -159,6 +162,8 @@ class Sale {
   }
 
   function edit($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
   }
@@ -174,6 +179,9 @@ class Sale {
   }
 
   function add_item($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -210,6 +218,9 @@ class Sale {
   }
 
   function remove_item($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -230,6 +241,9 @@ class Sale {
   }
 
   function update_item($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -255,6 +269,9 @@ class Sale {
   }
 
   function update_shipping($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     if ($sale->shipping_manual)
@@ -275,6 +292,9 @@ class Sale {
   }
 
   function set_address($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -314,6 +334,9 @@ class Sale {
   }
 
   function verify_address($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -384,6 +407,9 @@ class Sale {
   }
 
   function set_person($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -400,6 +426,9 @@ class Sale {
   }
 
   function set_status($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
@@ -424,6 +453,9 @@ class Sale {
   }
 
   function calculate_sales_tax($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->fail(403);
+
     $db= $f3->get('DBH');
 
     $sale_uuid= $f3->get('PARAMS.sale');
