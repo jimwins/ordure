@@ -31,6 +31,9 @@ class Sale {
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
                'Sale->verify_address');
+
+    $f3->route("GET|HEAD /shipstation", 'Sale->shipstation_get');
+    $f3->route("POST /shipstation", 'Sale->shipstation_post');
   }
 
   function create($f3, $args) {
@@ -731,5 +734,168 @@ class Sale {
     */
 
     echo json_encode(array());
+  }
+
+  function shipstation_auth($f3, $args) {
+    $user= $_SERVER['PHP_AUTH_USER'];
+    $password= $_SERVER['PHP_AUTH_PW'];
+
+    if ($user != $f3->get("SHIPSTATION_USER") ||
+        $password != $f3->get("SHIPSTATION_PASSWORD")) {
+      $f3->fail(403);
+    }
+  }
+
+  function shipstation_get($f3, $args) {
+    self::shipstation_auth($f3, $args);
+    
+    $action= $f3->get('REQUEST.action');
+    $start_date= $f3->get('REQUEST.start_date');
+    $end_date= $f3->get('REQUEST.end_date');
+    $page= $f3->get('REQUEST.page');
+
+    if ($action != 'export') {
+      $f3->fail(500, "I don't know how to do that.");
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->subtotal= '(SELECT SUM(quantity *
+                                  sale_price(retail_price,
+                                             discount_type,
+                                             discount))
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->tax= 'CAST(
+                   ROUND_TO_EVEN(shipping_tax +
+                                 (SELECT SUM(tax)
+                                    FROM sale_item WHERE sale_id = sale.id),
+                                 2)
+                   AS DECIMAL(9,2))';
+    $sale->total= 'CAST(
+                     ROUND_TO_EVEN(shipping + shipping_tax +
+                                   (SELECT SUM(quantity *
+                                               sale_price(retail_price,
+                                                          discount_type,
+                                                          discount)
+                                               + tax)
+                                      FROM sale_item WHERE sale_id = sale.id),
+                                   2)
+                     AS DECIMAL(9,2))';
+    $sale->paid= '(SELECT SUM(amount)
+                     FROM sale_payment
+                    WHERE sale_id = sale.id)';
+    $sales= $sale->find(array('status != "new" AND modified BETWEEN ? AND ?',
+                              (new \Datetime($start_date))->format("Y-m-d H:i:s"),
+                              (new \Datetime($end_date))->format("Y-m-d H:i:s")),
+                        array('order' => 'id'));
+
+    echo '<?xml version="1.0" encoding="utf-8"?>', "\n";
+    echo "<Orders>\n";
+    foreach ($sales as $order) {
+      echo "<Order>\n";
+      echo " <OrderID>", $order->id, "</OrderID>\n";
+      echo " <OrderNumber>", sprintf('%07d', $order->id), "</OrderNumber>\n";
+      echo " <OrderDate>",
+           (new \Datetime($order->created))->format("m/d/Y H:i"),
+           "</OrderDate>\n";
+      echo " <OrderStatus><![CDATA[", $order->status, "]]></OrderStatus>\n";
+      echo " <LastModified>",
+           (new \Datetime($order->modified))->format("m/d/Y H:i"),
+           "</LastModified>\n";
+      echo "</Order>\n";
+      echo " <OrderTotal>", $order->total, "</OrderTotal>\n";
+      echo " <TaxAmount>", $order->tax, "</TaxAmount>\n";
+      echo " <ShippingAmount>", $order->shipping, "</ShippingAmount>\n";
+      
+      /* customer */
+      echo " <Customer>\n";
+      echo "  <CustomerCode><![CDATA[", $order->email, "]]></CustomerCode>\n";
+      echo "  <BillTo>\n";
+      echo "   <Name><![CDATA[", $order->name, "]]></Name>\n";
+      echo "   <Email><![CDATA[", $order->email, "]]></Email>\n";
+      echo "  </BillTo>\n";
+      /* shipping address */
+      $shipping_address= new DB\SQL\Mapper($db, 'sale_address');
+      $shipping_address->load(array('id = ?',
+                                    $order->shipping_address_id ? 
+                                    $order->shipping_address_id :
+                                    $order->billing_address_id));
+      echo "  <ShipTo>\n";
+      echo "   <Name><![CDATA[", $shipping_address->name, "]]></Name>\n";
+      echo "   <Address1><![CDATA[",
+           $shipping_address->address1,
+           "]]></Address1>\n";
+      echo "   <Address2><![CDATA[",
+           $shipping_address->address2,
+           "]]></Address2>\n";
+      echo "   <City><![CDATA[", $shipping_address->city, "]]></City>\n";
+      echo "   <State><![CDATA[", $shipping_address->state, "]]></State>\n";
+      $zip= $shipping_address->zip5 . ($shipping_address->zip4 ?
+                                       "-" . $shipping_address->zip4 :
+                                       "");
+      echo "   <PostalCode><![CDATA[", $zip, "]]></PostalCode>\n";
+      echo "   <Country><![CDATA[US]]></Country>\n";
+      //echo "   <Phone><![CDATA[", $shipping_address->email, "]]></Phone>\n";
+      echo "  </ShipTo>\n";
+      /* shipping address */
+      echo " </Customer>\n";
+
+      /* items */
+      echo " <Items>\n";
+
+      $item= new DB\SQL\Mapper($db, 'sale_item');
+      $item->code= "(SELECT code FROM item WHERE id = item_id)";
+      $item->name= "(SELECT name FROM item WHERE id = item_id)";
+      $item->sale_price= "sale_price(retail_price, discount_type, discount)";
+
+      $items= $item->find(array('sale_id = ?', $order->id),
+                           array('order' => 'id'));
+
+      foreach ($items as $i) {
+        echo "  <LineItemID>", $i->id, "</LineItemID>\n";
+        echo "  <SKU><![CNAME[", $i->code, "]]></SKU>\n";
+        echo "  <Name><![CNAME[", $i->name, "]]></Name>\n";
+        echo "  <Quantity>", $i->quantity, "</Quantity>\n";
+        echo "  <UnitPrice>", $i->sale_price, "</UnitPrice>\n";
+      }
+      echo " </Items>\n";
+    }
+    echo "</Orders>\n";
+  }
+
+  function shipstation_post($f3, $args) {
+    self::shipstation_auth($f3, $args);
+
+    $action= $f3->get('REQUEST.action');
+    $order_number= $f3->get('REQUEST.order_number');
+    $carrier= $f3->get('REQUEST.carrier');
+    $service= $f3->get('REQUEST.service');
+    $tracking_number= $f3->get('REQUEST.tracking_number');
+
+    if ($action != 'shipnotify') {
+      $f3->fail(500, "I don't know how to do that.");
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('id = ?', $order_number))
+      or $f3->error(404);
+
+    $shipment= new DB\SQL\Mapper($db, 'sale_shipment');
+    $shipment->sale_id= $sale->id;
+    $shipment->carrier= $carrier;
+    $shipment->service= $service;
+    $shipment->tracking_number= $tracking_number;
+    // XXX parse body for this data
+    $shipment->created= date("Y-m-d H:i:s");
+    $shipment->ship_date= date("Y-m-d");
+    $shipment->shipping_cost= 0.00;
+    $shipment->data= file_get_contents('php://input');
+
+    $shipment->save();
+
+    echo "Success!";
   }
 }
