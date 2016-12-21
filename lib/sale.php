@@ -612,6 +612,44 @@ class Sale {
     return $this->json($f3, $args);
   }
 
+  function capture_sales_tax($f3, $sale) {
+    $curl= curl_init();
+
+    $data= array(
+      'apiLoginID' => $f3->get("TAXCLOUD_ID"),
+      'customerID' => $sale->person_id,
+      'cartID' => $sale->uuid,
+      'orderID' => $sale->uuid,
+      'dateAuthorized' => date("Y-m-d"),
+      'dateCaptured' => date("Y-m-d"),
+    );
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => "https://api.taxcloud.net/1.0/taxcloud/AuthorizedWithCapture?apiKey=" . $f3->get('TAXCLOUD_KEY'),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => json_encode($data),
+      CURLOPT_HTTPHEADER => array(
+        "accept: application/json",
+        "content-type: application/json"
+      ),
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      // XXX do something
+      error_log("cURL Error #:" . $err);
+    }
+  }
+
   function json($f3, $args) {
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
@@ -690,6 +728,8 @@ class Sale {
     ));
     $payment->save();
 
+    self::capture_sales_tax($f3, $sale);
+
     $sale->status= 'paid';
     $sale->save();
 
@@ -761,6 +801,8 @@ class Sale {
       'charge_id' => $charge->id,
     ));
     $payment->save();
+
+    self::capture_sales_tax($f3, $sale);
 
     $sale->status= 'paid';
     $sale->save();
