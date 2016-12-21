@@ -854,8 +854,8 @@ class Sale {
 
       foreach ($items as $i) {
         echo "  <LineItemID>", $i->id, "</LineItemID>\n";
-        echo "  <SKU><![CNAME[", $i->code, "]]></SKU>\n";
-        echo "  <Name><![CNAME[", $i->name, "]]></Name>\n";
+        echo "  <SKU><![CDATA[", $i->code, "]]></SKU>\n";
+        echo "  <Name><![CDATA[", $i->name, "]]></Name>\n";
         echo "  <Quantity>", $i->quantity, "</Quantity>\n";
         echo "  <UnitPrice>", $i->sale_price, "</UnitPrice>\n";
       }
