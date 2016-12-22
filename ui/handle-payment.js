@@ -219,7 +219,11 @@ $("#giftcard-use").on("submit", function (ev) {
            url: $form.attr('action'),
            data: { card: card }})
    .done(function (data) {
-     window.location.href= "./thanks";
+     if (data.paid) {
+       window.location.href= "./thanks";
+     } else {
+       window.location.href= "./pay";
+     }
    })
    .fail(function (jqXHR, textStatus, errorThrown) {
      $form.find('.errors').text(jqXHR.responseJSON.text ?

@@ -1040,6 +1040,11 @@ class Sale {
     ));
     $payment->save();
 
+    if ($amount != $sale->total - $sale->paid) {
+      echo json_encode(array('paid' => 0));
+      return;
+    }
+
     self::capture_sales_tax($f3, $sale);
 
     $sale->status= 'paid';
@@ -1057,11 +1062,7 @@ class Sale {
           implode("\r\n", $headers));
     */
 
-    if ($f3->get('AJAX')) {
-      echo json_encode(array('message' => 'Success!'));
-    } else {
-      $f3->reroute('thanks');
-    }
+    echo json_encode(array('paid' => 1));
   }
 
   function shipstation_auth($f3, $args) {
