@@ -951,6 +951,10 @@ class Sale {
       return $f3->error(500, $data->error);
     }
 
+    if ($data->balance == 0.00) {
+      return $f3->error(500, "There is no remaining balance on this card.");
+    }
+
     echo $response;
   }
 
