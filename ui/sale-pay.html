@@ -28,7 +28,7 @@
                 <label>
                   <span>Amount to be paid</span>
                   <input type="text" class="form-control" disabled
-                         value="{{ @amount(@sale.total - @sale.due) }}">
+                         value="{{ @amount(@sale.total - @sale.paid) }}">
                 </label>
               </div>
               <div class="form-group">
@@ -59,7 +59,7 @@
               <input type="hidden" name="amount" value="1000"><!-- dummy -->
 
               <button type="submit" class="btn btn-primary">
-                Pay {{ @amount(@sale.total - @sale.due) }}
+                Pay {{ @amount(@sale.total - @sale.paid) }}
               </button>
 
             </form>
@@ -86,7 +86,7 @@
                 <label>
                   <span>Amount to be paid</span>
                   <input type="text" class="form-control" disabled
-                         value="{{ @amount(@sale.total - @sale.due) }}">
+                         value="{{ @amount(@sale.total - @sale.paid) }}">
                 </label>
               </div>
                        
@@ -152,7 +152,7 @@
                 <label>
                   <span>Amount to be paid</span>
                   <input type="text" class="form-control" disabled
-                         value="{{ @amount(@sale.total - @sale.due) }}">
+                         value="{{ @amount(@sale.total - @sale.paid) }}">
                 </label>
               </div>
               <button id="generate-bitcoin-address" class="btn btn-primary">
@@ -197,7 +197,7 @@
                          name="balance" value="0">
                 </label>
               </div>
-              <input type="hidden" name="amount" value="{{ @sale.total - @sale.due }}">
+              <input type="hidden" name="amount" value="{{ @sale.total - @sale.paid }}">
               <button type="submit" class="btn btn-primary">
                 Pay
               </button>
