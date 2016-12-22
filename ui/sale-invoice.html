@@ -51,10 +51,14 @@
       <tr>
         <th colspan="5" class="text-right">
           <check if="{{ @data.method == 'credit' }}">
-            {{ @data.data.cc_brand }} ending in {{ @data.data.cc_last4 }}
+            Paid by {{ @data.data.cc_brand }}
+            ending in {{ @data.data.cc_last4 }}
+          </check>
+          <check if="{{ @data.method == 'paypal' }}">
+            Paid by PayPal
           </check>
           <check if="{{ @data.method == 'bitcoin' }}">
-            Bitcoin
+            Paid with Bitcoin
           </check>
           ({{ @data.processed }}):
         </th>

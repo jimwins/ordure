@@ -281,7 +281,7 @@ DROP TABLE IF EXISTS `sale_payment`;
 CREATE TABLE `sale_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
-  `method` enum('credit','bitcoin','gift') NOT NULL,
+  `method` enum('credit','bitcoin','paypal','gift') NOT NULL,
   `amount` decimal(9,3) NOT NULL,
   `processed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data` mediumblob,
@@ -396,4 +396,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-12-21 13:39:56
+-- Dump completed on 2016-12-21 22:26:10

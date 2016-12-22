@@ -101,3 +101,78 @@ loadScript('https://js.stripe.com/v2/',
   });
 
 });
+
+loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
+           function() {
+  loadScript('https://js.braintreegateway.com/web/3.6.2/js/paypal.min.js',
+             function() {
+
+    var paypalButton= document.getElementById('paypal-button');
+
+    // Create a Client component
+    braintree.client.create({
+      authorization: '{{ @VZERO_CLIENT_TOKEN }}'
+    }, function (clientErr, clientInstance) {
+      // Create PayPal component
+      braintree.paypal.create({
+        client: clientInstance
+      }, function (err, paypalInstance) {
+        paypalButton.addEventListener('click', function () {
+          $('.paypal-prompt').addClass('hidden');
+          $('.paypal-waiting').removeClass('hidden');
+          // Tokenize here!
+          paypalInstance.tokenize({
+            flow: 'checkout', // Required
+            amount: {{ @sale.total - @sale.due }}, // Required
+            currency: 'USD', // Required
+            useraction: 'commit',
+            locale: 'en_US',
+            enableShippingAddress: true,
+            shippingAddressEditable: false,
+            shippingAddressOverride: {
+              recipientName: '{{ @shipping_address.name ? @shipping_address.name : @sale.name }}',
+              line1: '{{ @shipping_address.address1 }}',
+              line2: '{{ @shipping_address.address2 }}',
+              city: '{{ @shipping_address.city }}',
+              countryCode: 'US',
+              postalCode: '{{ @shipping_address.zip5 }}',
+              state: '{{ @shipping_address.state }}',
+              phone: ''
+            }
+          }, function (err, tokenizationPayload) {
+            // Tokenization complete
+            if (err && err.code == 'PAYPAL_POPUP_CLOSED') {
+              $('.paypal-waiting').addClass('hidden');
+              $('.paypal-prompt').removeClass('hidden');
+              return; // That's cool.
+            }
+
+            if (err) {
+              $('.paypal-waiting').addClass('hidden');
+              $('.paypal-prompt').removeClass('hidden');
+              $('.paypal-errors').text(err.message).removeClass('hidden');
+              return;
+            }
+
+            // Send tokenizationPayload.nonce to server
+            $.ajax({ dataType: 'json', method: 'POST',
+                     url: 'process-paypal-payment',
+                     data: { nonce: tokenizationPayload.nonce }})
+             .done(function (data) {
+               window.location.href= "./thanks";
+             })
+             .fail(function (jqXHR, textStatus, errorThrown) {
+               $('.paypal-waiting').addClass('hidden');
+               $('.paypal-prompt').removeClass('hidden');
+               $('.paypal-errors').text(jqXHR.responseJSON.text ?
+                                        jqXHR.responseJSON.text : textStatus)
+                                  .removeClass('hidden');
+             });
+            
+          });
+        });
+      });
+    });
+
+  });
+});

@@ -8,6 +8,7 @@
     "stripe/stripe-php": "4.*",
     "respect/validation": "^0.9.3",
     "paragonie/random_compat": "^2.0",
-    "indigophp/hash-compat": "^1.1"
+    "indigophp/hash-compat": "^1.1",
+    "braintree/braintree_php": "^3.19"
   }
 }

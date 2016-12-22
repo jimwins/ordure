@@ -68,6 +68,53 @@
       </div>
 
       <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="pay-paypal-heading">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse"
+               data-parent="#accordion" href="#pay-paypal"
+               aria-expanded="true" area-controls="pay-paypal">
+              <i class="fa fa-paypal fa-lg"></i>
+              Pay with PayPal
+            </a>
+          </h4>
+        </div>
+        <div id="pay-paypal" class="panel-collapse collapse" role="tabpanel" aria-labelledby="pay-paypal-heading">
+          <div class="panel-body">
+            <div class="paypal-prompt">
+              <div class="paypal-errors alert alert-danger hidden"></div>
+              <div class="form-group">
+                <label>
+                  <span>Amount to be paid</span>
+                  <input type="text" class="form-control" disabled
+                         value="{{ @amount(@sale.total - @sale.due) }}">
+                </label>
+              </div>
+                       
+              <script src="https://www.paypalobjects.com/api/button.js?"
+                      data-merchant="braintree"
+                      data-id="paypal-button"
+                      data-button="checkout"
+                      data-color="gold"
+                      data-size="medium"
+                      data-shape="pill"
+                      data-button_type="submit"
+                      data-button_disabled="false"></script> 
+            </div>
+            <div class="paypal-waiting hidden">
+              <div class="progress progress-striped active"
+                   style="height: 1.5em">
+                <div class="progress-bar" role="progressbar"
+                     aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                     style="width: 100%">
+                  Processing PayPal payment&hellip;.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="pay-bitcoin-heading">
           <h4 class="panel-title">
             <a role="button" data-toggle="collapse"

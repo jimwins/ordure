@@ -25,6 +25,8 @@ class Sale {
                'Sale->process_creditcard_payment');
     $f3->route("POST /sale/@sale/process-bitcoin-payment [ajax]",
                'Sale->process_bitcoin_payment');
+    $f3->route("POST /sale/@sale/process-paypal-payment [ajax]",
+               'Sale->process_paypal_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
@@ -127,7 +129,11 @@ class Sale {
 
     $shipping_address= new DB\SQL\Mapper($db, 'sale_address');
     $shipping_address->load(array('id = ?', $sale->shipping_address_id));
-    $shipping_address->copyTo('shipping_address');
+    if (!$shipping_address->dry()) {
+      $shipping_address->copyTo('shipping_address');
+    } else {
+      $billing_address->copyTo('shipping_address');
+    }
 
     $item= new DB\SQL\Mapper($db, 'sale_item');
     $item->code= "(SELECT code FROM item WHERE id = item_id)";
@@ -204,6 +210,11 @@ class Sale {
   }
 
   function pay($f3, $args) {
+    $gateway= new Braintree_Gateway(array(
+      'accessToken' => $f3->get('VZERO_TOKEN'))
+    );
+    $f3->set('VZERO_CLIENT_TOKEN', $gateway->clientToken()->generate());
+
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-pay.html');
   }
@@ -799,6 +810,83 @@ class Sale {
     $payment->amount= $charge->amount / 100;
     $payment->data= json_encode(array(
       'charge_id' => $charge->id,
+    ));
+    $payment->save();
+
+    self::capture_sales_tax($f3, $sale);
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    /*
+    $headers= array();
+    $headers[]= "From: " . $f3->get('CONTACT');
+    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+
+    @mail($f3->get('CONTACT'),
+          "Sale: Gift Card",
+          Template::instance()->render('email-gift-card-sale.txt',
+                                       'text/plain'),
+          implode("\r\n", $headers));
+    */
+
+    echo json_encode(array());
+  }
+
+  function process_paypal_payment($f3, $args) {
+    $gateway= new Braintree_Gateway(array(
+      'accessToken' => $f3->get('VZERO_TOKEN'))
+    );
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $shipping_address= new DB\SQL\Mapper($db, 'sale_address');
+    $shipping_address->load(array('id = ?',
+                                  $order->shipping_address_id ? 
+                                  $order->shipping_address_id :
+                                  $order->billing_address_id));
+
+    $nonce= $f3->get('REQUEST.nonce');
+
+    list($firstName, $lastName)= explode(' ', $sale->name, 2);
+
+    $result= $gateway->transaction()->sale([
+      "amount" => $sale->total,
+      'merchantAccountId' => 'USD',
+      "paymentMethodNonce" => $nonce,
+      "orderId" => sprintf("%07d", $sale->id),
+      "shipping" => [
+        "firstName" => $firstName,
+        "lastName" => $lastName,
+        "company" => "",
+        "streetAddress" => $shipping_address->address1,
+        "extendedAddress" => $shipping_address->address2,
+        "locality" => $shipping_address->city,
+        "region" => $shipping_address->state,
+        "postalCode" => $shipping_address->zip5,
+        "countryCodeAlpha2" => "US"
+      ],
+      "options" => [
+        "submitForSettlement" => true,
+      ],
+    ]);
+
+    error_log($result);
+
+    if (!$result->success) {
+      $f3->error(500, $result->message);
+    }
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'paypal';
+    $payment->amount= $result->transaction->amount;
+    $payment->data= json_encode(array(
+      'id' => $result->transaction->id,
+      'sellerProtectionStatus' =>
+        $result->paypalDetails->sellerProtectionStatus,
     ));
     $payment->save();
 
