@@ -33,6 +33,7 @@ loadScript('https://js.stripe.com/v2/',
 
   function stripeResponseHandler(status, response) {
     var $form = $('#payment-form');
+    $form.find('.payment-errors').addClass('hidden');
 
     if (response.error) {
       stripeShowError($form, response.error.message);
