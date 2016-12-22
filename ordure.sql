@@ -291,6 +291,27 @@ CREATE TABLE `sale_payment` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `sale_shipment`
+--
+
+DROP TABLE IF EXISTS `sale_shipment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale_shipment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sale_id` int(10) unsigned NOT NULL,
+  `created` datetime NOT NULL,
+  `ship_date` date NOT NULL,
+  `carrier` varchar(50) NOT NULL,
+  `service` varchar(50) NOT NULL,
+  `tracking_number` varchar(50) NOT NULL,
+  `shipping_cost` decimal(9,2) NOT NULL,
+  `data` mediumblob,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `scat_item`
 --
 
