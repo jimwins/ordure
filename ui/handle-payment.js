@@ -176,3 +176,57 @@ loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
 
   });
 });
+
+$("#giftcard-check").on("submit", function (ev) {
+  var $form= $(ev.target);
+
+  $form.find('[type="submit"]').prop('disabled', true);
+  $form.find('.errors').addClass('hidden');
+
+  var card= $('[name="giftcard"]', $form).val();
+
+  $.ajax({ dataType: 'json', method: 'POST',
+           url: 'get-giftcard-balance',
+           data: { card: card } })
+   .done(function (data) {
+     $form.addClass('hidden');
+     var $use= $('#giftcard-use');
+     var amount= $use.find('[name="amount"]');
+     var text= "Pay $" + Math.min(amount.val(), data.balance).toFixed(2);
+     $use.find('button').text(text);
+     $use.find('[name="balance"]').val('$' + data.balance);
+     $use.removeClass('hidden');
+   })
+   .fail(function (jqXHR, textStatus, errorThrown) {
+     $form.find('.errors').text(jqXHR.responseJSON.text ?
+                                jqXHR.responseJSON.text : textStatus); 
+     $form.find('.errors').removeClass('hidden');
+     $form.find('[type="submit"]').prop('disabled', false);
+   });
+
+  return false;
+});
+
+$("#giftcard-use").on("submit", function (ev) {
+  var $form= $(ev.target);
+
+  $form.find('[type="submit"]').prop('disabled', true);
+  $form.find('.errors').addClass('hidden');
+
+  var card= $('#giftcard-check [name="giftcard"]').val();
+
+  $.ajax({ dataType: 'json', method: 'POST',
+           url: $form.attr('action'),
+           data: { card: card }})
+   .done(function (data) {
+     window.location.href= "./thanks";
+   })
+   .fail(function (jqXHR, textStatus, errorThrown) {
+     $form.find('.errors').text(jqXHR.responseJSON.text ?
+                                jqXHR.responseJSON.text : textStatus); 
+     $form.find('.errors').removeClass('hidden');
+     $form.find('[type="submit"]').prop('disabled', false);
+   });
+
+  return false;
+});

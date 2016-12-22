@@ -21,6 +21,10 @@ class Sale {
                'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/generate-bitcoin-address [ajax]",
                'Sale->generate_bitcoin_address');
+    $f3->route("POST /sale/@sale/get-giftcard-balance [ajax]",
+               'Sale->get_giftcard_balance');
+    $f3->route("POST /sale/@sale/process-giftcard-payment",
+               'Sale->process_giftcard_payment');
     $f3->route("POST /sale/@sale/process-creditcard-payment",
                'Sale->process_creditcard_payment');
     $f3->route("POST /sale/@sale/process-bitcoin-payment [ajax]",
@@ -908,6 +912,156 @@ class Sale {
     */
 
     echo json_encode(array());
+  }
+
+  function get_giftcard_balance($f3, $args) {
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $curl = curl_init();
+
+    $data= array('card' => $f3->get('REQUEST.card'));
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/check-balance.php' .
+                     '?card=' . rawurlencode($f3->get('REQUEST.card')),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      $f3->error(500, "cURL Error #:" . $err);
+    }
+
+    // have to strip jsonp wrapping
+    $response= substr($response, 1, -2);
+
+    error_log($response);
+    $data= json_decode($response);
+
+    // turn soft errors into hard ones
+    if ($data->error) {
+      return $f3->error(500, $data->error);
+    }
+
+    echo $response;
+  }
+
+  function process_giftcard_payment($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $curl= curl_init();
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/check-balance.php' .
+                     '?card=' . rawurlencode($f3->get('REQUEST.card')),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      $f3->error(500, "cURL Error #:" . $err);
+    }
+
+    // have to strip jsonp wrapping
+    $response= substr($response, 1, -2);
+    $data= json_decode($response);
+
+    // turn soft errors into hard ones
+    if ($data->error) {
+      return $f3->error(500, $data->error);
+    }
+
+    $amount= -min($data->balance, $sale->total - $sale->paid);
+
+    $curl= curl_init();
+
+    $data= array(
+      'card' => $f3->get('REQUEST.card'),
+      'amount' => $amount
+    );
+
+    error_log($f3->get('GIFT_BACKEND') . '/add-txn.php?' .
+                     http_build_query($data));
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/add-txn.php?' .
+                     http_build_query($data),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      $f3->error(500, "cURL Error #:" . $err);
+    }
+
+    // have to strip jsonp wrapping
+    $response= substr($response, 1, -2);
+    $data= json_decode($response);
+
+    error_log($response);
+
+    // turn soft errors into hard ones
+    if ($data->error) {
+      return $f3->error(500, $data->error);
+    }
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'gift';
+    $payment->amount= -$data->amount;
+    $payment->data= json_encode(array(
+      'card' => $f3->get('REQUEST.card'),
+    ));
+    $payment->save();
+
+    self::capture_sales_tax($f3, $sale);
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    /*
+    $headers= array();
+    $headers[]= "From: " . $f3->get('CONTACT');
+    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+
+    @mail($f3->get('CONTACT'),
+          "Sale: Gift Card",
+          Template::instance()->render('email-gift-card-sale.txt',
+                                       'text/plain'),
+          implode("\r\n", $headers));
+    */
+
+    if ($f3->get('AJAX')) {
+      echo json_encode(array('message' => 'Success!'));
+    } else {
+      $f3->reroute('thanks');
+    }
   }
 
   function shipstation_auth($f3, $args) {
