@@ -148,7 +148,7 @@
           Same as billing address.
         </div>
         <div class="pull-right"
-             data-bind="if: id() && iod() != $parent.billing_address.id()">
+             data-bind="if: id() && id() != $parent.billing_address.id()">
           <button class="btn btn-default btn-xs"
                   data-bind="click: $parent.verifyAddress">
             Verify
