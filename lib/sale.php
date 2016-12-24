@@ -426,46 +426,38 @@ class Sale {
       'apiLoginID' => $f3->get("TAXCLOUD_ID")
     );
 
-    $curl = curl_init();
+    $client= new GuzzleHttp\Client();
+    
+    $uri= "https://api.taxcloud.net/1.0/taxcloud/VerifyAddress?apiKey=" .
+            $f3->get('TAXCLOUD_KEY');
 
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => "https://api.taxcloud.net/1.0/taxcloud/VerifyAddress?apiKey=" . $f3->get('TAXCLOUD_KEY'),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 30,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_POSTFIELDS => json_encode($data),
-      CURLOPT_HTTPHEADER => array(
-        "accept: application/json",
-        "content-type: application/json"
-      ),
-    ));
-
-    $response= curl_exec($curl);
-    $err= curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      // XXX blah
-      echo "cURL Error #:" . $err;
-      return;
+    try {
+      $response= $client->post($uri, [ 'json' => $data ]);
+    } catch (\Exception $e) {
+      $f3->error(500, (sprintf("Request failed: %s (%s)",
+                               $e->getMessage(), $e->getCode())));
     }
 
-    $data= json_decode($response);
+    error_log($response->getBody());
 
-    if ($data->ErrNumber == "0") {
-      $address->zip4= $data->Zip4;
-      $address->zip5= $data->Zip5;
-      $address->state= $data->State;
-      $address->city= $data->City;
-      $address->address2= $data->Address2;
-      $address->address1= $data->Address1;
-      $address->verified= 1;
-      $address->save();
+    $data= json_decode($response->getBody());
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
     }
+
+    if ($data->ErrNumber != "0") {
+      $f3->error(500, $data->ErrDescription);
+    }
+
+    $address->zip4= $data->Zip4;
+    $address->zip5= $data->Zip5;
+    $address->state= $data->State;
+    $address->city= $data->City;
+    $address->address2= $data->Address2;
+    $address->address1= $data->Address1;
+    $address->verified= 1;
+    $address->save();
 
     return $this->json($f3, $args);
   }
