@@ -16,7 +16,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
-    $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status'); // XXX thanks
+    $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/thanks", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
