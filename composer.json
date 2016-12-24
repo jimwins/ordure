@@ -9,6 +9,9 @@
     "respect/validation": "^0.9.3",
     "paragonie/random_compat": "^2.0",
     "indigophp/hash-compat": "^1.1",
-    "braintree/braintree_php": "^3.19"
+    "braintree/braintree_php": "^3.19",
+    "guzzlehttp/guzzle": "~6.0",
+    "php-http/guzzle6-adapter": "^1.1",
+    "sparkpost/sparkpost": "^2.0"
   }
 }

@@ -4,6 +4,10 @@ $f3->set('amount', function ($d) {
   return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
 });
 
+function amount($d) {
+  return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
+}
+
 class Sale {
 
   static function addRoutes($f3) {
@@ -16,6 +20,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale/thanks", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
+    $f3->route("GET|HEAD /sale/@sale/test", 'Sale->send_order_test');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
                'Sale->calculate_sales_tax');
@@ -748,23 +753,11 @@ class Sale {
     $sale->status= 'paid';
     $sale->save();
 
-    /*
-    $headers= array();
-    $headers[]= "From: " . $f3->get('CONTACT');
-    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+    echo json_encode(array('message' => 'Success!'));
 
-    @mail($f3->get('CONTACT'),
-          "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt',
-                                       'text/plain'),
-          implode("\r\n", $headers));
-    */
+    $f3->abort(); // let client go
 
-    if ($f3->get('AJAX')) {
-      echo json_encode(array('message' => 'Success!'));
-    } else {
-      $f3->reroute('thanks');
-    }
+    self::send_order_email($f3);
   }
 
   function process_bitcoin_payment($f3, $args) {
@@ -822,19 +815,11 @@ class Sale {
     $sale->status= 'paid';
     $sale->save();
 
-    /*
-    $headers= array();
-    $headers[]= "From: " . $f3->get('CONTACT');
-    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
-
-    @mail($f3->get('CONTACT'),
-          "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt',
-                                       'text/plain'),
-          implode("\r\n", $headers));
-    */
-
     echo json_encode(array());
+
+    $f3->abort();
+
+    self::send_order_email($f3);
   }
 
   function process_paypal_payment($f3, $args) {
@@ -899,19 +884,11 @@ class Sale {
     $sale->status= 'paid';
     $sale->save();
 
-    /*
-    $headers= array();
-    $headers[]= "From: " . $f3->get('CONTACT');
-    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
-
-    @mail($f3->get('CONTACT'),
-          "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt',
-                                       'text/plain'),
-          implode("\r\n", $headers));
-    */
-
     echo json_encode(array());
+
+    $f3->abort(); // let client go
+
+    self::send_order_email($f3);
   }
 
   function get_giftcard_balance($f3, $args) {
@@ -1054,19 +1031,11 @@ class Sale {
     $sale->status= 'paid';
     $sale->save();
 
-    /*
-    $headers= array();
-    $headers[]= "From: " . $f3->get('CONTACT');
-    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
-
-    @mail($f3->get('CONTACT'),
-          "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt',
-                                       'text/plain'),
-          implode("\r\n", $headers));
-    */
-
     echo json_encode(array('paid' => 1));
+
+    $f3->abort(); // let client go
+
+    self::send_order_email($f3);
   }
 
   function shipstation_auth($f3, $args) {
@@ -1232,5 +1201,74 @@ class Sale {
     $shipment->save();
 
     echo "Success!";
+  }
+
+  function send_order_email($f3) {
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+    $hive= $f3->hive();
+
+    $data= array(
+      'sale' => $hive['sale'],
+      'billing_address' => $hive['billing_address'],
+      'shipping_address' => $hive['shipping_address'],
+      'items' => $hive['items'],
+      'payments' => $hive['payments'],
+    );
+
+    // Clean up the data for the template
+    $data['sale']['id']= sprintf("%07d", $data['sale']['id']);
+    $data['sale']['due']= amount($data['sale']['total'] -
+                                 $data['sale']['paid']);
+    $data['sale']['subtotal']= amount($data['sale']['subtotal']);
+    $data['sale']['shipping']= amount($data['sale']['shipping']);
+    $data['sale']['tax']= amount($data['sale']['tax']);
+    $data['sale']['total']= amount($data['sale']['total']);
+    $data['sale']['paid']= amount($data['sale']['paid']);
+
+    foreach ($data['payments'] as &$payment) {
+      $payment['amount']= amount($payment['amount']);
+    }
+    unset($payment);
+
+    foreach ($data['items'] as &$item) {
+      $item['ext_price']= amount($item['quantity'] * $item['sale_price']);
+      $item['sale_price']= amount($item['sale_price']);
+    }
+    unset($item);
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'template_id' => 'order-template',
+      ],
+      'substitution_data' => $data,
+      'recipients' => [
+        [
+          'address' => [
+            'name' => '',
+            'email' => $f3->get('CONTACT_SALES'),
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      error_log(sprintf("SparkPost failure: %s (%s)",
+                        $e->getMessage(), $e->getCode()));
+    }
+  }
+
+  function send_order_test($f3, $args) {
+    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $f3->abort();
+    self::send_order_email($f3);
   }
 }
