@@ -107,60 +107,70 @@
           </tr>
         </tbody>
       </table>
-      <div class="panel-footer text-right">
+      <div class="panel-footer">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                  <a data-bind="click: function() { editAddress('billing', billing_address) }">
+                    <i class="fa fa-address-card-o"></i>
+                  </a>
+                  Billing Address
+                </h3>
+              </div>
+              <div class="panel-body" data-bind="with: billing_address">
+                <div class="pull-right" data-bind="if: id">
+                  <button class="btn btn-default btn-xs"
+                          data-bind="text: verified() ? 'Verified' : 'Verify',
+                                     click: $parent.verifyAddress">
+                    Verify
+                  </button>
+                </div>
+                <div data-bind="text: name"></div>
+                <div data-bind="text: address1"></div>
+                <div data-bind="text: address2"></div>
+                <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip5() + (zip4() ? '-' + zip4() : '')"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">
+                  <a data-bind="click: function() { editAddress('shipping', shipping_address ) }">
+                    <i class="fa fa-address-card-o"></i>
+                  </a>
+                  Shipping Address
+                </h3>
+              </div>
+              <div class="panel-body" data-bind="with: shipping_address">
+                <div data-bind="if: !id() || id() == $parent.billing_address.id()">
+                  Same as billing address.
+                </div>
+                <div class="pull-right"
+                     data-bind="if: id() && id() != $parent.billing_address.id()">
+                  <button class="btn btn-default btn-xs"
+                          data-bind="click: $parent.verifyAddress">
+                    Verify
+                  </button>
+                </div>
+                <div data-bind="ifnot: id() == $parent.billing_address.id()">
+                  <div data-bind="text: name"></div>
+                  <div data-bind="text: address1"></div>
+                  <div data-bind="text: address2"></div>
+                  <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
     <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">
-          <a data-bind="click: function() { editAddress('billing', billing_address) }">
-            <i class="fa fa-address-card-o"></i>
-          </a>
-          Billing Address
-        </h3>
-      </div>
-      <div class="panel-body" data-bind="with: billing_address">
-        <div class="pull-right" data-bind="if: id">
-          <button class="btn btn-default btn-xs"
-                  data-bind="text: verified() ? 'Verified' : 'Verify',
-                             click: $parent.verifyAddress">
-            Verify
-          </button>
-        </div>
-        <div data-bind="text: name"></div>
-        <div data-bind="text: address1"></div>
-        <div data-bind="text: address2"></div>
-        <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip5() + (zip4() ? '-' + zip4() : '')"></div>
-      </div>
-      <div class="panel-heading">
-        <h3 class="panel-title">
-          <a data-bind="click: function() { editAddress('shipping', shipping_address ) }">
-            <i class="fa fa-address-card-o"></i>
-          </a>
-          Shipping Address
-        </h3>
-      </div>
-      <div class="panel-body" data-bind="with: shipping_address">
-        <div data-bind="if: !id() || id() == $parent.billing_address.id()">
-          Same as billing address.
-        </div>
-        <div class="pull-right"
-             data-bind="if: id() && id() != $parent.billing_address.id()">
-          <button class="btn btn-default btn-xs"
-                  data-bind="click: $parent.verifyAddress">
-            Verify
-          </button>
-        </div>
-        <div data-bind="ifnot: id() == $parent.billing_address.id()">
-          <div data-bind="text: name"></div>
-          <div data-bind="text: address1"></div>
-          <div data-bind="text: address2"></div>
-          <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
-        </div>
-      </div>
       <div class="panel-footer text-right">
         <button class="btn btn-primary"
                 data-bind="enable: sale.billing_address_id && sale.total &&
