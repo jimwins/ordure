@@ -224,7 +224,12 @@ class Sale {
     );
     $f3->set('VZERO_CLIENT_TOKEN', $gateway->clientToken()->generate());
 
-    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    if ($sale->status != 'unpaid') {
+      $f3->reroute('./');
+    }
+
     echo Template::instance()->render('sale-pay.html');
   }
 
