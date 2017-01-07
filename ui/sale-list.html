@@ -27,14 +27,16 @@
               <td>
                 <a href="{{ @sale.uuid }}">{{ sprintf("%07d", @sale.id) }}</a>
               </td>
-              <td>
-                {{ @sale.created }}
+              <td nowrap>
+                {{ (new DateTime(@sale.created))->format("M j H:i") }}
               </td>
               <td>
-                {{ @sale.modified }}
+                {{ (new DateTime(@sale.modified))->format("M j H:i") }}
               </td>
               <td>
-                {{ @sale.status }}
+                <a href="{{ @sale.uuid }}/edit">
+                  {{ @sale.status }}
+                </a>
               </td>
               <td>
                 <a href="mailto:{{ @sale.email }}">{{ @sale.name }}</a>
