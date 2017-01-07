@@ -102,7 +102,10 @@
               <span data-bind="text: $data.name"></span>
               <div class="small" data-bind="text: $data.detail"></div>
             </td>
-            <td class="text-right" data-bind="text: amount($data.sale_price())"></td>
+            <td class="editable text-right">
+              <span data-key="price"
+                    data-bind="text: amount($data.sale_price())">
+            </td>
             <td class="text-right" data-bind="text: amount($data.sale_price() * $data.quantity())"></td>
           </tr>
         </tbody>

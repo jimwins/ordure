@@ -327,6 +327,24 @@ class Sale {
       $line->quantity= (int)$f3->get('REQUEST.quantity');
     }
 
+    if ($f3->exists('REQUEST.price')) {
+      $price= $f3->get('REQUEST.price');
+
+      // XXX handle resetting price
+
+      if (preg_match('/^\d*(\/|%)$/', $price)) {
+        $line->discount_type= "percentage";
+        $line->discount= (float)$price;
+        $line->discount_manual= 1;
+      } elseif (preg_match('/^\$?(-?\d*\.?\d*)$/', $price, $m)) {
+        $line->discount= (float)$price;
+        $line->discount_type= "fixed";
+        $line->discount_manual= 1;
+      } else {
+        $f3->error(500, "Didn't understand price.");
+      }
+    }
+
     $line->save();
 
     $this->update_shipping($f3, $args);
