@@ -735,6 +735,11 @@ class Sale {
 
     $token= $f3->get('REQUEST.stripeToken');
 
+    if (!length($token)) {
+      error_log("No token.");
+      $f3->error(500, "There was an error processing your card.");
+    }
+
     try {
       $charge= \Stripe\Charge::create(array(
         "amount" => $amount,
@@ -748,6 +753,8 @@ class Sale {
       $err= $body['error'];
 
       // XXX Send email to admin
+
+      error_log($body);
 
       $f3->error(500, $err['message']);
     }
