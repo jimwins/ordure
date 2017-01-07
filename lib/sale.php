@@ -735,7 +735,7 @@ class Sale {
 
     $token= $f3->get('REQUEST.stripeToken');
 
-    if (!length($token)) {
+    if (!strlen($token)) {
       error_log("No token.");
       $f3->error(500, "There was an error processing your card.");
     }
