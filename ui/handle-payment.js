@@ -234,3 +234,28 @@ $("#giftcard-use").on("submit", function (ev) {
 
   return false;
 });
+
+$("#other-use").on("submit", function (ev) {
+  var $form= $(ev.target);
+
+  $form.find('[type="submit"]').prop('disabled', true);
+  $form.find('.errors').addClass('hidden');
+
+  $.ajax({ dataType: 'json', method: 'POST',
+           url: $form.attr('action') })
+   .done(function (data) {
+     if (data.paid) {
+       window.location.href= "./thanks";
+     } else {
+       window.location.href= "./pay";
+     }
+   })
+   .fail(function (jqXHR, textStatus, errorThrown) {
+     $form.find('.errors').text(jqXHR.responseJSON.text ?
+                                jqXHR.responseJSON.text : textStatus); 
+     $form.find('.errors').removeClass('hidden');
+     $form.find('[type="submit"]').prop('disabled', false);
+   });
+
+  return false;
+});

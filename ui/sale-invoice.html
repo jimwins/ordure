@@ -63,6 +63,9 @@
           <check if="{{ @data.method == 'gift' }}">
             Paid with Gift Card 
           </check>
+          <check if="{{ @data.method == 'other' }}">
+            Paid
+          </check>
           ({{ @data.processed }}):
         </th>
         <td colspan="5" class="text-right">{{ @amount(@data.amount) }}</td>

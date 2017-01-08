@@ -36,6 +36,8 @@ class Sale {
                'Sale->process_bitcoin_payment');
     $f3->route("POST /sale/@sale/process-paypal-payment [ajax]",
                'Sale->process_paypal_payment');
+    $f3->route("POST /sale/@sale/process-other-payment [ajax]",
+               'Sale->process_other_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
@@ -1041,6 +1043,39 @@ class Sale {
     $payment->data= json_encode(array(
       'card' => $f3->get('REQUEST.card'),
     ));
+    $payment->save();
+
+    if ($amount != $sale->total - $sale->paid) {
+      echo json_encode(array('paid' => 0));
+      return;
+    }
+
+    self::capture_sales_tax($f3, $sale);
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    echo json_encode(array('paid' => 1));
+
+    $f3->abort(); // let client go
+
+    self::send_order_email($f3);
+  }
+
+  function process_other_payment($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $amount= $sale->total - $sale->paid;
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'other';
+    $payment->amount= $amount;
     $payment->save();
 
     if ($amount != $sale->total - $sale->paid) {
