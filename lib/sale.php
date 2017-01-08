@@ -1257,6 +1257,9 @@ class Sale {
 
     $shipment->save();
 
+    $sale->status= 'shipped';
+    $sale->save();
+
     echo "Success!";
   }
 
