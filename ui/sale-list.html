@@ -16,6 +16,7 @@
             <th>Modified</th>
             <th>Status</th>
             <th>Customer</th>
+            <th>Tax</th>
             <th>Total</th>
           </tr>
         </thead>
@@ -40,6 +41,9 @@
               </td>
               <td>
                 <a href="mailto:{{ @sale.email }}">{{ @sale.name }}</a>
+              </td>
+              <td>
+                {{ @amount(@sale.tax) }}
               </td>
               <td>
                 {{ @amount(@sale.total) }}
