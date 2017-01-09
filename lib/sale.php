@@ -74,15 +74,16 @@ class Sale {
     $db= $f3->get('DBH');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->total= 'CAST(
-                     ROUND_TO_EVEN(shipping + shipping_tax +
-                                   (SELECT SUM(quantity *
-                                               sale_price(retail_price,
+    $sale->tax= 'CAST(ROUND(shipping_tax, 2) +
+                      (SELECT SUM(ROUND(tax,2))
+                         FROM sale_item WHERE sale_id = sale.id)
+                   AS DECIMAL(9,2))';
+    $sale->total= 'CAST(shipping + ROUND(shipping_tax, 2) +
+                        (SELECT SUM(quantity * sale_price(retail_price,
                                                           discount_type,
                                                           discount)
-                                               + tax)
-                                      FROM sale_item WHERE sale_id = sale.id),
-                                   2)
+                                    + ROUND(tax, 2))
+                           FROM sale_item WHERE sale_id = sale.id)
                      AS DECIMAL(9,2))';
     $sale->paid= '(SELECT SUM(amount)
                      FROM sale_payment
@@ -107,21 +108,16 @@ class Sale {
                                              discount_type,
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'CAST(
-                   ROUND_TO_EVEN(shipping_tax +
-                                 (SELECT SUM(tax)
-                                    FROM sale_item WHERE sale_id = sale.id),
-                                 2)
+    $sale->tax= 'CAST(ROUND(shipping_tax, 2) +
+                      (SELECT SUM(ROUND(tax,2))
+                         FROM sale_item WHERE sale_id = sale.id)
                    AS DECIMAL(9,2))';
-    $sale->total= 'CAST(
-                     ROUND_TO_EVEN(shipping + shipping_tax +
-                                   (SELECT SUM(quantity *
-                                               sale_price(retail_price,
+    $sale->total= 'CAST(shipping + ROUND(shipping_tax, 2) +
+                        (SELECT SUM(quantity * sale_price(retail_price,
                                                           discount_type,
                                                           discount)
-                                               + tax)
-                                      FROM sale_item WHERE sale_id = sale.id),
-                                   2)
+                                    + ROUND(tax, 2))
+                           FROM sale_item WHERE sale_id = sale.id)
                      AS DECIMAL(9,2))';
     $sale->paid= '(SELECT SUM(amount)
                      FROM sale_payment
@@ -1125,21 +1121,16 @@ class Sale {
                                              discount_type,
                                              discount))
                       FROM sale_item WHERE sale_id = sale.id)';
-    $sale->tax= 'CAST(
-                   ROUND_TO_EVEN(shipping_tax +
-                                 (SELECT SUM(tax)
-                                    FROM sale_item WHERE sale_id = sale.id),
-                                 2)
+    $sale->tax= 'CAST(ROUND(shipping_tax, 2) +
+                      (SELECT SUM(ROUND(tax,2))
+                         FROM sale_item WHERE sale_id = sale.id)
                    AS DECIMAL(9,2))';
-    $sale->total= 'CAST(
-                     ROUND_TO_EVEN(shipping + shipping_tax +
-                                   (SELECT SUM(quantity *
-                                               sale_price(retail_price,
+    $sale->total= 'CAST(shipping + ROUND(shipping_tax, 2) +
+                        (SELECT SUM(quantity * sale_price(retail_price,
                                                           discount_type,
                                                           discount)
-                                               + tax)
-                                      FROM sale_item WHERE sale_id = sale.id),
-                                   2)
+                                    + ROUND(tax, 2))
+                           FROM sale_item WHERE sale_id = sale.id)
                      AS DECIMAL(9,2))';
     $sale->paid= '(SELECT SUM(amount)
                      FROM sale_payment
