@@ -65,11 +65,13 @@
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
-                <th>Item No.</th><th>Description</th>
-                <th>List</th><th>Sale</th>
-                <th class="text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Availability</th>
+                <th class="col-xs-2">Item No.</th>
+                <th class="col-xs-5">Description</th>
+                <th class="col-xs-1">List</th>
+                <th class="col-xs-1">Sale</th>
+                <th class="col-xs-2 text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Availability</th>
                 <check if="{{ @ADMIN }}">
-                  <th>Active</th>
+                  <th class="col-xs-1">Active</th>
                 </check>
               </tr>
             </thead>
