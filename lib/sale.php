@@ -1172,7 +1172,7 @@ class Sale {
                                     $order->shipping_address_id :
                                     $order->billing_address_id));
       echo "  <ShipTo>\n";
-      echo "   <Name><![CDATA[", $shipping_address->name, "]]></Name>\n";
+      echo "   <Name><![CDATA[", $shipping_address->name ?: $order->name, "]]></Name>\n";
       echo "   <Address1><![CDATA[",
            $shipping_address->address1,
            "]]></Address1>\n";
@@ -1186,7 +1186,7 @@ class Sale {
                                        "");
       echo "   <PostalCode><![CDATA[", $zip, "]]></PostalCode>\n";
       echo "   <Country><![CDATA[US]]></Country>\n";
-      //echo "   <Phone><![CDATA[", $shipping_address->email, "]]></Phone>\n";
+      echo "   <Phone><![CDATA[", $shipping_address->phone, "]]></Phone>\n";
       echo "  </ShipTo>\n";
       /* shipping address */
       echo " </Customer>\n";
