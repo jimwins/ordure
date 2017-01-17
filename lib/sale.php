@@ -403,6 +403,7 @@ class Sale {
     $address->state= $f3->get('REQUEST.state');
     $address->zip5= $f3->get('REQUEST.zip5');
     $address->zip4= $f3->get('REQUEST.zip4');
+    $address->phone= $f3->get('REQUEST.phone');
     $address->verified= 0;
 
     $address->save();
