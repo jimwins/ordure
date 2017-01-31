@@ -19,6 +19,12 @@
         </div>
         <div id="pay-credit-card" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-credit-card-heading">
           <div class="panel-body">
+            <noscript>
+              <p class="alert alert-danger">
+                Sorry, you must have Javascript enabled in order to pay
+                online.
+              </p>
+            </noscript>
             <form method="POST"
                   action="process-creditcard-payment" data-ajax="true"
                   id="payment-form">
