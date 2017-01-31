@@ -1,14 +1,24 @@
 #!/bin/sh
 
+set -e
+
 URL=$1
 FILE=`basename "$URL"`
 DIR="static/catimg"
 if [ ! -z "$2" ]; then FILE=$2; fi
 if [ ! -z "$3" ]; then DIR=$3; fi
 
-curl -o tmp.jpg "$URL" \
-&& sips -s format jpeg -s formatOptions "75%" tmp.jpg --out tmp2.jpg \
-&& /opt/libjpeg-turbo/bin/jpegtran \
-     -copy none -optimize -outfile $DIR/$FILE tmp2.jpg
+if [ -f "$URL" ]; then
+  cp "$URL" tmp.jpg
+else
+  curl -o tmp.jpg "$URL"
+fi
+
+sips -s format jpeg -s formatOptions "75%" tmp.jpg --out tmp2.jpg
+
+/opt/libjpeg-turbo/bin/jpegtran \
+   -copy none -optimize -progressive -outfile $DIR/$FILE tmp2.jpg
+
 rm -f tmp.jpg tmp2.jpg
-echo `basename $DIR`/$FILE
+
+echo /`basename $DIR`/$FILE
