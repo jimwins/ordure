@@ -52,10 +52,12 @@ $f3->set('ONERROR', function ($f3) {
       $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
     }
 
+    $code= $f3->get('ERROR.code');
+
     // XXX There is some sort of bug in calling a template within ONERROR
     // related to escaping. Running fast and loose for now.
     $f3->set('ESCAPE', false);
-    echo Template::instance()->render('404.html');
+    echo Template::instance()->render("$code.html");
   }
 });
 
