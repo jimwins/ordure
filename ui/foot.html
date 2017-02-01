@@ -87,7 +87,8 @@ function afterLoad(func) {
 loadScript('{{ @STATIC }}/code/combined-2016-11-19.js', function() {
 
   window.environmentLoaded= true;
-  var envLoaded= new Event('envloaded');
+  var envLoaded= document.createEvent('Event');
+  envLoaded.initEvent('envloaded', true, true);
   document.body.dispatchEvent(envLoaded);
 
   $(window).on('resize', function() {
