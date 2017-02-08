@@ -176,7 +176,27 @@
 
   <div class="col-md-4">
     <div class="panel panel-default">
-      <div class="panel-footer text-right">
+      <div class="panel-footer">
+        <form class="form-inline" data-bind="submit: saveStatus">
+          <div class="form-group">
+            <label for="status">Status:</label>
+            <select class="form-control" name="status"
+                    data-bind="value: sale.status">
+              <option value="new">New
+              <option value="unpaid">Unpaid
+              <option value="paid">Paid
+              <option value="shipped">Shipped
+              <option value="cancelled">Cancelled
+              <option value="onhold">On Hold
+            </select>
+            <button class="btn btn-default">
+              Save
+            </button>
+          </div>
+        </form>
+
+        <br>
+
         <button class="btn btn-primary"
                 data-bind="enable: sale.billing_address_id && sale.total &&
                                    sale.tax_calculated,
@@ -331,6 +351,18 @@ afterLoad(function() {
      .done(function (data) {
        window.location.href= './';
     });
+  }
+
+  viewModel.saveStatus= function(data) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'set-status',
+             data: { status: this.sale.status() } })
+     .done(function (data) {
+       viewModel.load(data);
+     })
+     .fail(function (jqXHR, textStatus, errorThrown) {
+       alert(jqXHR.responseJSON.text ? jqXHR.responseJSON.text : textStatus);
+     });
   }
 
   ko.applyBindings(viewModel);
