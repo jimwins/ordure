@@ -1154,8 +1154,8 @@ class Sale {
       echo " <LastModified>",
            (new \Datetime($order->modified))->format("m/d/Y H:i"),
            "</LastModified>\n";
-      echo " <OrderTotal>", $order->total, "</OrderTotal>\n";
-      echo " <TaxAmount>", $order->tax, "</TaxAmount>\n";
+      echo " <OrderTotal>", $order->total ?: '0.00', "</OrderTotal>\n";
+      echo " <TaxAmount>", $order->tax ?: '0.00', "</TaxAmount>\n";
       echo " <ShippingAmount>", $order->shipping, "</ShippingAmount>\n";
       
       /* customer */
