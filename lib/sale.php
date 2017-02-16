@@ -753,7 +753,7 @@ class Sale {
 
       // XXX Send email to admin
 
-      error_log($body);
+      error_log(json_encode($body));
 
       $f3->error(500, $err['message']);
     }
