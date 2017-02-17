@@ -146,6 +146,9 @@
                     <i class="fa fa-address-card-o"></i>
                   </a>
                   Shipping Address
+                  <a class="pull-right" data-bind="click: inStorePickup">
+                    <i class="fa fa-building"></i>
+                  </a>
                 </h3>
               </div>
               <div class="panel-body" data-bind="with: shipping_address">
@@ -327,6 +330,14 @@ afterLoad(function() {
     $.ajax({ dataType: 'json', method: 'POST',
              url: 'verify-address',
              data: ko.mapping.toJS(data) })
+     .done(function (data) {
+       viewModel.load(data);
+    });
+  }
+
+  viewModel.inStorePickup= function(data) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'set-in-store-pickup' })
      .done(function (data) {
        viewModel.load(data);
     });
