@@ -400,6 +400,7 @@ class Sale {
     }
     
     $address->name= $f3->get('REQUEST.name');
+    $address->company= $f3->get('REQUEST.company');
     $address->address1= $f3->get('REQUEST.address1');
     $address->address2= $f3->get('REQUEST.address2');
     $address->city= $f3->get('REQUEST.city');
@@ -894,7 +895,7 @@ class Sale {
       "shipping" => [
         "firstName" => $firstName,
         "lastName" => $lastName,
-        "company" => "",
+        "company" => $shipping_address->company,
         "streetAddress" => $shipping_address->address1,
         "extendedAddress" => $shipping_address->address2,
         "locality" => $shipping_address->city,
@@ -1197,6 +1198,7 @@ class Sale {
                                     $order->billing_address_id));
       echo "  <ShipTo>\n";
       echo "   <Name><![CDATA[", $shipping_address->name ?: $order->name, "]]></Name>\n";
+      echo "   <Company><![CDATA[", $shipping_address->company, "]]></Company>\n";
       echo "   <Address1><![CDATA[",
            $shipping_address->address1,
            "]]></Address1>\n";
