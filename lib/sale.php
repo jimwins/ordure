@@ -43,6 +43,7 @@ class Sale {
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
     $f3->route("POST /sale/@sale/set-in-store-pickup [ajax]",
                'Sale->set_in_store_pickup');
+    $f3->route("POST /sale/@sale/set-shipping [ajax]", 'Sale->set_shipping');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
@@ -440,6 +441,39 @@ class Sale {
     $sale->save();
 
     $this->update_shipping($f3, $args);
+
+    return $this->json($f3, $args);
+  }
+
+  function set_shipping($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $shipping= $f3->get('REQUEST.shipping');
+
+    if ($shipping == 'auto') {
+      $sale->shipping= 0.00;
+      $sale->shipping_manual= 0;
+    } else {
+      $sale->shipping= $shipping;
+      $sale->shipping_manual= 1;
+    }
+
+    $sale->save();
+
+    $this->update_shipping($f3, $args);
+
+    $sale->tax_calculated= null;
+
+    $sale->save();
 
     return $this->json($f3, $args);
   }

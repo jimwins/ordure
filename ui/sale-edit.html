@@ -62,7 +62,10 @@
             <th colspan="5" class="text-right">
               Shipping &amp; handling:
             </th>
-            <td class="text-right" data-bind="text: amount(sale.shipping())"></td>
+            <td class="editable text-right">
+              <span data-key="shipping"
+                    data-bind="text: amount(sale.shipping())">
+            </td>
           </tr>
           <tr>
             <th colspan="5" class="text-right">
@@ -257,14 +260,23 @@ afterLoad(function() {
   }
 
   viewModel.updateItem= function(item, key, value) {
-    var data= { item: item.id() }
-    data[key]= value;
-    $.ajax({ dataType: 'json', method: 'POST',
-             url: 'update-item',
-             data: data })
-     .done(function (data) {
-       viewModel.load(data);
-     });
+    if (key == 'shipping') {
+      $.ajax({ dataType: 'json', method: 'POST',
+               url: 'set-shipping',
+               data: { shipping: value } })
+       .done(function (data) {
+         viewModel.load(data);
+       });
+    } else {
+      var data= { item: item.id() }
+      data[key]= value;
+      $.ajax({ dataType: 'json', method: 'POST',
+               url: 'update-item',
+               data: data })
+       .done(function (data) {
+         viewModel.load(data);
+       });
+    }
   }
 
   viewModel.editPerson= function(person) {
