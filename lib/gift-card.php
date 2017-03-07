@@ -24,12 +24,17 @@ class GiftCard {
         "currency" => "usd",
         "source" => $token,
         "receipt_email" => $f3->get('REQUEST.email'),
-        "description" => "Gift Card",
-        "statement_descriptor" => "Raw Materials Gift"
       ));
     } catch (\Stripe\Error\Card $e) {
       // The card has been declined!
-      $f3->error(500);
+      $body= $e->getJsonBody();
+      $err= $body['error'];
+
+      // XXX Send email to admin
+
+      error_log(json_encode($body));
+
+      $f3->error(500, $err['message']);
     }
 
     $headers= array();
