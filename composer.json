@@ -12,6 +12,7 @@
     "braintree/braintree_php": "^3.19",
     "guzzlehttp/guzzle": "~6.0",
     "php-http/guzzle6-adapter": "^1.1",
-    "sparkpost/sparkpost": "^2.0"
+    "sparkpost/sparkpost": "^2.0",
+    "mailerlite/mailerlite-api-v2-php-sdk": "^0.2.0"
   }
 }
