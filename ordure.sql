@@ -236,12 +236,14 @@ DROP TABLE IF EXISTS `sale_address`;
 CREATE TABLE `sale_address` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `company` varchar(255) DEFAULT NULL,
   `address1` varchar(255) NOT NULL,
   `address2` varchar(255) NOT NULL DEFAULT '',
   `city` varchar(255) NOT NULL,
   `state` char(2) NOT NULL,
   `zip5` char(5) NOT NULL,
   `zip4` char(4) NOT NULL DEFAULT '0000',
+  `phone` varchar(50) NOT NULL DEFAULT '',
   `verified` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
