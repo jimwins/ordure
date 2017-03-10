@@ -20,6 +20,22 @@ class Rewards {
 
     $loyalty->save();
 
+    // Sign them up for the newsletter
+    if ($f3->get('REQUEST.subscribe')) {
+      $key= $f3->get("MAILERLITE_KEY");
+      $groupsApi= (new MailerLiteApi\MailerLite($key))->groups();
+
+      $subscriber= [
+          'email' => $loyalty->email,
+          'fields' => [
+              'name' => $loyalty->name,
+          ]
+      ];
+
+      $response= $groupsApi->addSubscriber($f3->get('MAILERLITE_GROUP'),
+                                            $subscriber);
+    }
+
     $page= new DB\SQL\Mapper($db, 'page');
 
     $page->load(array('slug=?', 'reward-thanks'))
