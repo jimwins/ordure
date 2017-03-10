@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a60a9e712807016755b20974d41a8644",
-    "content-hash": "2833d7b570b1ef18394aff6b97613e63",
+    "hash": "7faec4ea232b4bb43467141418197faa",
+    "content-hash": "83453f656aa1431501463faa07dc438f",
     "packages": [
         {
             "name": "bcosca/fatfree",
