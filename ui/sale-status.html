@@ -10,10 +10,16 @@
         <h3 class="panel-title">Status</h3>
       </div>
       <div class="panel-body">
-        <check if="{{ @sale.status = 'paid' }}">
+        <check if="{{ @sale.status == 'paid' }}">
           <p class="text-success">
             <strong>Thanks for your order!</strong> We will let you know when
             your order has shipped, or contact you if there are any troubles.
+          </p>
+        </check>
+        <check if="{{ @sale.status == 'cancelled' }}">
+          <p class="text-danger">
+            <strong>This order has been cancelled!</strong> If you believe
+            this is a mistake, please contact us.
           </p>
         </check>
         <p>
