@@ -206,6 +206,10 @@ require '../lib/sale.php';
 Sale::addRoutes($f3);
 }
 
+/* Handle rewards URLs */
+require '../lib/rewards.php';
+Rewards::addRoutes($f3);
+
 /* Handle API calls */
 if ($f3->get('ADMIN')) {
   require '../lib/api.php';
