@@ -1301,11 +1301,22 @@ class Sale {
     $shipment->carrier= $carrier;
     $shipment->service= $service;
     $shipment->tracking_number= $tracking_number;
-    // XXX parse body for this data
+    // These are just defaults in case we can't parse them from datat
     $shipment->created= date("Y-m-d H:i:s");
     $shipment->ship_date= date("Y-m-d");
     $shipment->shipping_cost= 0.00;
     $shipment->data= file_get_contents('php://input');
+
+    try {
+      $xml= simplexml_load_string($shipment->data);
+      $shipment->created=
+        (new \Datetime($xml->LabelCreateDate))->format("Y-m-d H:i:s");
+      $shipment->ship_date= (new \Datetime($xml->ShipDate))->format("Y-m-d");
+      $shipment->shipping_cost= $xml->ShippingCost;
+    } catch (\Exception $e) {
+      error_log(sprintf("ShipStation shipment info failure: %s (%s)",
+                        $e->getMessage(), $e->getCode()));
+    }
 
     $shipment->save();
 
