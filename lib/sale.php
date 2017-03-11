@@ -185,6 +185,15 @@ class Sale {
     }
     $f3->set('payments', $payments_out);
 
+    $shipments= new DB\SQL\Mapper($db, 'sale_shipment');
+    $shipments= $shipments->find(array('sale_id = ?', $sale->id),
+                                 array('order' => 'id'));
+    $shipments_out= array();
+    foreach ($shipments as $i) {
+      $shipments_out[]= $i->cast();
+    }
+    $f3->set('shipments', $shipments_out);
+
     return $sale;
   }
 

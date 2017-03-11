@@ -22,6 +22,22 @@
             this is a mistake, please contact us.
           </p>
         </check>
+        <check if="{{ @sale.status == 'shipped' }}">
+          <p class="text-success">
+            <strong>Your order has been shipped!</strong>
+            <check if="{{ count(@shipments) }}">
+              <true>
+                <repeat group="{{ @shipments }}" value="{{ @data }}">
+                  <p>Package shipped {{ @data.ship_date }} via {{ @data.carrier }}<check if="{{ @data.service }}"> ({{ @data.service }})</check>, tracking number: <a href="{{ @BASE }}/track/{{ strtolower(@data.carrier) }}/{{ @data.tracking_number }}">{{ @data.tracking_number }}</a></p>
+                </repeat>
+              </true>
+              <false>
+                <p>Sorry, no tracking information is available for your
+                order.</p>
+              </false>
+            </check>
+          </p>
+        </check>
         <p>
           Feel free to <a href="{{ @BASE }}/contact">contact us
           with any questions or concerns</a>.
