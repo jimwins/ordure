@@ -188,6 +188,10 @@ $f3->route('GET /track/fedex/@code', function ($f3, $args) {
   $f3->reroute('https://www.fedex.com/apps/fedextrack/?cntry_code=us&tracknumbers=' . $f3->get('PARAMS.code'));
 });
 
+$f3->route('GET /track/gso/@code', function ($f3, $args) {
+  $f3->reroute('https://www.gso.com/Tracking/PackageDetail?TrackingNumber=' . $f3->get('PARAMS.code'));
+});
+
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
