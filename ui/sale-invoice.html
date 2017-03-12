@@ -105,15 +105,22 @@
             </h3>
           </div>
           <div class="panel-body">
-            <div>{{ @billing_address.name }}</div>
-            <div>{{ @billing_address.company }}</div>
-            <div>{{ @billing_address.phone }}</div>
-            <div>{{ @billing_address.address1 }}</div>
-            <div>{{ @billing_address.address2 }}</div>
-            <div>
-              {{ @billing_address.city }}, {{ @billing_address.state }}
-              {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
-            </div>
+            <check if="{{ @billing_address.id }}">
+              <true>
+                <div>{{ @billing_address.name }}</div>
+                <div>{{ @billing_address.company }}</div>
+                <div>{{ @billing_address.phone }}</div>
+                <div>{{ @billing_address.address1 }}</div>
+                <div>{{ @billing_address.address2 }}</div>
+                <div>
+                  {{ @billing_address.city }}, {{ @billing_address.state }}
+                  {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
+                </div>
+              </true>
+              <false>
+                Not specified.
+              </false>
+            </check>
           </div>
         </div>
       </div>
