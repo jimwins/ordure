@@ -119,8 +119,11 @@
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h3 class="panel-title">
-                  <a data-bind="click: function() { editAddress('billing', billing_address) }">
+                  <a data-bind="click: function() { editAddress('billing', sale.billing_address_id(), billing_address) }">
                     <i class="fa fa-address-card-o"></i>
+                  </a>
+                  <a class="pull-right" data-bind="if: sale.billing_address_id(), click: function() { removeAddress('billing') }">
+                    <i class="fa fa-trash-o"></i>
                   </a>
                   Billing Address
                 </h3>
@@ -146,11 +149,14 @@
             <div class="panel panel-default">
               <div class="panel-heading">
                 <h3 class="panel-title">
-                  <a data-bind="click: function() { editAddress('shipping', shipping_address ) }">
+                  <a data-bind="click: function() { editAddress('shipping', sale.shipping_address_id(), shipping_address ) }">
                     <i class="fa fa-address-card-o"></i>
                   </a>
                   Shipping Address
-                  <a class="pull-right" data-bind="click: inStorePickup">
+                  <a class="pull-right" data-bind="if: sale.shipping_address_id(), click: function() { removeAddress('shipping') }">
+                    <i class="fa fa-trash-o"></i>
+                  </a>
+                  <a class="pull-right" data-bind="if: !sale.shipping_address_id(), click: inStorePickup">
                     <i class="fa fa-building"></i>
                   </a>
                 </h3>
@@ -309,7 +315,7 @@ afterLoad(function() {
       });
   }
 
-  viewModel.editAddress= function(type, address) {
+  viewModel.editAddress= function(type, id, address) {
     $.ajax({ url: '{{ @BASE }}/ui/address.html', cache: false })
       .done(function (html) {
         var panel= $(html);
@@ -321,6 +327,7 @@ afterLoad(function() {
         var model= ko.mapping.toJS(address);
         model.error= '';
         model.type= type;
+        model.id= id;
 
         var personModel= ko.mapping.fromJS(model);
 
@@ -338,6 +345,15 @@ afterLoad(function() {
 
         panel.appendTo($('body')).modal();
       });
+  }
+
+  viewModel.removeAddress= function(type) {
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'remove-address',
+             data: { type: type } })
+     .done(function (data) {
+       viewModel.load(data);
+    });
   }
 
   viewModel.verifyAddress= function(data) {

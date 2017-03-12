@@ -41,6 +41,8 @@ class Sale {
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
+    $f3->route("POST /sale/@sale/remove-address [ajax]",
+               'Sale->remove_address');
     $f3->route("POST /sale/@sale/set-in-store-pickup [ajax]",
                'Sale->set_in_store_pickup');
     $f3->route("POST /sale/@sale/set-shipping [ajax]", 'Sale->set_shipping');
@@ -426,6 +428,31 @@ class Sale {
       $sale->shipping_address_id= $address->id;
     } else {
       $sale->billing_address_id= $address->id;
+    }
+
+    $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function remove_address($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $type= $f3->get('REQUEST.type');
+
+    if ($type == 'shipping') {
+      $sale->shipping_address_id= NULL;
+    } else {
+      $sale->billing_address_id= NULL;
     }
 
     $sale->save();
