@@ -411,15 +411,15 @@ class Sale {
         or $f3->error(404);
     }
     
-    $address->name= $f3->get('REQUEST.name');
-    $address->company= $f3->get('REQUEST.company');
-    $address->address1= $f3->get('REQUEST.address1');
-    $address->address2= $f3->get('REQUEST.address2');
-    $address->city= $f3->get('REQUEST.city');
-    $address->state= $f3->get('REQUEST.state');
-    $address->zip5= $f3->get('REQUEST.zip5');
-    $address->zip4= $f3->get('REQUEST.zip4');
-    $address->phone= $f3->get('REQUEST.phone');
+    $address->name= trim($f3->get('REQUEST.name'));
+    $address->company= trim($f3->get('REQUEST.company'));
+    $address->address1= trim($f3->get('REQUEST.address1'));
+    $address->address2= trim($f3->get('REQUEST.address2'));
+    $address->city= trim($f3->get('REQUEST.city'));
+    $address->state= trim($f3->get('REQUEST.state'));
+    $address->zip5= trim($f3->get('REQUEST.zip5'));
+    $address->zip4= trim($f3->get('REQUEST.zip4'));
+    $address->phone= trim($f3->get('REQUEST.phone'));
     $address->verified= 0;
 
     $address->save();
@@ -591,8 +591,8 @@ class Sale {
     $sale->load(array('uuid = ?', $sale_uuid))
       or $f3->error(404);
 
-    $sale->name= $f3->get('REQUEST.name');
-    $sale->email= $f3->get('REQUEST.email');
+    $sale->name= trim($f3->get('REQUEST.name'));
+    $sale->email= trim($f3->get('REQUEST.email'));
     $sale->save();
 
     return $this->json($f3, $args);
