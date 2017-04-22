@@ -178,7 +178,7 @@
                   <div data-bind="text: phone"></div>
                   <div data-bind="text: address1"></div>
                   <div data-bind="text: address2"></div>
-                  <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip4()"></div>
+                  <div data-bind="visible: city, text: city() + ', ' + state() + ' ' + zip5() + (zip4() ? '-' + zip4() : '')"></div>
                 </div>
               </div>
             </div>
