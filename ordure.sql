@@ -111,7 +111,7 @@ CREATE TABLE `item` (
   `tic` char(5) NOT NULL DEFAULT '00000',
   `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `inactive` tinyint(4) NOT NULL DEFAULT '1',
+  `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),
   KEY `product` (`product`)
@@ -196,7 +196,7 @@ CREATE TABLE `product` (
   `from_item_no` varchar(255) DEFAULT NULL,
   `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `inactive` tinyint(4) NOT NULL DEFAULT '1',
+  `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `department` (`department`,`brand`,`slug`),
   KEY `from_item_no` (`from_item_no`),
@@ -418,4 +418,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-03-09 17:59:03
+-- Dump completed on 2017-05-11 17:19:52

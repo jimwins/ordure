@@ -113,7 +113,7 @@
                     </td>
                     <check if="{{ @ADMIN }}">
                       <td class="text-center">
-                        <a class="item-toggle fa fa-lg {{ @item.inactive > 1 ? 'fa-eye-slash' : 'fa-eye' }} {{ @item.inactive == 1 ? 'text-muted' : '' }}"></a>
+                        <a class="item-toggle fa fa-lg {{ !@item.active ? 'fa-eye-slash' : 'fa-eye' }}"></a>
                         <a class="item-edit fa fa-lg fa-pencil"></a>
                       </td>
                     </check>

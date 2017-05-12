@@ -3,6 +3,7 @@ $(function() {
 
   $('[data-department]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-dept" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
+  $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs product-toggle" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-eye"></span></button>'));
   $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs item-add" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-plus-circle"></span></button>'));
   $('div[data-product]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-product" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
 
@@ -63,9 +64,9 @@ $(function() {
     $.getJSON(BASE + 'api/productToggle?callback=?',
               { product: product.data('product') })
       .done(function (data) {
-        var cl= [ 'fa-eye', 'fa-eye text-muted', 'fa-eye-slash' ];
-        $(ev.target).removeClass('fa-eye fa-eye-slash text-muted')
-                    .addClass(cl[data.inactive]);
+        var cl= [ 'fa-eye-slash', 'fa-eye' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash')
+                    .addClass(cl[data.active]);
       })
       .fail(function (jqxhr, textStatus, error) {
         var data= $.parseJSON(jqxhr.responseText);
@@ -79,9 +80,9 @@ $(function() {
     $.getJSON(BASE + 'api/itemToggle?callback=?',
               { item: item.data('item') })
       .done(function (data) {
-        var cl= [ 'fa-eye', 'fa-eye text-muted', 'fa-eye-slash' ];
-        $(ev.target).removeClass('fa-eye fa-eye-slash text-muted')
-                    .addClass(cl[data.inactive]);
+        var cl= [ 'fa-eye-slash', 'fa-eye' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash')
+                    .addClass(cl[data.active]);
       })
       .fail(function (jqxhr, textStatus, error) {
         var data= $.parseJSON(jqxhr.responseText);

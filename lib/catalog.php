@@ -118,10 +118,10 @@ class Catalog {
     $products= $product->find(array('department = ?' .
                                     ($f3->get('ADMIN') ?
                                      '' :
-                                     ' AND inactive != 2'), 
+                                     ' AND active'), 
                                     $dept->id),
                               array('order' =>
-                                      'inactive = 2, brand_name, name'));
+                                      '!active, brand_name, name'));
 
     $f3->set('products', $products);
 
@@ -146,7 +146,7 @@ class Catalog {
 
     $product= new DB\SQL\Mapper($db, 'product');
     $product->load(array('id=?', $id));
-    if (!$product || $product->inactive > 1) return false;
+    if (!$product || !$product->active) return false;
 
     $dept= new DB\SQL\Mapper($db, 'department');
     $dept->load(array('id=?', $product->department));
@@ -193,13 +193,13 @@ class Catalog {
                          $dept->id));
     $f3->set('product', $product);
 
-    $inactive= "";
+    $active= "";
 
     if (!$f3->get('ADMIN')) {
-      if ($product->inactive == 2) {
+      if (!$product->active) {
         $f3->error(404);
       }
-      $inactive= " AND inactive != 2";
+      $active= " AND active";
     }
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
@@ -213,11 +213,11 @@ class Catalog {
                 discount_type, discount,
                 stock stocked,
                 minimum_quantity,
-                thumbnail, inactive
+                thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
-          WHERE product = ? $inactive
-          ORDER BY variation, inactive,
+          WHERE product = ? $active
+          ORDER BY variation, !active,
                    IF(minimum_quantity OR stocked, 0, 1), code";
 
     $items= $db->exec($q, $product['id']);
@@ -285,9 +285,9 @@ class Catalog {
     $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
 
-    $inactive= "";
+    $active= "";
     if (!$f3->get('ADMIN')) {
-      $inactive= " AND inactive != 2";
+      $active= " AND active";
     }
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
@@ -300,11 +300,11 @@ class Catalog {
                            scat_item.discount) sale_price,
                 discount_type, discount,
                 stock stocked,
-                thumbnail, inactive
+                thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
-          WHERE product = ? $inactive
-          ORDER BY variation, inactive, IF(stocked IS NULL, 1, 0), code";
+          WHERE product = ? $active
+          ORDER BY variation, !active, IF(stocked IS NULL, 1, 0), code";
 
     $items= $db->exec($q, $product['id']);
 
@@ -359,14 +359,14 @@ class Catalog {
                      FROM department
                     WHERE subdept.parent = department.id) AS dept,
                   subdept.slug AS subdept, product.slug,
-                  brand.name brand_name, inactive
+                  brand.name brand_name, active
              FROM product
              LEFT JOIN brand ON product.brand = brand.id
              JOIN department subdept ON product.department = subdept.id
             WHERE MATCH(product.name, description)
                   AGAINST(? IN NATURAL LANGUAGE MODE)
-              AND inactive != 2
-            -- ORDER BY inactive, brand.name, name";
+              AND active
+            -- ORDER BY !active, brand.name, name";
       
       $products= $db->exec($q, $term);
 

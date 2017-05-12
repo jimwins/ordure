@@ -73,7 +73,7 @@ class API {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'product');
     $page->load(array('id=?', $_REQUEST['product']));
-    $page->inactive= ($page->inactive + 1) % 3;
+    $page->active= !($page->active);
     $page->save();
     $ret= $page->cast();
     echo jsonp($f3, $ret);
@@ -83,7 +83,7 @@ class API {
     $db= $f3->get('DBH');
     $page= new DB\SQL\Mapper($db, 'item');
     $page->load(array('id=?', $_REQUEST['item']));
-    $page->inactive= ($page->inactive + 1) % 3;
+    $page->active= !($page->active);
     $page->save();
     $ret= $page->cast();
     echo jsonp($f3, $ret);
