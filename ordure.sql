@@ -240,6 +240,7 @@ CREATE TABLE `sale` (
   `shipping_manual` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `tax_exemption` varchar(50) DEFAULT NULL,
   `tax_calculated` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)

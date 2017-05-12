@@ -71,6 +71,8 @@
             <th colspan="5" class="text-right">
               <a data-bind="if: admin(), click: calculateSalesTax">
                 <i class="fa fa-calculator"></i></a>
+              <a data-bind="if: admin(), click: addExemptionCertificate">
+                <i class="fa fa-certificate"></i></a>
               Estimated tax to be collected:
             </th>
             <td class="text-right" data-bind="css: { 'text-danger' : !sale.tax_calculated() }, text: sale.tax_calculated() ? amount(sale.tax()) : '$--.--'"></td>
@@ -383,6 +385,47 @@ afterLoad(function() {
      .fail(function (jqXHR, textStatus, errorThrown) {
        alert(jqXHR.responseJSON.text ? jqXHR.responseJSON.text : textStatus);
      });
+  }
+
+  viewModel.addExemptionCertificate= function() {
+    $.ajax({ url: '{{ @BASE }}/ui/exemption.html', cache: false })
+      .done(function (html) {
+        var panel= $(html);
+
+        panel.on('hidden.bs.modal', function() {
+          $(this).remove();
+        });
+
+        var model= {
+          first_name: '',
+          last_name: '',
+          title: '',
+          address1: '',
+          address2: '',
+          city: '',
+          state: '',
+          zip: '',
+          cert: ''
+        };
+
+        model.error= '';
+
+        var personModel= ko.mapping.fromJS(model);
+
+        personModel.save= function(place, ev) {
+          $.ajax({ dataType: 'json', method: 'POST',
+                   url: 'add-exemption',
+                   data: ko.mapping.toJS(personModel) })
+           .done(function (data) {
+             viewModel.load(data);
+          });
+          $(place).closest('.modal').modal('hide');
+        }
+
+        ko.applyBindings(personModel, panel[0]);
+
+        panel.appendTo($('body')).modal();
+      });
   }
 
   viewModel.prepareForPayment= function(data) {

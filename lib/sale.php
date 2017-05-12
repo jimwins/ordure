@@ -24,6 +24,8 @@ class Sale {
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
                'Sale->calculate_sales_tax');
+    $f3->route("POST /sale/@sale/add-exemption [ajax]",
+               'Sale->add_exemption');
     $f3->route("POST /sale/@sale/generate-bitcoin-address [ajax]",
                'Sale->generate_bitcoin_address');
     $f3->route("POST /sale/@sale/get-giftcard-balance [ajax]",
@@ -593,6 +595,74 @@ class Sale {
 
     $sale->name= trim($f3->get('REQUEST.name'));
     $sale->email= trim($f3->get('REQUEST.email'));
+    $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function add_exemption($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $data= array(
+      'customerID' => $sale->uuid,
+      'exemptCert' => array(
+        'CreatedDate' => date("m/d/Y"),
+        'SinglePurchase' => true,
+        'SinglePurchaseOrderNumber' => $sale->id,
+        'PurchaserFirstName' => trim($f3->get('REQUEST.first_name')),
+        'PurchaserLastName' => trim($f3->get('REQUEST.last_name')),
+        'PurchaserTitle' => trim($f3->get('REQUEST.title')),
+        'PurchaserAddress1' => trim($f3->get('REQUEST.address1')),
+        'PurchaserAddress2' => trim($f3->get('REQUEST.address2')),
+        'PurchaserCity' => trim($f3->get('REQUEST.city')),
+        'PurchaserState' => trim($f3->get('REQUEST.state')),
+        'PurchaserZip' => trim($f3->get('REQUEST.zip')),
+        'ExemptStates' => array( 'StateAbbr' => 'CA', 'ReasonForExemption' => 'Resale', 'IdentificationNumber' => trim($f3->get('REQUEST.cert'))),
+        'PurchaseTaxID' => array( 'TaxType' => 'StateIssued', 'IDNumber' => trim($f3->get('REQUEST.cert')), 'StateOfIssue' => 'CA'),
+        'PurchaserExemptionReason' => 'Resale',
+        'PurchaserExemptionValue' => '',
+        'PurchaserBusinessType' => 'RetailTrade',
+        'PurchaserBusinessTypeOtherValue' => '',
+      ),
+      'apiLoginID' => $f3->get("TAXCLOUD_ID"),
+    );
+
+    $client= new GuzzleHttp\Client();
+    
+    $uri= "https://api.taxcloud.net/1.0/taxcloud/AddExemptCertificate?apiKey=" .
+            $f3->get('TAXCLOUD_KEY');
+
+    error_log(json_encode($data));
+
+    try {
+      $response= $client->post($uri, [ 'json' => $data ]);
+    } catch (\Exception $e) {
+      $f3->error(500, (sprintf("Request failed: %s (%s)",
+                               $e->getMessage(), $e->getCode())));
+    }
+
+    error_log($response->getBody());
+
+    $data= json_decode($response->getBody());
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
+    }
+
+    if ($data->ErrNumber != "0") {
+      $f3->error(500, $data->ErrDescription);
+    }
+
+    $sale->tax_exemption= $data->CertificateID;
     $sale->save();
 
     return $this->json($f3, $args);
