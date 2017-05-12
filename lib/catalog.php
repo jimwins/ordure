@@ -16,6 +16,10 @@ class Catalog {
       $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
     }
 
+    if ($f3->get('ADMIN')) {
+      $f3->route("GET|HEAD /$CATALOG/admin", 'Catalog->admin');
+    }
+
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
@@ -456,5 +460,24 @@ class Catalog {
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-search.html');
+  }
+
+  function admin($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $q= "SELECT item.id, item.code, item.name
+           FROM item
+                JOIN product ON item.product = product.id
+                LEFT JOIN scat.item si ON (item.code = si.code AND si.active)
+                LEFT JOIN scat.vendor_item sv ON item.code = sv.code 
+          WHERE si.code IS NULL AND sv.code IS NULL AND
+                product.active AND item.active
+          ORDER BY 2";
+
+    $items= $db->exec($q);
+
+    $f3->set('inactive_items', $items);
+
+    echo Template::instance()->render("admin.html");
   }
 }

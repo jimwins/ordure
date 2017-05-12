@@ -1,0 +1,48 @@
+<set title="Ordure Administration">
+<include href="header.html" />
+<div class="row" data-slug="{{ @PAGE.slug }}">
+  <div class="rendered">
+    <div class="page-header">
+      <h1>Administration</h1>
+    </div>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Code</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <repeat group="{{ @inactive_items }}" value="{{ @item }}">
+          <tr data-item="{{ @item.id }}">
+            <td><i class="item-toggle fa fa-eye text-muted"></i></td>
+            <td><a href="../{{ @item.code }}">{{ @item.code }}</a></td>
+            <td>{{ @item.name }}</td>
+          </tr>
+        </repeat>
+      </tbody>
+    </table>
+  </div>
+</div>
+<include href="footer.html" />
+<script>
+afterLoad(function() {
+  $('.item-toggle').on('click', function(ev) {
+    var item= $(ev.target).closest('[data-item]');
+
+    $.getJSON(BASE + 'api/itemToggle?callback=?',
+              { item: item.data('item') })
+      .done(function (data) {
+        var cl= [ 'fa-eye-slash', 'fa-eye' ];
+        $(ev.target).removeClass('fa-eye fa-eye-slash')
+                    .addClass(cl[data.active]);
+      })
+      .fail(function (jqxhr, textStatus, error) {
+        var data= $.parseJSON(jqxhr.responseText);
+        // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
+      });
+  });
+});
+</script>
