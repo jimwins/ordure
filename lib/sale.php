@@ -351,9 +351,16 @@ class Sale {
         $line->discount= (float)$price;
         $line->discount_manual= 1;
       } elseif (preg_match('/^\$?(-?\d*\.?\d*)$/', $price, $m)) {
-        $line->discount= (float)$price;
-        $line->discount_type= "fixed";
-        $line->discount_manual= 1;
+        if ($line->retail_price != 0.00) {
+          $line->discount= (float)$price;
+          $line->discount_type= "fixed";
+          $line->discount_manual= 1;
+        } else {
+          $line->retail_price= (float)$price;
+          $line->discount= NULL;
+          $line->discount_type= NULL;
+          $line->discount_manual= NULL;
+        }
       } else {
         $f3->error(500, "Didn't understand price.");
       }
