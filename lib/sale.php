@@ -1409,12 +1409,21 @@ class Sale {
     $sale->load(array('id = ?', $order_number))
       or $f3->error(404);
 
+    // Special handling for "other" carriers (like GSO), expects tracking
+    // number to look like "Carrier/#####"
+    if ($carrier == 'Other'
+        && preg_match('!^(.+?)/(.+)!', $tracking_number, $m))
+    {
+      $carrier= $m[0];
+      $tracking_number= $m[1];
+    }
+
     $shipment= new DB\SQL\Mapper($db, 'sale_shipment');
     $shipment->sale_id= $sale->id;
     $shipment->carrier= $carrier;
     $shipment->service= $service;
     $shipment->tracking_number= $tracking_number;
-    // These are just defaults in case we can't parse them from datat
+    // These are just defaults in case we can't parse them from data
     $shipment->created= date("Y-m-d H:i:s");
     $shipment->ship_date= date("Y-m-d");
     $shipment->shipping_cost= 0.00;
