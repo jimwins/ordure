@@ -27,22 +27,3 @@
   </div>
 </div>
 <include href="footer.html" />
-<script>
-afterLoad(function() {
-  $('.item-toggle').on('click', function(ev) {
-    var item= $(ev.target).closest('[data-item]');
-
-    $.getJSON(BASE + 'api/itemToggle?callback=?',
-              { item: item.data('item') })
-      .done(function (data) {
-        var cl= [ 'fa-eye-slash', 'fa-eye' ];
-        $(ev.target).removeClass('fa-eye fa-eye-slash')
-                    .addClass(cl[data.active]);
-      })
-      .fail(function (jqxhr, textStatus, error) {
-        var data= $.parseJSON(jqxhr.responseText);
-        // XXX page.error(textStatus + ', ' + error + ': ' + data.text)
-      });
-  });
-});
-</script>
