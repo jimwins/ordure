@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "7faec4ea232b4bb43467141418197faa",
-    "content-hash": "83453f656aa1431501463faa07dc438f",
+    "hash": "34b2dca5df7be154b4d8a9851e8d62f3",
+    "content-hash": "65d94f263efc885ce0b96c219299dfa9",
     "packages": [
         {
             "name": "bcosca/fatfree",
@@ -40,16 +40,16 @@
         },
         {
             "name": "braintree/braintree_php",
-            "version": "3.19.0",
+            "version": "3.23.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/braintree/braintree_php.git",
-                "reference": "66550498408df0fd186df2f2c3bde842a7e8a6e9"
+                "reference": "8a66302c0ae9d4be120f8c4e02603027f2067196"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/braintree/braintree_php/zipball/66550498408df0fd186df2f2c3bde842a7e8a6e9",
-                "reference": "66550498408df0fd186df2f2c3bde842a7e8a6e9",
+                "url": "https://api.github.com/repos/braintree/braintree_php/zipball/8a66302c0ae9d4be120f8c4e02603027f2067196",
+                "reference": "8a66302c0ae9d4be120f8c4e02603027f2067196",
                 "shasum": ""
             },
             "require": {
@@ -83,7 +83,7 @@
                 }
             ],
             "description": "Braintree PHP Client Library",
-            "time": "2016-12-12 23:19:58"
+            "time": "2017-05-05 21:51:18"
         },
         {
             "name": "clue/stream-filter",
@@ -135,28 +135,80 @@
             "time": "2015-11-08 23:41:30"
         },
         {
-            "name": "guzzlehttp/guzzle",
-            "version": "6.2.2",
+            "name": "easypost/easypost-php",
+            "version": "3.3.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60"
+                "url": "https://github.com/EasyPost/easypost-php.git",
+                "reference": "082c875effcc1736f3c011c3495a0f6d80e99809"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
-                "reference": "ebf29dee597f02f09f4d5bbecc68230ea9b08f60",
+                "url": "https://api.github.com/repos/EasyPost/easypost-php/zipball/082c875effcc1736f3c011c3495a0f6d80e99809",
+                "reference": "082c875effcc1736f3c011c3495a0f6d80e99809",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "EasyPost": "lib/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sawyer Bateman"
+                }
+            ],
+            "description": "EasyPost Shipping API Client Library for PHP",
+            "homepage": "https://github.com/EasyPost/easypost-php",
+            "keywords": [
+                "api",
+                "easypost",
+                "shipping"
+            ],
+            "support": {
+                "source": "https://github.com/EasyPost/easypost-php/tree/3.3.3",
+                "issues": "https://github.com/EasyPost/easypost-php/issues"
+            },
+            "time": "2017-02-15 02:27:13"
+        },
+        {
+            "name": "guzzlehttp/guzzle",
+            "version": "6.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/guzzle.git",
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f4db5a78a5ea468d4831de7f0bf9d9415e348699",
+                "reference": "f4db5a78a5ea468d4831de7f0bf9d9415e348699",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/promises": "^1.0",
-                "guzzlehttp/psr7": "^1.3.1",
+                "guzzlehttp/psr7": "^1.4",
                 "php": ">=5.5"
             },
             "require-dev": {
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.0",
+                "phpunit/phpunit": "^4.0 || ^5.0",
                 "psr/log": "^1.0"
+            },
+            "suggest": {
+                "psr/log": "Required for using the Log middleware"
             },
             "type": "library",
             "extra": {
@@ -194,7 +246,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2016-10-08 15:01:37"
+            "time": "2017-06-22 18:50:49"
         },
         {
             "name": "guzzlehttp/promises",
@@ -249,16 +301,16 @@
         },
         {
             "name": "guzzlehttp/psr7",
-            "version": "1.3.1",
+            "version": "1.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "5c6447c9df362e8f8093bda8f5d8873fe5c7f65b"
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/5c6447c9df362e8f8093bda8f5d8873fe5c7f65b",
-                "reference": "5c6447c9df362e8f8093bda8f5d8873fe5c7f65b",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
+                "reference": "f5b8a8512e2b58b0071a7280e39f14f72e05d87c",
                 "shasum": ""
             },
             "require": {
@@ -294,16 +346,23 @@
                     "name": "Michael Dowling",
                     "email": "mtdowling@gmail.com",
                     "homepage": "https://github.com/mtdowling"
+                },
+                {
+                    "name": "Tobias Schultze",
+                    "homepage": "https://github.com/Tobion"
                 }
             ],
-            "description": "PSR-7 message implementation",
+            "description": "PSR-7 message implementation that also provides common utility methods",
             "keywords": [
                 "http",
                 "message",
+                "request",
+                "response",
                 "stream",
-                "uri"
+                "uri",
+                "url"
             ],
-            "time": "2016-06-24 23:00:38"
+            "time": "2017-03-20 17:10:46"
         },
         {
             "name": "indigophp/hash-compat",
@@ -358,16 +417,16 @@
         },
         {
             "name": "mailerlite/mailerlite-api-v2-php-sdk",
-            "version": "0.2.0",
+            "version": "0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mailerlite/mailerlite-api-v2-php-sdk.git",
-                "reference": "81b0e25985739ead0491dff162820bafabd96227"
+                "reference": "e33d833fa707360556227065e86df184fd25b59b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mailerlite/mailerlite-api-v2-php-sdk/zipball/81b0e25985739ead0491dff162820bafabd96227",
-                "reference": "81b0e25985739ead0491dff162820bafabd96227",
+                "url": "https://api.github.com/repos/mailerlite/mailerlite-api-v2-php-sdk/zipball/e33d833fa707360556227065e86df184fd25b59b",
+                "reference": "e33d833fa707360556227065e86df184fd25b59b",
                 "shasum": ""
             },
             "require": {
@@ -400,7 +459,7 @@
                 "marketing",
                 "sdk"
             ],
-            "time": "2017-02-09 11:15:21"
+            "time": "2017-03-28 10:17:58"
         },
         {
             "name": "morris/lessql",
@@ -452,16 +511,16 @@
         },
         {
             "name": "paragonie/random_compat",
-            "version": "v2.0.4",
+            "version": "v2.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/random_compat.git",
-                "reference": "a9b97968bcde1c4de2a5ec6cbd06a0f6c919b46e"
+                "reference": "634bae8e911eefa89c1abfbf1b66da679ac8f54d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/a9b97968bcde1c4de2a5ec6cbd06a0f6c919b46e",
-                "reference": "a9b97968bcde1c4de2a5ec6cbd06a0f6c919b46e",
+                "url": "https://api.github.com/repos/paragonie/random_compat/zipball/634bae8e911eefa89c1abfbf1b66da679ac8f54d",
+                "reference": "634bae8e911eefa89c1abfbf1b66da679ac8f54d",
                 "shasum": ""
             },
             "require": {
@@ -496,7 +555,7 @@
                 "pseudorandom",
                 "random"
             ],
-            "time": "2016-11-07 23:38:38"
+            "time": "2017-03-13 16:27:32"
         },
         {
             "name": "php-http/curl-client",
@@ -556,16 +615,16 @@
         },
         {
             "name": "php-http/discovery",
-            "version": "v1.1.1",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/discovery.git",
-                "reference": "47fc36bd73ab615b55c31f4134e6bae70f1c04c1"
+                "reference": "6b33475a3239439bc7ced287d0de0bb82e04d2f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/discovery/zipball/47fc36bd73ab615b55c31f4134e6bae70f1c04c1",
-                "reference": "47fc36bd73ab615b55c31f4134e6bae70f1c04c1",
+                "url": "https://api.github.com/repos/php-http/discovery/zipball/6b33475a3239439bc7ced287d0de0bb82e04d2f0",
+                "reference": "6b33475a3239439bc7ced287d0de0bb82e04d2f0",
                 "shasum": ""
             },
             "require": {
@@ -585,7 +644,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.2-dev"
+                    "dev-master": "1.3-dev"
                 }
             },
             "autoload": {
@@ -614,7 +673,7 @@
                 "message",
                 "psr7"
             ],
-            "time": "2016-11-27 12:21:25"
+            "time": "2017-03-02 06:56:00"
         },
         {
             "name": "php-http/guzzle6-adapter",
@@ -734,16 +793,16 @@
         },
         {
             "name": "php-http/message",
-            "version": "v1.4.1",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-http/message.git",
-                "reference": "bfd895a4e753bdde99bed64d75b999e0c9fa6147"
+                "reference": "2edd63bae5f52f79363c5f18904b05ce3a4b7253"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-http/message/zipball/bfd895a4e753bdde99bed64d75b999e0c9fa6147",
-                "reference": "bfd895a4e753bdde99bed64d75b999e0c9fa6147",
+                "url": "https://api.github.com/repos/php-http/message/zipball/2edd63bae5f52f79363c5f18904b05ce3a4b7253",
+                "reference": "2edd63bae5f52f79363c5f18904b05ce3a4b7253",
                 "shasum": ""
             },
             "require": {
@@ -751,6 +810,9 @@
                 "php": ">=5.4",
                 "php-http/message-factory": "^1.0.2",
                 "psr/http-message": "^1.0"
+            },
+            "provide": {
+                "php-http/message-factory-implementation": "1.0"
             },
             "require-dev": {
                 "akeneo/phpspec-skip-example-extension": "^1.0",
@@ -771,7 +833,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.5-dev"
+                    "dev-master": "1.6-dev"
                 }
             },
             "autoload": {
@@ -799,7 +861,7 @@
                 "message",
                 "psr-7"
             ],
-            "time": "2016-12-16 21:09:21"
+            "time": "2017-07-05 06:40:53"
         },
         {
             "name": "php-http/message-factory",
@@ -1060,16 +1122,16 @@
         },
         {
             "name": "stripe/stripe-php",
-            "version": "v4.3.0",
+            "version": "v4.13.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stripe/stripe-php.git",
-                "reference": "234bcbd7483873c8762a67dfbdf2e6594b0a2ecc"
+                "reference": "834681b9cdfa68d88a27e36ec9e356b598a5f0e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/234bcbd7483873c8762a67dfbdf2e6594b0a2ecc",
-                "reference": "234bcbd7483873c8762a67dfbdf2e6594b0a2ecc",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/834681b9cdfa68d88a27e36ec9e356b598a5f0e6",
+                "reference": "834681b9cdfa68d88a27e36ec9e356b598a5f0e6",
                 "shasum": ""
             },
             "require": {
@@ -1111,7 +1173,7 @@
                 "payment processing",
                 "stripe"
             ],
-            "time": "2016-11-30 19:16:32"
+            "time": "2017-06-20 01:39:06"
         }
     ],
     "packages-dev": [],

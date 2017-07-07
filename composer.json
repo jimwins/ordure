@@ -3,6 +3,12 @@
   "description": "Ordure is an online store.",
   "homepage": "http://trainedmonkey.com/projects/ordure/",
   "license": "MIT",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/EasyPost/easypost-php"
+    }
+  ],
   "require": {
     "bcosca/fatfree": "3.5.1",
     "stripe/stripe-php": "4.*",
@@ -14,6 +20,7 @@
     "php-http/guzzle6-adapter": "^1.1",
     "sparkpost/sparkpost": "^2.0",
     "mailerlite/mailerlite-api-v2-php-sdk": "^0.2.0",
-    "morris/lessql": "^0.3.4"
+    "morris/lessql": "^0.3.4",
+    "easypost/easypost-php": "~3.0"
   }
 }
