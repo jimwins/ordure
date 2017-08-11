@@ -95,8 +95,14 @@ class Sale {
     $sale->paid= '(SELECT SUM(amount)
                      FROM sale_payment
                     WHERE sale_id = sale.id)';
-    $sales= $sale->find(array('status != "cancelled" AND status != "shipped"'),
+
+    $which= ($f3->get('REQUEST.all') ?
+             'status != "cancelled"' :
+             'status != "cancelled" AND status != "shipped"');
+
+    $sales= $sale->find(array($which),
                         array('order' => 'id'));
+
     $sales_out= array();
     foreach ($sales as $i) {
       $sales_out[]= $i->cast();
