@@ -16,7 +16,6 @@
             <th>Modified</th>
             <th>Status</th>
             <th>Customer</th>
-            <th>Tax</th>
             <th>Total</th>
           </tr>
         </thead>
@@ -27,11 +26,12 @@
             <tr valign="top">
               <td>
                 <a href="{{ @sale.uuid }}">{{ sprintf("%07d", @sale.id) }}</a>
+                &nbsp; <a href="{{ @sale.uuid }}/json"><i class="fa fa-download"></i></a>
               </td>
               <td nowrap>
                 {{ (new DateTime(@sale.created))->format("M j H:i") }}
               </td>
-              <td>
+              <td nowrap>
                 {{ (new DateTime(@sale.modified))->format("M j H:i") }}
               </td>
               <td>
@@ -41,9 +41,6 @@
               </td>
               <td>
                 <a href="mailto:{{ @sale.email }}">{{ @sale.name }}</a>
-              </td>
-              <td>
-                {{ @amount(@sale.tax) }}
               </td>
               <td>
                 {{ @amount(@sale.total) }}

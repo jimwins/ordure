@@ -865,12 +865,14 @@ class Sale {
   function json($f3, $args) {
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
+    header("Content-type: application/json");
     echo json_encode(array( 'sale' => $f3->get('sale'),
                             'person' => $f3->get('person'),
                             'billing_address' => $f3->get('billing_address'),
                             'shipping_address' => $f3->get('shipping_address'),
                             'items' => $f3->get('items'),
-                            'payments' => $f3->get('payments')));
+                            'payments' => $f3->get('payments')),
+                     JSON_PRETTY_PRINT);
   }
 
   function generate_bitcoin_address($f3, $args) {
