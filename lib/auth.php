@@ -31,11 +31,18 @@ class Auth {
 
       if ($auth_token->expires &&
           new \Datetime() > new \Datetime($auth_token->expires)) {
-        // XXX delete token
+        $auth_token->erase();
         return false; // expired
       }
 
       if (hash_equals($auth_token->token, hash('sha256', $validator))) {
+        /* Push out expiry of token if more than a day since we've seen it */
+        if (new \Datetime('-1 day') > new \Datetime($auth_token->modified)) {
+          $auth_token->expires= (new \Datetime('+14 days'))
+                                     ->format('Y-m-d H:i:s');
+          $auth_token->save();
+        }
+
         return $auth_token->person_id;
       }
     }
