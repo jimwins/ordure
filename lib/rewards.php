@@ -2,8 +2,13 @@
 
 class Rewards {
 
+  // These URLs are kind of a mess
   static function addRoutes($f3) {
     $f3->route("POST /process-rewards", 'Rewards->process');
+    $f3->route("GET /get-pending-rewards [json]",
+               'Rewards->getPendingRequests');
+    $f3->route("GET|POST /mark-rewards-processed [json]",
+               'Rewards->markRewardsProcessed');
   }
 
   function process($f3, $args) {
@@ -44,5 +49,49 @@ class Rewards {
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('page.html');
+  }
+
+  function getPendingRequests($f3) {
+    $db= $f3->get('DBH');
+
+    $loyalty= new DB\SQL\Mapper($db, 'loyalty');
+
+    $key= $f3->get('UPLOAD_KEY');
+
+    if ($key != $_REQUEST['key']) {
+      $f3->error(500, 'Wrong key.');
+    }
+
+    $list= $loyalty->find(array('processed = 0'));
+
+    $out= array();
+    foreach ($list as $l) {
+      $out[]= $l->cast();
+    }
+
+    echo json_encode($out, JSON_PRETTY_PRINT);
+  }
+
+  function markRewardsProcessed($f3) {
+    $db= $f3->get('DBH');
+
+    $loyalty= new DB\SQL\Mapper($db, 'loyalty');
+
+    $key= $f3->get('UPLOAD_KEY');
+
+    if ($key != $_REQUEST['key']) {
+      $f3->error(500, 'Wrong key.');
+    }
+
+    $item= $loyalty->find(array('id = ?', $_REQUEST['id']));
+
+    if (!$item) {
+      die(json_encode(array("error" => "No such record found.")));
+    }
+
+    $item[0]->processed= 1;
+    $item[0]->save();
+
+    echo json_encode($item[0]->cast(), JSON_PRETTY_PRINT);
   }
 }
