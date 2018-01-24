@@ -26,16 +26,12 @@ class Sale {
                'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/add-exemption [ajax]",
                'Sale->add_exemption');
-    $f3->route("POST /sale/@sale/generate-bitcoin-address [ajax]",
-               'Sale->generate_bitcoin_address');
     $f3->route("POST /sale/@sale/get-giftcard-balance [ajax]",
                'Sale->get_giftcard_balance');
     $f3->route("POST /sale/@sale/process-giftcard-payment",
                'Sale->process_giftcard_payment');
     $f3->route("POST /sale/@sale/process-creditcard-payment",
                'Sale->process_creditcard_payment');
-    $f3->route("POST /sale/@sale/process-bitcoin-payment [ajax]",
-               'Sale->process_bitcoin_payment');
     $f3->route("POST /sale/@sale/process-paypal-payment [ajax]",
                'Sale->process_paypal_payment');
     $f3->route("POST /sale/@sale/process-other-payment [ajax]",
@@ -875,31 +871,6 @@ class Sale {
                      JSON_PRETTY_PRINT);
   }
 
-  function generate_bitcoin_address($f3, $args) {
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
-
-    $amount= (int)(($sale->total - $sale->paid) * 100);
-
-    \Stripe\Stripe::setApiKey($f3->get('STRIPE_SECRET_KEY'));
-
-    $source= \Stripe\Source::create(array(
-      "type" => "bitcoin",
-      "amount" => $amount,
-      "currency" => "usd",
-      "owner" => array(
-        "email" => $sale->email
-      )
-    ));
-
-    echo json_encode(array(
-      'bitcoin_amount' => $source->bitcoin->amount,
-      'receiver_address' => $source->receiver->address,
-      'bitcoin_uri' => $source->bitcoin->uri,
-      'source_id' => $source->id,
-      'source_client_secret' => $source->client_secret,
-    ));
-  }
-
   function process_creditcard_payment($f3, $args) {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
@@ -957,68 +928,6 @@ class Sale {
     echo json_encode(array('message' => 'Success!'));
 
     $f3->abort(); // let client go
-
-    self::send_order_email($f3);
-  }
-
-  function process_bitcoin_payment($f3, $args) {
-    $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
-                    'publishable_key' => $f3->get('STRIPE_KEY'));
-
-    $token= json_decode($_REQUEST['token']);
-
-    $db= $f3->get('DBH');
-
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
-
-    $amount= (int)($sale->total * 100);
-
-    \Stripe\Stripe::setApiKey($stripe['secret_key']);
-
-    $token= $f3->get('REQUEST.stripeToken');
-
-    $source= \Stripe\Source::create(array(
-      "type" => "bitcoin",
-      "amount" => $amount,
-      "currency" => "usd",
-      "owner" => array(
-        "email" => $sale->email
-      )
-    ));
-
-    try {
-      $charge= \Stripe\Charge::create(array(
-        "amount" => $source->amount,
-        "currency" => $source->currency,
-        "source" => $source->id,
-        "receipt_email" => $person->email,
-      ));
-    } catch (\Stripe\Error\Base $e) {
-      $body= $e->getJsonBody();
-      $err= $body['error'];
-
-      // XXX Send email to admin
-
-      $f3->error(500, $err['message']);
-    }
-
-    $payment= new DB\SQL\Mapper($db, 'sale_payment');
-    $payment->sale_id= $sale->id;
-    $payment->method= 'bitcoin';
-    $payment->amount= $charge->amount / 100;
-    $payment->data= json_encode(array(
-      'charge_id' => $charge->id,
-    ));
-    $payment->save();
-
-    self::capture_sales_tax($f3, $sale);
-
-    $sale->status= 'paid';
-    $sale->save();
-
-    echo json_encode(array());
-
-    $f3->abort();
 
     self::send_order_email($f3);
   }
