@@ -207,7 +207,6 @@ class Catalog {
     }
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
-                unit_of_sale,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
                 IFNULL(scat_item.purchase_quantity, item.purchase_quantity) purchase_quantity,
                 length, width, height, weight,
@@ -295,7 +294,6 @@ class Catalog {
     }
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
-                unit_of_sale,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
                 IFNULL(scat_item.purchase_quantity, item.purchase_quantity) purchase_quantity,
                 length, width, height, weight,
