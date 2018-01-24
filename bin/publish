@@ -9,10 +9,14 @@ if [ -z "$HOST" ]; then
   exit 1
 fi
 
+mysqldump --opt scat \
+          brand department item product | \
+  gzip -9 > ~/rm/tmp/scat.sql.gz
+
 mysqldump --opt ordure \
-          brand department item page product redirect | \
+          page redirect | \
   gzip -9 > ~/rm/tmp/ordure.sql.gz
 
-scp ~/rm/tmp/ordure.sql.gz $HOST:
+scp ~/rm/tmp//scat.sql.gz ~/rm/tmp/ordure.sql.gz $HOST:
 
-ssh $HOST "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
+ssh $HOST "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && (zcat scat.sql.gz | /usr/local/mysql/bin/mysql catalog) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
