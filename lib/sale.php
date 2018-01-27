@@ -110,8 +110,7 @@ class Sale {
 
     if ($f3->get('REQUEST.json')) {
       header("Content-type: application/json");
-      echo json_encode(array('sales' => $f3->get('sales')),
-                       JSON_PRETTY_PRINT);
+      echo json_encode($sales_out, JSON_PRETTY_PRINT);
       return;
     }
 
