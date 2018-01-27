@@ -703,8 +703,8 @@ class Sale {
 
     $status= $f3->get('REQUEST.status');
 
-    if (!in_array($status, array('new','unpaid','paid','shipped',
-                                 'cancelled','onhold'))) {
+    if (!in_array($status, array('new','unpaid','paid','processing',
+                                 'shipped','cancelled','onhold'))) {
       // XXX better error handling
       $f3->error(500);
     }
