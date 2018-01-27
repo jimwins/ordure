@@ -71,8 +71,11 @@ class Sale {
   }
 
   function showList($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      self::shipstation_auth($f3, $args); // will 403 if no auth
+    if (\Auth::authenticated_user($f3) != 1) {
+      if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
+        $f3->error(403);
+      }
+    }
 
     $db= $f3->get('DBH');
 
@@ -685,8 +688,11 @@ class Sale {
   }
 
   function set_status($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+    if (\Auth::authenticated_user($f3) != 1) {
+      if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
+        $f3->error(403);
+      }
+    }
 
     $db= $f3->get('DBH');
 
@@ -879,8 +885,11 @@ class Sale {
   }
 
   function fetch_json($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      self::shipstation_auth($f3, $args); // will 403 if no auth
+    if (\Auth::authenticated_user($f3) != 1) {
+      if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
+        $f3->error(403);
+      }
+    }
 
     return $this->json($f3, $args);
   }
