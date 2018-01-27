@@ -19,7 +19,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/thanks", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
-    $f3->route("GET|HEAD /sale/@sale/json", 'Sale->json');
+    $f3->route("GET|HEAD /sale/@sale/json", 'Sale->fetch_json');
     $f3->route("GET|HEAD /sale/@sale/test", 'Sale->send_order_test');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
@@ -72,7 +72,7 @@ class Sale {
 
   function showList($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+      self::shipstation_auth($f3, $args); // will 403 if no auth
 
     $db= $f3->get('DBH');
 
@@ -104,6 +104,13 @@ class Sale {
       $sales_out[]= $i->cast();
     }
     $f3->set('sales', $sales_out);
+
+    if ($f3->get('REQUEST.json')) {
+      header("Content-type: application/json");
+      echo json_encode(array('sales' => $f3->get('sales')),
+                       JSON_PRETTY_PRINT);
+      return;
+    }
 
     echo Template::instance()->render('sale-list.html');
   }
@@ -869,6 +876,13 @@ class Sale {
                             'items' => $f3->get('items'),
                             'payments' => $f3->get('payments')),
                      JSON_PRETTY_PRINT);
+  }
+
+  function fetch_json($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      self::shipstation_auth($f3, $args); // will 403 if no auth
+
+    return $this->json($f3, $args);
   }
 
   function process_creditcard_payment($f3, $args) {
