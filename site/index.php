@@ -48,15 +48,17 @@ $f3->set('ONERROR', function ($f3) {
   } else {
     $db= $f3->get('DBH');
 
-    $redir= new DB\SQL\Mapper($db, 'redirect');
-
-    $path= $f3->get('PATH');
-    if ($redir->load(array('source LIKE ?', $path . '%'))) {
-      $q= $f3->get('QUERY');
-      $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
-    }
-
     $code= $f3->get('ERROR.code');
+
+    if ($code == "404") {
+      $redir= new DB\SQL\Mapper($db, 'redirect');
+
+      $path= $f3->get('PATH');
+      if ($redir->load(array('source LIKE ?', $path . '%'))) {
+        $q= $f3->get('QUERY');
+        $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
+      }
+    }
 
     // XXX There is some sort of bug in calling a template within ONERROR
     // related to escaping. Running fast and loose for now.
