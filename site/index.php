@@ -31,6 +31,10 @@ $f3->set('item_style_color', function($text) {
   }
 });
 
+$f3->set('includeTemplate', function($template) {
+  echo Template::instance()->render("$template.html");
+});
+
 // if DEBUG, allow access to /info
 if ($f3->get('DEBUG')) {
   $f3->route('GET|HEAD /info', function ($f3) {
