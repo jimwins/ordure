@@ -213,7 +213,7 @@ class Catalog {
                 sale_price(scat_item.retail_price,
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
-                discount_type, discount,
+                scat_item.discount_type, scat_item.discount,
                 stock stocked,
                 minimum_quantity,
                 thumbnail, active
