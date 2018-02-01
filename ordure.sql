@@ -52,71 +52,65 @@ CREATE TABLE `auth_token` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `brand`
+-- Temporary view structure for view `brand`
 --
 
 DROP TABLE IF EXISTS `brand`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `brand` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `slug` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `slug` (`slug`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50001 DROP VIEW IF EXISTS `brand`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `brand` AS SELECT 
+ 1 AS `id`,
+ 1 AS `name`,
+ 1 AS `slug`*/;
+SET character_set_client = @saved_cs_client;
 
 --
--- Table structure for table `department`
+-- Temporary view structure for view `department`
 --
 
 DROP TABLE IF EXISTS `department`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `department` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `parent` int(10) unsigned NOT NULL DEFAULT '0',
-  `name` varchar(255) NOT NULL,
-  `slug` varchar(80) NOT NULL,
-  `pos` tinyint(4) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `parent` (`parent`,`slug`),
-  KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50001 DROP VIEW IF EXISTS `department`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `department` AS SELECT 
+ 1 AS `id`,
+ 1 AS `parent`,
+ 1 AS `name`,
+ 1 AS `slug`,
+ 1 AS `pos`*/;
+SET character_set_client = @saved_cs_client;
 
 --
--- Table structure for table `item`
+-- Temporary view structure for view `item`
 --
 
 DROP TABLE IF EXISTS `item`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `item` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `product` int(10) unsigned NOT NULL,
-  `code` varchar(32) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `short_name` varchar(255) DEFAULT NULL,
-  `variation` varchar(255) NOT NULL,
-  `unit_of_sale` varchar(16) NOT NULL DEFAULT '',
-  `retail_price` decimal(9,2) NOT NULL,
-  `purchase_quantity` int(10) unsigned NOT NULL DEFAULT '1',
-  `length` decimal(9,2) DEFAULT NULL,
-  `width` decimal(9,2) DEFAULT NULL,
-  `height` decimal(9,2) DEFAULT NULL,
-  `weight` decimal(9,2) DEFAULT NULL,
-  `thumbnail` varchar(255) DEFAULT NULL,
-  `tic` char(5) NOT NULL DEFAULT '00000',
-  `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `active` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`),
-  KEY `product` (`product`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50001 DROP VIEW IF EXISTS `item`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `item` AS SELECT 
+ 1 AS `id`,
+ 1 AS `product`,
+ 1 AS `code`,
+ 1 AS `name`,
+ 1 AS `short_name`,
+ 1 AS `variation`,
+ 1 AS `unit_of_sale`,
+ 1 AS `retail_price`,
+ 1 AS `discount_type`,
+ 1 AS `discount`,
+ 1 AS `purchase_quantity`,
+ 1 AS `length`,
+ 1 AS `width`,
+ 1 AS `height`,
+ 1 AS `weight`,
+ 1 AS `thumbnail`,
+ 1 AS `tic`,
+ 1 AS `added`,
+ 1 AS `modified`,
+ 1 AS `active`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `loyalty`
@@ -178,32 +172,26 @@ CREATE TABLE `person` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `product`
+-- Temporary view structure for view `product`
 --
 
 DROP TABLE IF EXISTS `product`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `product` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `department` int(10) unsigned DEFAULT NULL,
-  `brand` int(10) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text,
-  `slug` varchar(255) NOT NULL,
-  `image` varchar(255) NOT NULL DEFAULT '',
-  `variation_style` enum('tabs','flat') DEFAULT 'tabs',
-  `from_item_no` varchar(255) DEFAULT NULL,
-  `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `active` tinyint(4) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `department` (`department`,`brand`,`slug`),
-  KEY `from_item_no` (`from_item_no`),
-  KEY `name` (`name`),
-  FULLTEXT KEY `full` (`name`,`description`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!50001 DROP VIEW IF EXISTS `product`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `product` AS SELECT 
+ 1 AS `id`,
+ 1 AS `department`,
+ 1 AS `brand`,
+ 1 AS `name`,
+ 1 AS `description`,
+ 1 AS `slug`,
+ 1 AS `image`,
+ 1 AS `variation_style`,
+ 1 AS `added`,
+ 1 AS `modified`,
+ 1 AS `active`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `redirect`
@@ -409,6 +397,78 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+
+--
+-- Final view structure for view `brand`
+--
+
+/*!50001 DROP VIEW IF EXISTS `brand`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `brand` AS select `scat`.`brand`.`id` AS `id`,`scat`.`brand`.`name` AS `name`,`scat`.`brand`.`slug` AS `slug` from `scat`.`brand` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `department`
+--
+
+/*!50001 DROP VIEW IF EXISTS `department`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `department` AS select `scat`.`department`.`id` AS `id`,`scat`.`department`.`parent_id` AS `parent`,`scat`.`department`.`name` AS `name`,`scat`.`department`.`slug` AS `slug`,0 AS `pos` from `scat`.`department` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `item`
+--
+
+/*!50001 DROP VIEW IF EXISTS `item`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `item` AS select `scat`.`item`.`id` AS `id`,`scat`.`item`.`product_id` AS `product`,`scat`.`item`.`code` AS `code`,`scat`.`item`.`name` AS `name`,`scat`.`item`.`short_name` AS `short_name`,`scat`.`item`.`variation` AS `variation`,'' AS `unit_of_sale`,`scat`.`item`.`retail_price` AS `retail_price`,`scat`.`item`.`discount_type` AS `discount_type`,`scat`.`item`.`discount` AS `discount`,`scat`.`item`.`purchase_quantity` AS `purchase_quantity`,`scat`.`item`.`length` AS `length`,`scat`.`item`.`width` AS `width`,`scat`.`item`.`height` AS `height`,`scat`.`item`.`weight` AS `weight`,if((`scat`.`item`.`color` <> ''),concat('color:',`scat`.`item`.`color`),'') AS `thumbnail`,`scat`.`item`.`tic` AS `tic`,`scat`.`item`.`added` AS `added`,`scat`.`item`.`modified` AS `modified`,`scat`.`item`.`active` AS `active` from `scat`.`item` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `product`
+--
+
+/*!50001 DROP VIEW IF EXISTS `product`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `product` AS select `scat`.`product`.`id` AS `id`,`scat`.`product`.`department_id` AS `department`,`scat`.`product`.`brand_id` AS `brand`,`scat`.`product`.`name` AS `name`,`scat`.`product`.`description` AS `description`,`scat`.`product`.`slug` AS `slug`,`scat`.`product`.`image` AS `image`,`scat`.`product`.`variation_style` AS `variation_style`,`scat`.`product`.`added` AS `added`,`scat`.`product`.`modified` AS `modified`,`scat`.`product`.`active` AS `active` from `scat`.`product` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -419,4 +479,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-05-11 17:19:52
+-- Dump completed on 2018-02-01 12:21:12
