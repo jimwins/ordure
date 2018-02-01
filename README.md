@@ -15,6 +15,9 @@ Ordure uses Font Awesome, the iconic font designed for Bootstrap:
 Ordure uses the Knockout JavaScript MVVM library:
   http://knockoutjs.com/
 
+Ordure uses the TOTP / HOTP library in PHP from Spomky Labs:
+  https://github.com/Spomky-Labs/otphp
+
 Ordure uses the Fat-Free Framework.
   https://github.com/bcosca/fatfree
 
