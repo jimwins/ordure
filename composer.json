@@ -20,7 +20,6 @@
     "php-http/guzzle6-adapter": "^1.1",
     "sparkpost/sparkpost": "^2.0",
     "mailerlite/mailerlite-api-v2-php-sdk": "^0.2.0",
-    "morris/lessql": "^0.3.4",
     "easypost/easypost-php": "~3.0",
     "spomky-labs/otphp": "^8.3"
   }
