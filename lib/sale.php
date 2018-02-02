@@ -162,7 +162,8 @@ class Sale {
 
     $item= new DB\SQL\Mapper($db, 'sale_item');
     $item->code= "(SELECT code FROM item WHERE id = item_id)";
-    $item->name= "(SELECT name FROM item WHERE id = item_id)";
+    $item->name= "IFNULL(override_name,
+                         (SELECT name FROM item WHERE id = item_id))";
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
     $item->detail= "(SELECT IFNULL(CONCAT(IF(item.retail_price,
                                              'MSRP $', 'List $'),
@@ -351,6 +352,10 @@ class Sale {
 
     if ($f3->exists('REQUEST.quantity')) {
       $line->quantity= (int)$f3->get('REQUEST.quantity');
+    }
+
+    if ($f3->exists('REQUEST.override_name')) {
+      $line->override_name= $f3->get('REQUEST.override_name');
     }
 
     if ($f3->exists('REQUEST.price')) {
@@ -1309,7 +1314,8 @@ class Sale {
 
       $item= new DB\SQL\Mapper($db, 'sale_item');
       $item->code= "(SELECT code FROM item WHERE id = item_id)";
-      $item->name= "(SELECT name FROM item WHERE id = item_id)";
+      $item->name= "IFNULL(override_name,
+                           (SELECT name FROM item WHERE id = item_id))";
       $item->sale_price= "sale_price(retail_price, discount_type, discount)";
 
       $items= $item->find(array('sale_id = ?', $order->id),

@@ -104,7 +104,9 @@
             </td>
             <td><small data-bind="text: $data.code"></small></td>
             <td>
-              <span data-bind="text: $data.name"></span>
+              <span class="editable">
+                <span data-key="override_name" data-bind="text: $data.name"></span>
+              </span>
               <div class="small" data-bind="text: $data.detail"></div>
             </td>
             <td class="editable text-right">

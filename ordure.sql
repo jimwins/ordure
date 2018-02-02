@@ -270,6 +270,7 @@ CREATE TABLE `sale_item` (
   `sale_id` int(10) unsigned NOT NULL,
   `item_id` int(10) unsigned NOT NULL,
   `quantity` int(10) unsigned NOT NULL,
+  `override_name` varchar(255) DEFAULT NULL,
   `retail_price` decimal(9,2) NOT NULL,
   `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
   `discount` decimal(9,2) DEFAULT NULL,
@@ -479,4 +480,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-02-01 12:21:12
+-- Dump completed on 2018-02-01 16:06:07
