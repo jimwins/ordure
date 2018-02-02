@@ -14,6 +14,20 @@ class Rewards {
   function process($f3, $args) {
     $db= $f3->get('DBH');
 
+    if (!($f3->get('REQUEST.email') || $f3->get('REQUEST.phone'))) {
+      $page= new DB\SQL\Mapper($db, 'page');
+
+      $page->load(array('slug=?', 'rewards'))
+        or $f3->error(404);
+
+      $f3->set('PAGE', $page);
+      $f3->set('error',
+               "You need to supply an email address or phone number.");
+
+      echo Template::instance()->render('page.html');
+      return;
+    }
+
     $loyalty= new DB\SQL\Mapper($db, 'loyalty');
     
     $loyalty->name= $f3->get('REQUEST.name');
@@ -26,7 +40,7 @@ class Rewards {
     $loyalty->save();
 
     // Sign them up for the newsletter
-    if ($f3->get('REQUEST.subscribe')) {
+    if ($f3->get('REQUEST.subscribe') && $f3->get('REQUEST.email')) {
       $key= $f3->get("MAILERLITE_KEY");
       $groupsApi= (new MailerLiteApi\MailerLite($key))->groups();
 
