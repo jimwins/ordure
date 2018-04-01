@@ -433,7 +433,10 @@ class Catalog {
                          \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
                        ));
 
-      $q= "select * from ordure where match(?)"; 
+     $q= "SELECT *,WEIGHT() weight
+            FROM ordure
+           WHERE match(?)
+          OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
       
       $products= $sph->exec($q, $term);
 
