@@ -8,6 +8,7 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/brand/@brand", 'Catalog->brand');
 
     /* Use Sphinx if it is configured */
     if ($f3->get('sphinx.dsn')) {
@@ -241,6 +242,64 @@ class Catalog {
              array('title' => "$product[name] by $product[brand_name] - Raw Materials Art Supplies"));
 
     echo Template::instance()->render('catalog-product.html');
+  }
+
+  function brand($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $brand= new DB\SQL\Mapper($db, 'brand');
+    $brand->products= '(SELECT COUNT(*)
+                          FROM product
+                         WHERE brand = brand.id)';
+
+    $brand->load(array('slug = ?', $f3->get('PARAMS.brand')))
+      or $f3->error(404);
+
+    $f3->set('brand', $brand->cast());
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->products= '(SELECT COUNT(*)
+                         FROM product
+                        WHERE department = department.id)';
+    $departments= $dept->find(array('parent = 0'),
+                              array('order' => 'name'));
+
+    $f3->set('departments', $departments);
+
+    $product= new DB\SQL\Mapper($db, 'product');
+    $product->brand_name= '(SELECT name
+                              FROM brand
+                             WHERE brand = brand.id)';
+    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
+                           FROM item
+                           JOIN scat_item ON item.code = scat_item.code
+                          WHERE item.product = product.id)';
+
+    $products= $product->find(array('brand = ? AND active',
+                                    $brand->id),
+                              array('order' =>
+                                      '!!IFNULL(stocked,0), !active, brand_name, name'));
+
+    foreach ($products as &$product) {
+      $product['slug']= Catalog::getProductSlug($f3, $product['id']);
+    }
+
+    $f3->set('products', $products);
+
+    $slug= substr_replace($f3->get('URI'), '', 0, strlen($f3->get('BASE')) + 1);
+    $page= new DB\SQL\Mapper($db, 'page');
+    $page->load(array('slug=?', $slug));
+
+    if (!$page->title) {
+      $page->title= $brand->name . ' - Raw Materials Art Supplies';
+    }
+    if (!$page->slug) {
+      $page->slug= $slug;
+    }
+
+    $f3->set('PAGE', $page);
+
+    echo Template::instance()->render('catalog-brand.html');
   }
 
   function oembed($f3, $args) {
