@@ -55,7 +55,7 @@
                 <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
                   {{ @product.name }}
                 </a>
-                <p>{{ @product.description }}</p>
+                <p>{{ @markdown(@product.description) | raw }}</p>
               </td>
               <td class="text-center" valign="top">
                 <check if="! @product.stocked">
