@@ -54,6 +54,9 @@ $f3->set('ONERROR', function ($f3) {
       $redir= new DB\SQL\Mapper($db, 'redirect');
 
       $path= $f3->get('PATH');
+
+      if ($path == '/') die("Confused. Hang on.");
+
       if ($redir->load(array('source LIKE ?', $path . '%'))) {
         $q= $f3->get('QUERY');
         $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
@@ -77,7 +80,7 @@ class Page {
 
     $path= $args['*'];
 
-    if ($page->load(array('slug=?', $path))) {
+    if ($page->load(array('slug=?', empty($path) ? '//' : $path))) {
       $f3->set('PAGE', $page);
 
       $template= empty($path) ? 'home.html' : 'page.html';
