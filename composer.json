@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "bcosca/fatfree": "3.5.1",
+    "bcosca/fatfree": "3.6.4",
     "stripe/stripe-php": "4.*",
     "respect/validation": "^0.9.3",
     "paragonie/random_compat": "^2.0",

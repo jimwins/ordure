@@ -75,8 +75,7 @@ class Page {
     $page= new DB\SQL\Mapper($db, 'page');
     $item= new DB\SQL\Mapper($db, 'item');
 
-    // f3 includes query string in $args[1], which is an odd choice.
-    $path= preg_replace('/\?.+$/', '', $args[1]);
+    $path= $args['*'];
 
     if ($page->load(array('slug=?', $path))) {
       $f3->set('PAGE', $page);
