@@ -130,8 +130,7 @@ $f3->route('POST /contact', function ($f3, $args) {
 
   @mail($f3->get('CONTACT'),
         $f3->get('REQUEST.subject'),
-        Template::instance()->render('email-' . $template . '.txt',
-                                     'text/plain'),
+        Template::instance()->render('email-' . $template . '.txt'),
         implode("\r\n", $headers));
 
   $db= $f3->get('DBH');
