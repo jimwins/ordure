@@ -43,8 +43,7 @@ class GiftCard {
 
     @mail($f3->get('CONTACT'),
           "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt',
-                                       'text/plain'),
+          Template::instance()->render('email-gift-card-sale.txt'),
           implode("\r\n", $headers));
 
     $f3->reroute('thanks');
