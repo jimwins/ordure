@@ -14,7 +14,7 @@ else
   curl -o tmp.jpg "$URL"
 fi
 
-sips -s format jpeg -Z 480 -s formatOptions "75%" tmp.jpg --out tmp2.jpg
+sips -s format jpeg -Z 600 -s formatOptions "75%" tmp.jpg --out tmp2.jpg
 
 /opt/libjpeg-turbo/bin/jpegtran \
    -copy none -optimize -progressive -outfile $DIR/$FILE tmp2.jpg
