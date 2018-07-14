@@ -28,10 +28,6 @@
     </check>
 
     <div data-slug="{{ @PAGE.slug }}">
-      <check if="{{ @ADMIN && isset(@subdept) }}">
-        <a id="product-add" data-parent="{{ @subdept.id }}"
-           class="pull-right btn btn-primary btn-xs"><span class="fa fa-lg fa-plus-circle"></span></a>
-      </check>
       <div class="rendered">
         {{ @PAGE.content ? @markdown(@PAGE.content) : '' | raw }}
       </div>
@@ -43,9 +39,6 @@
             <th>Brand</th>
             <th>Product</th>
             <th class="text-center hastip" title="Whether this product is stocked in our store or only available via special order." data-placement="left">Available in Store</th>
-            <check if="{{ @ADMIN }}">
-              <th>Active</th>
-            </check>
           </tr>
         </thead>
         <tbody>
@@ -67,11 +60,6 @@
                   </false>
                 </check>
               </td>
-              <check if="{{ @ADMIN }}">
-                <td class="text-center">
-                  <a class="product-toggle fa fa-lg {{ !@product.active ? 'fa-eye-slash' : 'fa-eye' }}"></a>
-                </td>
-              </check>
             </tr>
           </repeat>
         </tbody>

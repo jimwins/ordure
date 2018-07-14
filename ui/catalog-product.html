@@ -70,9 +70,6 @@
                 <th class="col-xs-2">List</th>
                 <th class="col-xs-1">Sale</th>
                 <th class="col-xs-2 text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Availability</th>
-                <check if="{{ @ADMIN }}">
-                  <th class="col-xs-1">Active</th>
-                </check>
               </tr>
             </thead>
             <tbody>
@@ -111,12 +108,6 @@
                         </false>
                       </check>
                     </td>
-                    <check if="{{ @ADMIN }}">
-                      <td class="text-center">
-                        <a class="item-toggle fa fa-lg {{ !@item.active ? 'fa-eye-slash' : 'fa-eye' }}"></a>
-                        <a class="item-edit fa fa-lg fa-pencil"></a>
-                      </td>
-                    </check>
                   </tr>
                 </check>
               </repeat>
