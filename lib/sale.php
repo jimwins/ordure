@@ -270,7 +270,15 @@ class Sale {
 
     if ($uuid) {
       error_log("Loading $uuid.");
-      $this->load($f3, $uuid, 'uuid');
+      $sale= $this->load($f3, $uuid, 'uuid');
+
+      $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+                $_SERVER['HTTP_HOST'] : false);
+      SetCookie('cartDetails',
+                json_encode(array('items' => count($f3->get('items')),
+                                  'total' => $sale->total)),
+                0 /* session cookie */,
+                '/', $domain, true, false); // JavaScript accessible
     }
 
     echo Template::instance()->render('sale-cart.html');

@@ -112,6 +112,11 @@ loadScript('{{ @STATIC }}/code/combined-2018-07-15.js', function() {
   $('.nav-tabs a').on('shown.bs.tab', function (e) {
       window.location.hash = e.target.hash.replace("#", "#" + prefix);
   });
+
+  // Fill in cartDetails
+  var details= Cookies.getJSON('cartDetails');
+  $('#cart-button .badge').text('' + details.items + ': $' + details.total)
+                          .show();
 });
 </script>
 <check if="{{ isset(@GA_UA) }}">
