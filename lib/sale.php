@@ -289,6 +289,8 @@ class Sale {
               $_SERVER['HTTP_HOST'] : false);
     SetCookie('cartID', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, true);
+    SetCookie('cartDetails', "", (new \Datetime("-24 hours"))->format("U"),
+              '/', $domain, true, false);
   }
 
   function pay($f3, $args) {
