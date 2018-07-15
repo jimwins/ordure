@@ -14,6 +14,7 @@ curl "http://code.jquery.com/jquery-$JQUERY.min.js" > $JS
 curl "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP/js/bootstrap.min.js" >> $JS
 curl "http://knockoutjs.com/downloads/knockout-$KNOCKOUT.js" >> $JS
 curl "https://raw.githubusercontent.com/SteveSanderson/knockout.mapping/master/build/output/knockout.mapping-latest.js" >> $JS
+curl "https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js" >> $JS
 
 curl "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP/css/bootstrap.min.css" > $CSS
 curl "https://maxcdn.bootstrapcdn.com/font-awesome/$FONTAWESOME/css/font-awesome.min.css" >> $CSS
