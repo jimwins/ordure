@@ -16,7 +16,6 @@
           <li><a href="{{ @BASE }}/">Home</a></li>
           <li class="{{ !strncmp(@URI, @BASE . '/art-supplies', strlen(@BASE . '/art-supplies')) ? 'active' : '' }}"><a href="{{ @BASE }}/art-supplies">Art Supplies</a></li>
           <li class="{{ !strncmp(@URI, @BASE . '/framing', strlen(@BASE . '/framing')) ? 'active' : '' }}"><a href="{{ @BASE }}/framing">Custom Framing</a></li>
-          <li class="{{ !strncmp(@URI, @BASE . '/workshops', strlen(@BASE . '/workshops')) ? 'active' : '' }}"><a href="{{ @BASE }}/workshops">Workshops</a></li>
           <li class="{{ !strncmp(@URI, @BASE . '/contact', strlen(@BASE . '/contact')) ? 'active' : '' }}"><a href="{{ @BASE }}/contact">Contact</a></li>
         </ul>
 <check if="{{ @FEATURE_cart }}">
