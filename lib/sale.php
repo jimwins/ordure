@@ -568,6 +568,8 @@ class Sale {
 
     $sale->save();
 
+    $this->update_shipping_and_tax($f3, $sale);
+
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args);
     }
