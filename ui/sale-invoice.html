@@ -24,6 +24,7 @@
           Shopping Cart
         </h3>
       </div>
+      <form method="POST" action="{{ @BASE }}/cart/update">
     </false>
   </check>
   <table class="table table-striped">
@@ -59,11 +60,31 @@
         <th colspan="5" class="text-right">
           Estimated tax to be collected:
         </th>
-        <td class="text-right">{{ @amount(@sale.tax) }}</td>
+        <td class="text-right">
+<check if="{{ @FEATURE_cart && @sale.status == 'cart'
+              && !@sale.tax_calculated }}">
+  <true>
+          <span class="text-danger">----------</span>
+  </true>
+  <false>
+          {{ @amount(@sale.tax) }}
+  </false>
+</check>
+        </td>
       </tr>
       <tr>
         <th colspan="5" class="text-right">Total:</th>
-        <td class="text-right">{{ @amount(@sale.total) }}</td>
+        <td class="text-right">
+<check if="{{ @FEATURE_cart && @sale.status == 'cart'
+              && !@sale.tax_calculated }}">
+  <true>
+          <span class="text-danger">----------</span>
+  </true>
+  <false>
+          {{ @amount(@sale.total) }}
+  </false>
+</check>
+        </td>
       </tr>
       <repeat group="{{ @payments }}" value="{{ @data }}">
       <tr>
@@ -125,9 +146,12 @@
     </repeat>
     </tbody>
   </table>
+<check if="{{ @FEATURE_cart && @sale.status == 'cart'}}">
+  </form>
+</check>
   <div class="panel-footer">
     <div class="row">
-      <div class="col-sm-6">
+      <div class="col-sm-8">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">
@@ -136,6 +160,69 @@
             </h3>
           </div>
           <div class="panel-body">
+<check if="{{ @FEATURE_cart }}">
+  <true>
+      <form method="POST" action="{{ @BASE }}/cart/set-address">
+        <div class="row">
+          <div class="form-group col-sm-12">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" name="name"
+                   value="{{ @billing_address.name }}">
+          </div>
+
+          <div class="form-group col-sm-12">
+            <label for="company">Company (optional)</label>
+            <input type="text" class="form-control" name="company"
+                   value="{{ @billing_address.company }}">
+          </div>
+
+          <div class="form-group col-sm-12">
+            <label for="phone">Phone (optional)</label>
+            <input type="text" class="form-control" name="phone"
+                   value="{{ @billing_address.phone }}">
+          </div>
+
+          <div class="form-group col-sm-12">
+            <label for="address1">Address</label>
+            <input type="text" class="form-control" name="address1"
+                   value="{{ @billing_address.address1 }}"
+                   placeholder="436 S Main St">
+            <input type="text" class="form-control" name="address2" 
+                   value="{{ @billing_address.address2 }}"
+                   placeholder="Apt 2-B">
+          </div>
+          <div class="form-group col-sm-5">
+            <label for="city">City</label>
+            <input type="text" class="form-control" name="city"
+                   value="{{ @billing_address.city }}"
+                   placeholder="Los Angeles">
+          </div>
+          <div class="form-group col-sm-2">
+            <label for="state">State</label>
+            <input type="text" class="form-control" name="state"
+                   value="{{ @billing_address.state }}"
+                   placeholder="CA">
+          </div>
+          <div class="form-group col-sm-3">
+            <label for="zip">ZIP</label>
+            <input type="text" class="form-control" name="zip5"
+                   value="{{ @billing_address.zip5 }}"
+                   placeholder="90013">
+          </div>
+          <div class="form-group col-sm-2">
+            <label for="zip4">+4</label>
+            <input type="text" class="form-control" name="zip4"
+                   value="{{ @billing_address.zip4 }}"
+                   placeholder="0000">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <i class="fa fa-home"></i> Set Address
+        </button>
+      </form>
+  </true>
+  <false>
             <check if="{{ @billing_address.id }}">
               <true>
                 <div>{{ @billing_address.name }}</div>
@@ -152,10 +239,12 @@
                 Not specified.
               </false>
             </check>
+  </false>
+</check>
           </div>
         </div>
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-4">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h3 class="panel-title">
@@ -169,6 +258,19 @@
               <true>
                 <div>
                   Same as billing address.
+<check if="{{ @FEATURE_cart && @sale.status == 'cart' }}">
+                  <p class="text-info">
+                    (If this should be different, please note the shipping
+                    address in the comments when submitting your order. This
+                    may cause the sales tax to be collected to change.)
+                  </p>
+                  <form method="POST"
+                        action="{{ @BASE }}/cart/set-in-store-pickup">
+                    <button type="submit" class="btn btn-default">
+                      <i class="fa fa-building"></i> Pick up at our store
+                    </button>
+                  </form>
+</check>
                 </div>
               </true>
               <false>

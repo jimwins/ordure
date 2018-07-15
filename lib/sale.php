@@ -56,6 +56,8 @@ class Sale {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
       $f3->route("POST /cart/add-item", 'Sale->add_item');
       $f3->route("POST /cart/update", 'Sale->update_items');
+      $f3->route("POST /cart/set-address", 'Sale->set_address');
+      $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
       $f3->route("GET /cart/forget", 'Sale->forget_cart');
     }
   }
@@ -329,8 +331,7 @@ class Sale {
 
     $item_code= $f3->get('REQUEST.item');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
     $item= new DB\SQL\Mapper($db, 'item');
@@ -354,11 +355,7 @@ class Sale {
 
     $line->insert();
 
-    $this->update_shipping($f3, $sale->uuid);
-
-    // XXX update tax if we have a shipping address
-    $sale->tax_calculated= null;
-    $sale->save();
+    $this->update_shipping_and_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args);
@@ -385,10 +382,7 @@ class Sale {
       or $f3->error(404);
     $line->erase();
 
-    $this->update_shipping($f3, $sale->uuid);
-
-    $sale->tax_calculated= null;
-    $sale->save();
+    $this->update_shipping_and_tax($f3, $sale);
 
     return $this->json($f3, $args);
   }
@@ -445,10 +439,7 @@ class Sale {
 
     $line->save();
 
-    $this->update_shipping($f3, $sale->uuid);
-
-    $sale->tax_calculated= null;
-    $sale->save();
+    $this->update_shipping_and_tax($f3, $sale);
 
     return $this->json($f3, $args);
   }
@@ -468,9 +459,7 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
     foreach ($f3->get('REQUEST.qty') as $id => $val) {
       $line= new DB\SQL\Mapper($db, 'sale_item');
@@ -487,11 +476,9 @@ class Sale {
       }
     }
 
-    $this->update_shipping($f3, $sale->uuid);
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    // XXX update tax if we have a shipping address
-    $sale->tax_calculated= null;
-    $sale->save();
+    $this->update_shipping_and_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args);
@@ -500,12 +487,7 @@ class Sale {
     $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
-  function update_shipping($f3, $uuid) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
-
-    $sale= $this->load($f3, $uuid, 'uuid');
-
+  function update_shipping($f3, $sale) {
     if ($sale->shipping_manual)
       return;
 
@@ -524,17 +506,29 @@ class Sale {
     $sale->save();
   }
 
+  function update_shipping_and_tax($f3, $sale) {
+    $this->update_shipping($f3, $sale);
+    $this->update_sales_tax($f3, $sale);
+
+    $sale->save();
+  }
+
   function set_address($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
     $type= $f3->get('REQUEST.type');
 
@@ -565,7 +559,11 @@ class Sale {
 
     $sale->save();
 
-    return $this->json($f3, $args);
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
   function remove_address($f3, $args) {
@@ -594,24 +592,33 @@ class Sale {
   }
 
   function set_in_store_pickup($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
     $sale->shipping_address_id= 1;
 
     $sale->save();
 
-    $this->update_shipping($f3, $sale->uuid);
+    $this->update_shipping_and_tax($f3, $sale);
 
-    return $this->json($f3, $args);
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
   function set_shipping($f3, $args) {
@@ -638,11 +645,7 @@ class Sale {
 
     $sale->save();
 
-    $this->update_shipping($f3, $sale->uuid);
-
-    $sale->tax_calculated= null;
-
-    $sale->save();
+    $this->update_shipping_and_tax($f3, $sale);
 
     return $this->json($f3, $args);
   }
@@ -829,17 +832,15 @@ class Sale {
     return $this->json($f3, $args);
   }
 
-  function calculate_sales_tax($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+  function update_sales_tax($f3, $sale) {
+    /* No address? Can't do it. */
+    if (!$sale->shipping_address_id && !$sale->billing_address_id) {
+      $sale->tax_calculated= null;
+      $sale->save();
+      return;
+    }
 
     $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
 
     $address= new DB\SQL\Mapper($db, 'sale_address');
     $address->load(array('id = ?',
@@ -941,6 +942,22 @@ class Sale {
 
     $sale->tax_calculated= date('Y-m-d H:i:s');
     $sale->save();
+
+  }
+
+  function calculate_sales_tax($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    $this->update_sales_tax($f3, $sale);
 
     return $this->json($f3, $args);
   }
