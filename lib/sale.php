@@ -1379,6 +1379,9 @@ class Sale {
     $sale->email= $email;
     $sale->save();
 
+    // recopy
+    $sale->copyTo('sale');
+
     self::send_order_email($f3, $comment);
 
     $this->forget_cart($f3, $args);
