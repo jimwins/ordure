@@ -35,6 +35,19 @@ $f3->set('includeTemplate', function($template) {
   echo Template::instance()->render("$template.html");
 });
 
+$f3->set('includeFragment', function($template) {
+  $db= \Base::instance()->get('DBH');
+
+  $page= new DB\SQL\Mapper($db, 'page');
+
+  if ($page->load(array('slug=?', $template))) {
+    $text= Template::instance()->resolve($page->content);
+    echo Markdown::instance()->convert($text);
+  } else {
+    echo "Couldn't find '$template'";
+  }
+});
+
 // if DEBUG, allow access to /info
 if ($f3->get('DEBUG')) {
   $f3->route('GET|HEAD /info', function ($f3) {
