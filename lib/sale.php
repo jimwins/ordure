@@ -53,11 +53,12 @@ class Sale {
     $f3->route("POST /shipstation", 'Sale->shipstation_post');
   }
 
-  function create($f3, $args) {
+  function create($f3, $status= 'new') {
     $db= $f3->get('DBH');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
     $sale->person_id= 0;
+    $sale->status= $status;
     // Could use real UUID() but this is shorter. Hardcoded '1' could be
     // replaced with a server-id to further avoid collisions
     $sale->uuid= sprintf("%08x%02x%s", time(), 1, bin2hex(random_bytes(8)));
