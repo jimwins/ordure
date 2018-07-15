@@ -11,7 +11,7 @@ function amount($d) {
 class Sale {
 
   static function addRoutes($f3) {
-    $f3->route("GET|HEAD /sale/new", 'Sale->create');
+    $f3->route("GET|HEAD /sale/new", 'Sale->new_sale');
     $f3->route("GET|HEAD /sale/list", 'Sale->showList');
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
@@ -54,9 +54,6 @@ class Sale {
   }
 
   function create($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
-
     $db= $f3->get('DBH');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
@@ -66,6 +63,15 @@ class Sale {
     $sale->uuid= sprintf("%08x%02x%s", time(), 1, bin2hex(random_bytes(8)));
 
     $sale->insert();
+
+    return $sale->uuid;
+  }
+
+  function new_sale($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $uuid= $this->create($f3);
 
     $f3->reroute("./" . $sale->uuid);
   }
