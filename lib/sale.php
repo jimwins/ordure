@@ -51,6 +51,12 @@ class Sale {
 
     $f3->route("GET|HEAD /shipstation", 'Sale->shipstation_get');
     $f3->route("POST /shipstation", 'Sale->shipstation_post');
+
+    if ($f3->get('FEATURE_cart')) {
+      $f3->route("GET|HEAD /cart", 'Sale->cart');
+      $f3->route("POST /cart/add-item", 'Sale->add_item');
+      $f3->route("GET /cart/forget", 'Sale->forget_cart');
+    }
   }
 
   function create($f3, $status= 'new') {
@@ -231,6 +237,7 @@ class Sale {
 
     switch ($sale->status) {
     case 'new':
+    case 'cart':
       return $f3->reroute($sale->uuid . '/edit');
     case 'unpaid':
       return $f3->reroute($sale->uuid . '/pay');
@@ -250,6 +257,27 @@ class Sale {
       $f3->error(403);
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
+  }
+
+  function cart($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
+
+    if ($uuid) {
+      error_log("Loading $uuid.");
+      $this->load($f3, $uuid, 'uuid');
+    }
+
+    echo Template::instance()->render('sale-cart.html');
+  }
+
+  function forget_cart($f3, $args) {
+    $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+              $_SERVER['HTTP_HOST'] : false);
+    SetCookie('cartID', "", (new \Datetime("-24 hours"))->format("U"),
+              '/', $domain, true, true);
+    echo "Huh?";
   }
 
   function pay($f3, $args) {
@@ -273,12 +301,31 @@ class Sale {
   }
 
   function add_item($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+
+      /* No cart yet? Create one. */
+      if (!$sale_uuid) {
+        error_log("Creating cart.");
+        $sale_uuid= $this->create($f3, 'cart');
+
+        $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+                  $_SERVER['HTTP_HOST'] : false);
+
+        SetCookie('cartID', $sale_uuid, null /* don't expire */,
+                  '/', $domain, true, true);
+      } else {
+        error_log("Loading cart from UUID '$sale_uuid'.");
+      }
+    }
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
     $item_code= $f3->get('REQUEST.item');
 
     $sale= new DB\SQL\Mapper($db, 'sale');
@@ -308,10 +355,15 @@ class Sale {
 
     $this->update_shipping($f3, $sale->uuid);
 
+    // XXX update tax if we have a shipping address
     $sale->tax_calculated= null;
     $sale->save();
 
-    return $this->json($f3, $args);
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
   function remove_item($f3, $args) {

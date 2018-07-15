@@ -1,20 +1,22 @@
 <div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">
-      Sale {{ sprintf("%07d", @sale.id) }}
-    </h3>
-    <p>
-      <small>
-        Created: {{ @sale.created }} /
-        Last Modified: {{ @sale.modified }}
-      </small>
-    </p>
-    <p>
-      <i class="fa fa-user-o fa-border"></i>
-      {{ @sale.name }}
-      &lt;{{ @sale.email }}&gt;
-    </p>
-  </div>
+  <check if="{{ @sale.status != 'cart' }}">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Sale {{ sprintf("%07d", @sale.id) }}
+      </h3>
+      <p>
+        <small>
+          Created: {{ @sale.created }} /
+          Last Modified: {{ @sale.modified }}
+        </small>
+      </p>
+      <p>
+        <i class="fa fa-user-o fa-border"></i>
+        {{ @sale.name }}
+        &lt;{{ @sale.email }}&gt;
+      </p>
+    </div>
+  </check>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -71,10 +73,12 @@
         <td colspan="5" class="text-right">{{ @amount(@data.amount) }}</td>
       </tr>
       </repeat>
-      <tr>
-        <th colspan="5" class="text-right">Due:</th>
-        <td class="text-right">{{ @amount(@sale.total - @sale.paid) }}</td>
-      </tr>
+      <check if="{{ @sale.status != 'cart' }}">
+        <tr>
+          <th colspan="5" class="text-right">Due:</th>
+          <td class="text-right">{{ @amount(@sale.total - @sale.paid) }}</td>
+        </tr>
+      </check>
     </tfoot>
     <tbody>
     <repeat group="{{ @items }}" value="{{ @data }}">
