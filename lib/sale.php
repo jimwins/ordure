@@ -281,7 +281,6 @@ class Sale {
               $_SERVER['HTTP_HOST'] : false);
     SetCookie('cartID', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, true);
-    echo "Huh?";
   }
 
   function pay($f3, $args) {
@@ -1353,6 +1352,8 @@ class Sale {
     $sale->save();
 
     self::send_order_email($f3);
+
+    $this->forget_cart($f3, $args);
 
     $f3->reroute("/sale/" . $sale->uuid);
   }
