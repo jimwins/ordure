@@ -1363,6 +1363,7 @@ class Sale {
     }
 
     $email= $f3->get('REQUEST.email');
+    $comment= $f3->get('REQUEST.comment');
 
     if (!$email) {
       $f3->reroute("/cart?error=email");
@@ -1373,10 +1374,10 @@ class Sale {
       $f3->error(500);
 
     $sale->status= 'processing';
-    $sale->email= $f3->get('REQUEST.email');
+    $sale->email= $email;
     $sale->save();
 
-    self::send_order_email($f3);
+    self::send_order_email($f3, $comment);
 
     $this->forget_cart($f3, $args);
 
@@ -1568,7 +1569,7 @@ class Sale {
     echo "Success!";
   }
 
-  function send_order_email($f3) {
+  function send_order_email($f3, $comment= null) {
     $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
     $sparky= new \SparkPost\SparkPost($httpClient,
                            [ 'key' => $f3->get('SPARKPOST_KEY') ]);
@@ -1581,6 +1582,7 @@ class Sale {
       'shipping_address' => $hive['shipping_address'],
       'items' => $hive['items'],
       'payments' => $hive['payments'],
+      'comment' => $comment,
     );
 
     // Clean up the data for the template
