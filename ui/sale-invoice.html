@@ -160,7 +160,7 @@
             </h3>
           </div>
           <div class="panel-body">
-<check if="{{ @FEATURE_cart }}">
+<check if="{{ @FEATURE_cart && @sale.status == 'cart' }}">
   <true>
       <form method="POST" action="{{ @BASE }}/cart/set-address">
         <div class="row">

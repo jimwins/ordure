@@ -11,6 +11,13 @@
         <h3 class="panel-title">Status</h3>
       </div>
       <div class="panel-body">
+        <check if="{{ @sale.status == 'processing' }}">
+          <p class="text-success">
+            <strong>Thanks for your order!</strong> We will contact you once
+            your order has been verified with informtion on how to submit
+            payment for the order.
+          </p>
+        </check>
         <check if="{{ @sale.status == 'paid' }}">
           <p class="text-success">
             <strong>Thanks for your order!</strong> We will let you know when

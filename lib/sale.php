@@ -58,6 +58,7 @@ class Sale {
       $f3->route("POST /cart/update", 'Sale->update_items');
       $f3->route("POST /cart/set-address", 'Sale->set_address');
       $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
+      $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("GET /cart/forget", 'Sale->forget_cart');
     }
   }
@@ -1331,6 +1332,29 @@ class Sale {
     $f3->abort(); // let client go
 
     self::send_order_email($f3);
+  }
+
+  function place_order($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    if (!$uuid) {
+      $f3->error(404);
+    }
+
+    $email= $f3->get('REQUEST.email');
+
+    if (!$email) {
+      $f3->reroute("/cart?error=email");
+    }
+
+    $sale= $this->load($f3, $uuid, 'uuid');
+    $sale->status= 'processing';
+    $sale->email= $f3->get('REQUEST.email');
+    $sale->save();
+
+    self::send_order_email($f3);
+
+    $f3->reroute("/sale/" . $sale->uuid);
   }
 
   function shipstation_auth($f3, $args) {
