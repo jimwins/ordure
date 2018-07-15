@@ -334,6 +334,9 @@ class Sale {
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
     $item= new DB\SQL\Mapper($db, 'item');
     $item->nretail_price= "IFNULL((SELECT retail_price FROM scat_item WHERE scat_item.code = item.code), retail_price)";
     $item->discount_type= "(SELECT discount_type FROM scat_item WHERE scat_item.code = item.code)";
@@ -461,6 +464,9 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
     foreach ($f3->get('REQUEST.qty') as $id => $val) {
       $line= new DB\SQL\Mapper($db, 'sale_item');
       $line->load(array('id = ?', $id))
@@ -529,6 +535,9 @@ class Sale {
     $db= $f3->get('DBH');
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
 
     $type= $f3->get('REQUEST.type');
 
@@ -607,6 +616,9 @@ class Sale {
     $db= $f3->get('DBH');
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
 
     $sale->shipping_address_id= 1;
 
@@ -1347,6 +1359,9 @@ class Sale {
     }
 
     $sale= $this->load($f3, $uuid, 'uuid');
+    if ($sale->status != 'cart')
+      $f3->error(500);
+
     $sale->status= 'processing';
     $sale->email= $f3->get('REQUEST.email');
     $sale->save();
