@@ -1,5 +1,7 @@
 <?php
 
+use Respect\Validation\Validator as v;
+
 $f3->set('amount', function ($d) {
   return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
 });
@@ -482,7 +484,9 @@ class Sale {
       $line->load(array('id = ?', $id))
         or $f3->error(404);
 
-      // XXX validate that $val is 0 or a positive integer
+      if (!v::numeric()->min(0, true)->validate($val)) {
+        continue;
+      }
 
       if ((int)$val) {
         $line->quantity= (int)$val;
