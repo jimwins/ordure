@@ -2,7 +2,9 @@
 <include href="header.html" />
 <div class="row">
   <div class="col-md-8">
-    <include href="sale-invoice.html" />
+    <form method="POST" action="{{ @BASE }}/cart/update">
+      <include href="sale-invoice.html" />
+    </form>
   </div>
 
   <div class="col-md-4">

@@ -55,6 +55,7 @@ class Sale {
     if ($f3->get('FEATURE_cart')) {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
       $f3->route("POST /cart/add-item", 'Sale->add_item');
+      $f3->route("POST /cart/update", 'Sale->update_items');
       $f3->route("GET /cart/forget", 'Sale->forget_cart');
     }
   }
@@ -450,6 +451,53 @@ class Sale {
     $sale->save();
 
     return $this->json($f3, $args);
+  }
+
+  function update_items($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->load(array('uuid = ?', $sale_uuid))
+      or $f3->error(404);
+
+    foreach ($f3->get('REQUEST.qty') as $id => $val) {
+      $line= new DB\SQL\Mapper($db, 'sale_item');
+      $line->load(array('id = ?', $id))
+        or $f3->error(404);
+
+      // XXX validate that $val is 0 or a positive integer
+
+      if ((int)$val) {
+        $line->quantity= (int)$val;
+        $line->save();
+      } else {
+        $line->erase();
+      }
+    }
+
+    $this->update_shipping($f3, $sale->uuid);
+
+    // XXX update tax if we have a shipping address
+    $sale->tax_calculated= null;
+    $sale->save();
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
   function update_shipping($f3, $uuid) {
