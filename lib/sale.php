@@ -306,7 +306,7 @@ class Sale {
 
     $line->insert();
 
-    $this->update_shipping($f3, $args);
+    $this->update_shipping($f3, $sale->uuid);
 
     $sale->tax_calculated= null;
     $sale->save();
@@ -332,7 +332,7 @@ class Sale {
       or $f3->error(404);
     $line->erase();
 
-    $this->update_shipping($f3, $args);
+    $this->update_shipping($f3, $sale->uuid);
 
     $sale->tax_calculated= null;
     $sale->save();
@@ -392,7 +392,7 @@ class Sale {
 
     $line->save();
 
-    $this->update_shipping($f3, $args);
+    $this->update_shipping($f3, $sale->uuid);
 
     $sale->tax_calculated= null;
     $sale->save();
@@ -400,11 +400,11 @@ class Sale {
     return $this->json($f3, $args);
   }
 
-  function update_shipping($f3, $args) {
+  function update_shipping($f3, $uuid) {
     if (\Auth::authenticated_user($f3) != 1)
       $f3->error(403);
 
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     if ($sale->shipping_manual)
       return;
@@ -509,7 +509,7 @@ class Sale {
 
     $sale->save();
 
-    $this->update_shipping($f3, $args);
+    $this->update_shipping($f3, $sale->uuid);
 
     return $this->json($f3, $args);
   }
@@ -538,7 +538,7 @@ class Sale {
 
     $sale->save();
 
-    $this->update_shipping($f3, $args);
+    $this->update_shipping($f3, $sale->uuid);
 
     $sale->tax_calculated= null;
 
