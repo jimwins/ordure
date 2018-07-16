@@ -512,14 +512,10 @@ class Sale {
       return;
 
     // shipping_address_id == 1 means it is an in-store pick-up
-    if ($sale->subtotal >= 150.00 || $sale->shipping_address_id == 1) {
+    if ($sale->subtotal >= 100.00 || $sale->shipping_address_id == 1) {
       $sale->shipping= 0.00;
-    } else if ($sale->subtotal >= 100.00) {
-      $sale->shipping= 13.95;
-    } else if ($sale->subtotal >= 50.00) {
-      $sale->shipping= 11.95;
     } else {
-      $sale->shipping= 7.95;
+      $sale->shipping= 9.99;
     }
     $sale->shipping_tax= 0;
 
