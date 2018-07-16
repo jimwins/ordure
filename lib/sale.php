@@ -1105,6 +1105,9 @@ class Sale {
 
     $f3->abort(); // let client go
 
+    // recopy
+    $sale->copyTo('sale');
+
     self::send_order_email($f3);
   }
 
@@ -1173,6 +1176,9 @@ class Sale {
     echo json_encode(array());
 
     $f3->abort(); // let client go
+
+    // recopy
+    $sale->copyTo('sale');
 
     self::send_order_email($f3);
   }
@@ -1321,6 +1327,9 @@ class Sale {
 
     $f3->abort(); // let client go
 
+    // recopy
+    $sale->copyTo('sale');
+
     self::send_order_email($f3);
   }
 
@@ -1353,6 +1362,9 @@ class Sale {
     echo json_encode(array('paid' => 1));
 
     $f3->abort(); // let client go
+
+    // recopy
+    $sale->copyTo('sale');
 
     self::send_order_email($f3);
   }
