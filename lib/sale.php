@@ -86,7 +86,7 @@ class Sale {
 
     $uuid= $this->create($f3);
 
-    $f3->reroute("./" . $sale->uuid);
+    $f3->reroute("./" . $uuid);
   }
 
   function showList($f3, $args) {
