@@ -269,7 +269,7 @@ CREATE TABLE `sale_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
   `item_id` int(10) unsigned NOT NULL,
-  `quantity` int(10) unsigned NOT NULL,
+  `quantity` int(11) NOT NULL,
   `override_name` varchar(255) DEFAULT NULL,
   `retail_price` decimal(9,2) NOT NULL,
   `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
