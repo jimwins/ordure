@@ -219,7 +219,7 @@ CREATE TABLE `sale` (
   `uuid` varchar(50) DEFAULT NULL,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `status` enum('new','unpaid','paid','processing','shipped','cancelled','onhold') NOT NULL DEFAULT 'new',
+  `status` enum('new','cart','review','unpaid','paid','processing','shipped','cancelled','onhold') NOT NULL DEFAULT 'new',
   `person_id` int(10) unsigned NOT NULL,
   `billing_address_id` int(10) unsigned DEFAULT NULL,
   `shipping_address_id` int(10) unsigned DEFAULT NULL,
