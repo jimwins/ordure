@@ -843,7 +843,7 @@ class Sale {
 
     $status= $f3->get('REQUEST.status');
 
-    if (!in_array($status, array('new','unpaid','paid','processing',
+    if (!in_array($status, array('new','review','unpaid','paid','processing',
                                  'shipped','cancelled','onhold'))) {
       // XXX better error handling
       $f3->error(500);
@@ -1387,7 +1387,7 @@ class Sale {
     if ($sale->status != 'cart')
       $f3->error(500);
 
-    $sale->status= 'processing';
+    $sale->status= 'review';
     $sale->email= $email;
     $sale->save();
 
