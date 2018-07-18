@@ -544,7 +544,7 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    if ($sale->status != 'new' && $sale->status != 'cart')
+    if (!in_array($sale->status, array('new','cart','review')))
       $f3->error(500);
 
     $type= $f3->get('REQUEST.type');
