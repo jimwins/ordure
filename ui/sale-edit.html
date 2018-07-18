@@ -194,7 +194,7 @@
 
   <div class="col-md-4">
     <div class="panel panel-default">
-      <div class="panel-footer">
+      <div class="panel-heading">
         <form class="form-inline" data-bind="submit: saveStatus">
           <div class="form-group">
             <label for="status">Status:</label>
@@ -213,18 +213,36 @@
             </button>
           </div>
         </form>
+      </div>
 
-        <br>
+      <div class="panel-body">
+        <form data-bind="if: sale.status() != 'paid' &&
+                             sale.status() != 'shipped',
+                         submit: confirmOrder">
+          <div class="form-group">
+            <textarea class="form-control" rows="6" name="content_top">We have verified we have the items in stock. Once you've remitted payment, your order will ship out the next business day via USPS Priority Mail and should arrive within three days.</textarea>
+          </div>
 
-        <div data-bind="if: sale.status() != 'paid' &&
-                               sale.status() != 'shipped'">
-          <button class="btn btn-primary"
-                  data-bind="enable: sale.billing_address_id && sale.total &&
-                                     sale.tax_calculated,
-                             click: prepareForPayment">
-            Prepare for payment &raquo;
-          </button>
-        </div>
+          <div class="form-group">
+            <button class="btn btn-primary" disabled>
+              Pay Your Invoice Online
+            </button>
+          </div>
+
+          <div class="form-group">
+            <textarea class="form-control" rows="6" name="content_bottom">Let us know if there is anything else that we can do to help.
+
+Thanks.</textarea>
+          </div>
+
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary"
+                    data-bind="enable: sale.billing_address_id && sale.total &&
+                                       sale.tax_calculated">
+              Send confirmation &raquo;
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -434,10 +452,14 @@ afterLoad(function() {
       });
   }
 
-  viewModel.prepareForPayment= function(data) {
+  viewModel.confirmOrder= function(data) {
+    content_top= $("textarea[name='content_top']").val();
+    content_bottom=  $("textarea[name='content_bottom']").val();
+
     $.ajax({ dataType: 'json', method: 'POST',
-             url: 'set-status',
-             data: { status: 'unpaid' } })
+             url: 'confirm-order',
+             data: { content_top: content_top,
+                     content_bottom: content_bottom} })
      .done(function (data) {
        window.location.href= './';
     });
