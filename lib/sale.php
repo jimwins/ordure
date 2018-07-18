@@ -388,8 +388,7 @@ class Sale {
     $sale_uuid= $f3->get('PARAMS.sale');
     $sale_item_id= $f3->get('REQUEST.item');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
@@ -411,8 +410,7 @@ class Sale {
     $sale_uuid= $f3->get('PARAMS.sale');
     $sale_item_id= $f3->get('REQUEST.item');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
@@ -653,8 +651,7 @@ class Sale {
 
     $sale_uuid= $f3->get('PARAMS.sale');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
     $shipping= $f3->get('REQUEST.shipping');
