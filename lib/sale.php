@@ -1387,6 +1387,7 @@ class Sale {
       $f3->error(500);
 
     $sale->status= 'review';
+    $sale->name= $f3->get('billing_address.name');
     $sale->email= $email;
     $sale->save();
 
