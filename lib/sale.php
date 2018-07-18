@@ -346,7 +346,7 @@ class Sale {
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
-    if ($sale->status != 'new' && $sale->status != 'cart')
+    if (!in_array($sale->status, array('new','cart','review'))
       $f3->error(500);
 
     $item= new DB\SQL\Mapper($db, 'item');
