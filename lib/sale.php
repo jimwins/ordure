@@ -249,6 +249,7 @@ class Sale {
     case 'unpaid':
       return $f3->reroute($sale->uuid . '/pay');
     case 'paid':
+    case 'review':
     case 'processing':
     case 'shipped':
     case 'cancelled':
