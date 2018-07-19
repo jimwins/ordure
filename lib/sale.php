@@ -735,6 +735,8 @@ class Sale {
     $address->verified= 1;
     $address->save();
 
+    $this->update_shipping_and_tax($f3, $sale);
+
     return $this->json($f3, $args);
   }
 
