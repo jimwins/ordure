@@ -78,16 +78,16 @@ class Sale {
 
     $sale->insert();
 
-    return $sale->uuid;
+    return $sale;
   }
 
   function new_sale($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
       $f3->error(403);
 
-    $uuid= $this->create($f3);
+    $sale= $this->create($f3);
 
-    $f3->reroute("./" . $uuid);
+    $f3->reroute("./" . $sale->uuid);
   }
 
   function showList($f3, $args) {
@@ -329,7 +329,8 @@ class Sale {
       /* No cart yet? Create one. */
       if (!$sale_uuid) {
         error_log("Creating cart.");
-        $sale_uuid= $this->create($f3, 'cart');
+        $sale= $this->create($f3, 'cart');
+        $sale_uuid= $sale->uuid;
 
         $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                   $_SERVER['HTTP_HOST'] : false);
