@@ -27,6 +27,7 @@
               <td>
                 <a href="{{ @sale.uuid }}">{{ sprintf("%07d", @sale.id) }}</a>
                 &nbsp; <a href="{{ @sale.uuid }}/json"><i class="fa fa-download"></i></a>
+                &nbsp; <a href="{{ @sale.uuid }}/clone"><i class="fa fa-clone"></i></a>
               </td>
               <td nowrap>
                 {{ (new DateTime(@sale.created))->format("M j H:i") }}

@@ -23,6 +23,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/json", 'Sale->fetch_json');
     $f3->route("GET|HEAD /sale/@sale/test", 'Sale->send_order_test');
+    $f3->route("GET|HEAD /sale/@sale/clone", 'Sale->make_clone');
     $f3->route("POST /sale/@sale/add-item [ajax]", 'Sale->add_item');
     $f3->route("POST /sale/@sale/calculate-sales-tax [ajax]",
                'Sale->calculate_sales_tax');
@@ -265,6 +266,23 @@ class Sale {
       $f3->error(403);
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
+  }
+
+  function make_clone($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1)
+      $f3->error(403);
+
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $new_sale= $this->create($f3);
+
+    $new_sale->name= $sale->name;
+    $new_sale->email= $sale->email;
+    $new_sale->billing_address_id= $sale->billing_address_id;
+    $new_sale->shipping_address_id= $sale->shipping_address_id;
+    $new_sale->save();
+
+    $f3->reroute("../{$new_sale->uuid}/edit");
   }
 
   function cart($f3, $args) {
