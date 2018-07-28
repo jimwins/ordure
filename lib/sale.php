@@ -737,8 +737,7 @@ class Sale {
 
     $sale_uuid= $f3->get('PARAMS.sale');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
     $type= $f3->get('REQUEST.type');
