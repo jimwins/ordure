@@ -47,6 +47,8 @@ class Sale {
     $f3->route("POST /sale/@sale/set-in-store-pickup [ajax]",
                'Sale->set_in_store_pickup');
     $f3->route("POST /sale/@sale/set-shipping [ajax]", 'Sale->set_shipping');
+    $f3->route("POST /sale/@sale/ship-to-billing [ajax]",
+               'Sale->ship_to_billing_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
@@ -60,8 +62,10 @@ class Sale {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
       $f3->route("POST /cart/add-item", 'Sale->add_item');
       $f3->route("POST /cart/update", 'Sale->update_items');
+      $f3->route("POST /cart/update-person", 'Sale->set_person');
       $f3->route("POST /cart/set-address", 'Sale->set_address');
       $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
+      $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
       $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("GET /cart/forget", 'Sale->forget_cart');
     }
@@ -664,6 +668,39 @@ class Sale {
     $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
+  function ship_to_billing_address($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
+    $sale->shipping_address_id= 0;
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
+  }
+
   function set_shipping($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
       $f3->error(403);
@@ -760,22 +797,34 @@ class Sale {
   }
 
   function set_person($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
-      $f3->error(403);
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != 1)
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
 
     $db= $f3->get('DBH');
 
-    $sale_uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    if (!in_array($sale->status, array('new','cart','review')))
+      $f3->error(500);
 
     $sale->name= trim($f3->get('REQUEST.name'));
     $sale->email= trim($f3->get('REQUEST.email'));
     $sale->save();
 
-    return $this->json($f3, $args);
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid);
   }
 
   function add_exemption($f3, $args) {
@@ -1396,21 +1445,16 @@ class Sale {
       $f3->error(404);
     }
 
-    $email= $f3->get('REQUEST.email');
     $comment= $f3->get('REQUEST.comment');
-
-    if (!$email) {
-      $f3->reroute("/cart?error=email");
-    }
 
     $sale= $this->load($f3, $uuid, 'uuid');
     if ($sale->status != 'cart')
       $f3->error(500);
 
     $sale->status= 'review';
-    $sale->name= $f3->get('billing_address.name');
-    $sale->email= $email;
     $sale->save();
+
+    // XXX save comment
 
     // recopy
     $sale->copyTo('sale');
