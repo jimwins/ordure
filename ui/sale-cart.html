@@ -27,7 +27,7 @@
 <check if="{{ !@billing_address.id }}">
         <p class="text-danger">You need to supply your billing address.</p>
 </check>
-<check if="{{ @sale.subtotal && @billing_address.id }}">
+<check if="{{ @sale.email && @sale.subtotal && @billing_address.id }}">
         <div class="alert alert-warning">
           During this soft launch of our online store, all orders are reviewed
           manually by our staff. We will contact you within one business day

@@ -1450,6 +1450,14 @@ class Sale {
     if ($sale->status != 'cart')
       $f3->error(500);
 
+    if (!$sale->email) {
+      $f3->reroute('/cart?error=email');
+    }
+
+    if (!$sale->billing_address_id) {
+      $f3->reroute('/cart?error=billing');
+    }
+
     $sale->status= 'review';
     $sale->save();
 
