@@ -1770,6 +1770,13 @@ class Sale {
         'subject' => $f3->get('title'),
         'from' => array('name' => 'Raw Materials Art Supplies',
                         'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
       ],
       'recipients' => [
         [
