@@ -22,3 +22,8 @@
 
   background: #b00;
 }
+
+/* Make images with ALT tag obvious */
+img:not([alt]) {
+  filter: invert(100%)
+}
