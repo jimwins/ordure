@@ -17,10 +17,6 @@ class Catalog {
       $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
     }
 
-    if ($f3->get('ADMIN')) {
-      $f3->route("GET|HEAD /$CATALOG/admin", 'Catalog->admin');
-    }
-
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
@@ -120,10 +116,7 @@ class Catalog {
                            JOIN scat_item ON item.code = scat_item.code
                           WHERE item.product = product.id)';
 
-    $products= $product->find(array('department = ?' .
-                                    ($f3->get('ADMIN') ?
-                                     '' :
-                                     ' AND active'), 
+    $products= $product->find(array('department = ? AND active',
                                     $dept->id),
                               array('order' =>
                                       '!active, brand_name, name'));
@@ -200,12 +193,10 @@ class Catalog {
 
     $active= "";
 
-    if (!$f3->get('ADMIN')) {
-      if (!$product->active) {
-        $f3->error(404);
-      }
-      $active= " AND active";
+    if (!$product->active) {
+      $f3->error(404);
     }
+    $active= " AND active";
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
@@ -347,10 +338,7 @@ class Catalog {
     $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
 
-    $active= "";
-    if (!$f3->get('ADMIN')) {
-      $active= " AND active";
-    }
+    $active= " AND active";
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
@@ -520,24 +508,5 @@ class Catalog {
     $f3->set('PAGE', $page);
 
     echo Template::instance()->render('catalog-search.html');
-  }
-
-  function admin($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $q= "SELECT item.id, item.code, item.name
-           FROM item
-                JOIN product ON item.product = product.id
-                LEFT JOIN scat.item si ON (item.code = si.code AND si.active)
-                LEFT JOIN scat.vendor_item sv ON item.code = sv.code 
-          WHERE si.code IS NULL AND sv.code IS NULL AND
-                product.active AND item.active
-          ORDER BY 2";
-
-    $items= $db->exec($q);
-
-    $f3->set('inactive_items', $items);
-
-    echo Template::instance()->render("admin.html");
   }
 }
