@@ -208,6 +208,7 @@ class Catalog {
                 scat_item.discount_type, scat_item.discount,
                 stock stocked,
                 minimum_quantity,
+                item.prop65, item.oversized, item.hazmat,
                 thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
