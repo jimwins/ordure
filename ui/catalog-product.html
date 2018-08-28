@@ -110,6 +110,9 @@
                           </check>
                         </false>
                       </check>
+                      <check if="@item.prop65">
+                        <a class="pull-right" style="color: inherit" href="/proposition-65-warning" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+                      </check>
                     </td>
                     <check if="{{ @FEATURE_cart }}">
                       <td>
