@@ -117,7 +117,7 @@ loadScript('{{ @STATIC }}/code/combined-2018-07-15.js', function() {
 
   // Fill in cartDetails
   var details= Cookies.getJSON('cartDetails');
-  if (details.items > 0) {
+  if (details && details.items > 0) {
     $('#cart-button .badge').text('' + details.items + ': $' + details.total)
                             .show();
   }
