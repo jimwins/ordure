@@ -115,6 +115,9 @@ loadScript('{{ @STATIC }}/code/combined-2018-07-15.js', function() {
       window.location.hash = e.target.hash.replace("#", "#" + prefix);
   });
 
+  // Enable tooltips
+  $('[data-toggle="tooltip"]').tooltip();
+
   // Fill in cartDetails
   var details= Cookies.getJSON('cartDetails');
   if (details && details.items > 0) {

@@ -69,7 +69,7 @@
                 <th class="col-xs-4">Description</th>
                 <th class="col-xs-2">List</th>
                 <th class="col-xs-1">Sale</th>
-                <th class="col-xs-2 text-center hastip" title="Whether this item is stocked in our store or only available via special order." data-placement="left">Availability</th>
+                <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is stocked in our store or only available via special order.">Availability</th>
                 <check if="{{ @FEATURE_cart }}">
                   <th class="col-xs-1"></th>
                 </check>
@@ -111,7 +111,7 @@
                         </false>
                       </check>
                       <check if="@item.prop65">
-                        <a class="pull-right" style="color: inherit" href="/proposition-65-warning" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+                        <a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
                       </check>
                     </td>
                     <check if="{{ @FEATURE_cart }}">
