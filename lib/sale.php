@@ -122,7 +122,16 @@ class Sale {
 
     $which= ($f3->get('REQUEST.all') ?
              'status != "cancelled"' :
-             'status != "cancelled" AND status != "shipped"');
+             ($f3->get('REQUEST.carts') ?
+              'status = "cart"' :
+              'status != "cancelled" AND
+               status != "shipped" AND
+               status != "cart"'));
+
+    $f3->set('which', ($f3->get('REQUEST.all') ?
+                       'all' :
+                       ($f3->get('REQUEST.carts') ?
+                        'carts' : 'default')));
 
     $sales= $sale->find(array($which),
                         array('order' => 'id'));
