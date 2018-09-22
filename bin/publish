@@ -9,12 +9,16 @@ if [ -z "$HOST" ]; then
   exit 1
 fi
 
+# XXX temporarily downgrading collation due to mix of MySQL versions
+
 mysqldump --opt scat \
           brand department item product prop65_warning | \
+  sed -e 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/' | \
   gzip -9 > ~/rm/tmp/scat.sql.gz
 
 mysqldump --opt ordure \
           page redirect | \
+  sed -e 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/' | \
   gzip -9 > ~/rm/tmp/ordure.sql.gz
 
 scp ~/rm/tmp//scat.sql.gz ~/rm/tmp/ordure.sql.gz $HOST:
