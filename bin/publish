@@ -10,7 +10,7 @@ if [ -z "$HOST" ]; then
 fi
 
 mysqldump --opt scat \
-          brand department item product | \
+          brand department item product prop65_warning | \
   gzip -9 > ~/rm/tmp/scat.sql.gz
 
 mysqldump --opt ordure \
