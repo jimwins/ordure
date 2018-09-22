@@ -107,7 +107,10 @@ SET character_set_client = utf8;
  1 AS `tic`,
  1 AS `added`,
  1 AS `modified`,
- 1 AS `active`*/;
+ 1 AS `active`,
+ 1 AS `prop65`,
+ 1 AS `oversized`,
+ 1 AS `hazmat`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -189,6 +192,19 @@ SET character_set_client = utf8;
  1 AS `added`,
  1 AS `modified`,
  1 AS `active`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `prop65_warning`
+--
+
+DROP TABLE IF EXISTS `prop65_warning`;
+/*!50001 DROP VIEW IF EXISTS `prop65_warning`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `prop65_warning` AS SELECT 
+ 1 AS `id`,
+ 1 AS `warning`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -335,9 +351,9 @@ CREATE TABLE `scat_item` (
   `stock` int(11) DEFAULT NULL,
   `minimum_quantity` int(11) DEFAULT '0',
   `purchase_quantity` int(11) DEFAULT '1',
-  `code` varchar(255) NOT NULL,
+  `code` varchar(50) NOT NULL,
   PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -430,7 +446,7 @@ DELIMITER ;
 /*!50001 SET collation_connection      = utf8_general_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `item` AS select `scat`.`item`.`id` AS `id`,`scat`.`item`.`product_id` AS `product`,`scat`.`item`.`code` AS `code`,`scat`.`item`.`name` AS `name`,`scat`.`item`.`short_name` AS `short_name`,`scat`.`item`.`variation` AS `variation`,'' AS `unit_of_sale`,`scat`.`item`.`retail_price` AS `retail_price`,`scat`.`item`.`discount_type` AS `discount_type`,`scat`.`item`.`discount` AS `discount`,`scat`.`item`.`purchase_quantity` AS `purchase_quantity`,`scat`.`item`.`length` AS `length`,`scat`.`item`.`width` AS `width`,`scat`.`item`.`height` AS `height`,`scat`.`item`.`weight` AS `weight`,if((`scat`.`item`.`color` <> ''),concat('color:',`scat`.`item`.`color`),'') AS `thumbnail`,`scat`.`item`.`tic` AS `tic`,`scat`.`item`.`added` AS `added`,`scat`.`item`.`modified` AS `modified`,`scat`.`item`.`active` AS `active` from `scat`.`item` */;
+/*!50001 VIEW `item` AS select `scat`.`item`.`id` AS `id`,`scat`.`item`.`product_id` AS `product`,`scat`.`item`.`code` AS `code`,`scat`.`item`.`name` AS `name`,`scat`.`item`.`short_name` AS `short_name`,`scat`.`item`.`variation` AS `variation`,'' AS `unit_of_sale`,`scat`.`item`.`retail_price` AS `retail_price`,`scat`.`item`.`discount_type` AS `discount_type`,`scat`.`item`.`discount` AS `discount`,`scat`.`item`.`purchase_quantity` AS `purchase_quantity`,`scat`.`item`.`length` AS `length`,`scat`.`item`.`width` AS `width`,`scat`.`item`.`height` AS `height`,`scat`.`item`.`weight` AS `weight`,if((`scat`.`item`.`color` <> ''),concat('color:',`scat`.`item`.`color`),'') AS `thumbnail`,`scat`.`item`.`tic` AS `tic`,`scat`.`item`.`added` AS `added`,`scat`.`item`.`modified` AS `modified`,`scat`.`item`.`active` AS `active`,`scat`.`item`.`prop65` AS `prop65`,`scat`.`item`.`oversized` AS `oversized`,`scat`.`item`.`hazmat` AS `hazmat` from `scat`.`item` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -449,6 +465,24 @@ DELIMITER ;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `product` AS select `scat`.`product`.`id` AS `id`,`scat`.`product`.`department_id` AS `department`,`scat`.`product`.`brand_id` AS `brand`,`scat`.`product`.`name` AS `name`,`scat`.`product`.`description` AS `description`,`scat`.`product`.`slug` AS `slug`,`scat`.`product`.`image` AS `image`,`scat`.`product`.`variation_style` AS `variation_style`,`scat`.`product`.`added` AS `added`,`scat`.`product`.`modified` AS `modified`,`scat`.`product`.`active` AS `active` from `scat`.`product` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `prop65_warning`
+--
+
+/*!50001 DROP VIEW IF EXISTS `prop65_warning`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8 */;
+/*!50001 SET character_set_results     = utf8 */;
+/*!50001 SET collation_connection      = utf8_general_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `prop65_warning` AS select `scat`.`prop65_warning`.`id` AS `id`,`scat`.`prop65_warning`.`warning` AS `warning` from `scat`.`prop65_warning` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
