@@ -1826,7 +1826,7 @@ class Sale {
 
   function send_order_test($f3, $args) {
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
-    $f3->abort();
     self::send_order_email($f3);
+    $f3->reroute("status");
   }
 }
