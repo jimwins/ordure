@@ -328,7 +328,6 @@ class Sale {
               '/', $domain, true, true);
     SetCookie('cartDetails', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, false);
-    $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
   }
 
   function pay($f3, $args) {
