@@ -1470,7 +1470,13 @@ class Sale {
     $sale->status= 'review';
     $sale->save();
 
-    // XXX save comment
+    // save comment
+    $db= $f3->get('DBH');
+    $note= new DB\SQL\Mapper($db, 'sale_note');
+    $note->sale_id= $sale->id;
+    $note->person_id= $sale->person_id;
+    $note->content= $comment;
+    $note->save();
 
     // recopy
     $sale->copyTo('sale');

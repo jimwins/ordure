@@ -298,6 +298,25 @@ CREATE TABLE `sale_item` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `sale_note`
+--
+
+DROP TABLE IF EXISTS `sale_note`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sale_note` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sale_id` int(10) unsigned DEFAULT NULL,
+  `person_id` int(10) unsigned NOT NULL DEFAULT '0',
+  `content` mediumtext,
+  `added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `modified` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `sale_id` (`sale_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `sale_payment`
 --
 
