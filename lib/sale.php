@@ -1725,6 +1725,7 @@ class Sale {
       ],
       'options' => [
         'inlineCss' => true,
+        'transactional' => true,
       ],
     ]);
 
