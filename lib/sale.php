@@ -580,6 +580,13 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
+    /* If we got an email and there's no person_id, we set them on the sale */
+    $email= $f3->get('REQUEST.email');
+    if ($email && !$sale->person_id) {
+      $sale->email= trim($email);
+      $sale->name= trim($f3->get('REQUEST.name'));
+    }
+
     if (!in_array($sale->status, array('new','cart','review')))
       $f3->error(500);
 
