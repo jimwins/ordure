@@ -34,11 +34,22 @@
           font-size: 14px;
           vertical-align: top; }
 
-      .table-striped tbody tr:nth-child(even) {
-        background: #eee; }
-      .table td, .table th {
+      table.table thead th {
+        background: #777777;
+        color: #ffffff;
+      }
+      table.table-striped tbody tr:nth-child(even) {
+        background: #eeeeee; }
+      table.table td, table.table th {
         vertical-align: middle;
         padding: 8px 4px; }
+      table.table tfoot th, table.table tfoot td {
+        background: #dddddd;
+      }
+      h3.panel-title {
+        margin-top: 14px;
+        margin-bottom: 14px;
+      }
 
       /* -------------------------------------
           BODY & CONTAINER
@@ -51,7 +62,7 @@
       /* Set a max-width, and make it display as block so it will automatically stretch to that width, but will also shrink down on a phone or something */
       .container {
         display: block;
-        Margin: 0 auto !important;
+        margin: 0 auto !important;
         /* makes it centered */
         max-width: 580px;
         padding: 10px;
@@ -61,7 +72,7 @@
       .content {
         box-sizing: border-box;
         display: block;
-        Margin: 0 auto;
+        margin: 0 auto;
         max-width: 580px;
         padding: 10px; }
 
@@ -84,7 +95,7 @@
 
       .footer {
         clear: both;
-        Margin-top: 10px;
+        margin-top: 10px;
         text-align: center;
         width: 100%; }
         .footer td,
@@ -107,7 +118,7 @@
         font-weight: 400;
         line-height: 1.4;
         margin: 0;
-        Margin-bottom: 30px; }
+        margin-bottom: 30px; }
 
       h1 {
         font-size: 35px;
@@ -122,7 +133,7 @@
         font-size: 14px;
         font-weight: normal;
         margin: 0;
-        Margin-bottom: 15px; }
+        margin-bottom: 15px; }
         p li,
         ul li,
         ol li {
@@ -215,7 +226,7 @@
       hr {
         border: 0;
         border-bottom: 1px solid #f6f6f6;
-        Margin: 20px 0; }
+        margin: 20px 0; }
 
       /* -------------------------------------
           RESPONSIVE AND MOBILE FRIENDLY STYLES
