@@ -1,18 +1,13 @@
 <set title="Shopping Cart @ Raw Materials Art Supplies">
+
 <include href="header.html" />
+
 <div class="row">
-  <div class="col-md-8">
-<check if="{{ @sale.id }}">
-  <true>
+  <div class="col-md-6">
     <include href="sale-invoice.html" />
-  </true>
-  <false>
-    {{ @includeFragment('art-supplies') }}
-  </false>
-</check>
   </div>
 
-  <div class="col-md-4">
+  <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Ready to order?</h3>

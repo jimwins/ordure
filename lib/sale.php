@@ -314,9 +314,11 @@ class Sale {
                                   'total' => $sale->total)),
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
-    }
 
-    echo Template::instance()->render('sale-cart.html');
+      echo Template::instance()->render('sale-cart.html');
+    } else {
+      $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
+    }
   }
 
   function forget_cart($f3, $args) {
@@ -326,6 +328,7 @@ class Sale {
               '/', $domain, true, true);
     SetCookie('cartDetails', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, false);
+    $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
   }
 
   function pay($f3, $args) {
