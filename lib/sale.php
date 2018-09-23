@@ -1678,43 +1678,34 @@ class Sale {
     $sparky= new \SparkPost\SparkPost($httpClient,
                            [ 'key' => $f3->get('SPARKPOST_KEY') ]);
 
-    $hive= $f3->hive();
+    $f3->set('comment', $comment);
+    $title= "Order " . $f3->get('sale.status') . ': ' .
+            sprintf('%07d', $f3->get('sale.id')) . ' ' . $f3->get('sale.name');
+    $f3->set('title', $title);
 
-    $data= array(
-      'sale' => $hive['sale'],
-      'billing_address' => $hive['billing_address'],
-      'shipping_address' => $hive['shipping_address'],
-      'items' => $hive['items'],
-      'payments' => $hive['payments'],
-      'comment' => $comment,
-    );
-
-    // Clean up the data for the template
-    $data['sale']['id']= sprintf("%07d", $data['sale']['id']);
-    $data['sale']['due']= amount($data['sale']['total'] -
-                                 $data['sale']['paid']);
-    $data['sale']['subtotal']= amount($data['sale']['subtotal']);
-    $data['sale']['shipping']= amount($data['sale']['shipping']);
-    $data['sale']['tax']= amount($data['sale']['tax']);
-    $data['sale']['total']= amount($data['sale']['total']);
-    $data['sale']['paid']= amount($data['sale']['paid']);
-
-    foreach ($data['payments'] as &$payment) {
-      $payment['amount']= amount($payment['amount']);
+    if ($f3->get('sale.status') == 'review') {
+      $f3->set('call_to_action', 'Review Order');
+      $f3->set('call_to_action_url', 'https://' .  $_SERVER['HTTP_HOST'] .
+                                     '/sale/' .
+                                     $f3->get('sale.uuid') . '/edit');
     }
-    unset($payment);
 
-    foreach ($data['items'] as &$item) {
-      $item['ext_price']= amount($item['quantity'] * $item['sale_price']);
-      $item['sale_price']= amount($item['sale_price']);
-    }
-    unset($item);
+    $html= Template::instance()->render('email-invoice.html');
 
     $promise= $sparky->transmissions->post([
       'content' => [
-        'template_id' => 'order-template',
+        'html' => $html,
+        'subject' => $title,
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
       ],
-      'substitution_data' => $data,
       'recipients' => [
         [
           'address' => [
