@@ -54,6 +54,7 @@ class Sale {
     $f3->route("POST /sale/@sale/verify-address [ajax]",
                'Sale->verify_address');
     $f3->route("POST /sale/@sale/confirm-order [ajax]", 'Sale->confirm_order');
+    $f3->route("POST /sale/@sale/send-note [ajax]", 'Sale->send_note');
 
     $f3->route("GET|HEAD /shipstation", 'Sale->shipstation_get');
     $f3->route("POST /shipstation", 'Sale->shipstation_post');
@@ -1777,6 +1778,90 @@ class Sale {
              $_SERVER['HTTP_HOST'] . '/sale/' . $f3->get('sale.uuid') . '/pay');
 
     $f3->set('content_bottom', Markdown::instance()->convert($bottom));
+
+    $html= Template::instance()->render('email-template.html');
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'html' => $html,
+        'subject' => $f3->get('title'),
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
+      ],
+      'recipients' => [
+        [
+          'address' => [
+            'name' => $f3->get('sale.name'),
+            'email' => $f3->get('sale.email'),
+          ],
+        ],
+        [
+          // BCC ourselves
+          'address' => [
+            'name' => $f3->get('sale.name'),
+            'header_to' => $f3->get('sale.email'),
+            'email' => $f3->get('CONTACT_SALES'),
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+        'transactional' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      error_log(sprintf("SparkPost failure: %s (%s)",
+                        $e->getMessage(), $e->getCode()));
+    }
+  }
+
+  function send_note($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1) {
+        $f3->error(403);
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid')
+      or $f3->error(404);
+
+    $message= $f3->get('REQUEST.note');
+
+    $db= $f3->get('DBH');
+    $note= new DB\SQL\Mapper($db, 'sale_note');
+    $note->sale_id= $sale->id;
+    $note->person_id= \Auth::authenticated_user($f3);
+    $note->content= $message;
+    $note->save();
+
+    self::send_order_note($f3, $message);
+
+    return $this->json($f3, $args);
+  }
+
+  function send_order_note($f3, $note) {
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+    $order_no= sprintf("%07d", $f3->get('sale.id'));
+    $f3->set('title', "Thanks for shopping with us! (Order #{$order_no})");
+    $f3->set('preheader', "Thank you for shopping at Raw Materials Art Supplies!  We have reviewed your order.");
+
+    $f3->set('content_top', Markdown::instance()->convert($note));
 
     $html= Template::instance()->render('email-template.html');
 

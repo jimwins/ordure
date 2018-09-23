@@ -217,8 +217,8 @@
       </div>
 
       <div class="panel-body">
-        <form data-bind="if: sale.status() != 'paid' &&
-                             sale.status() != 'shipped',
+        <form data-bind="if: sale.status() == 'new' ||
+                             sale.status() == 'review',
                          submit: confirmOrder">
           <div class="form-group">
             <textarea class="form-control" rows="6" name="content_top">We have verified we have the items in stock. Once you've remitted payment, your order will ship out the next business day via USPS Priority Mail and should arrive within three days.</textarea>
@@ -244,6 +244,24 @@ Thanks.</textarea>
             </button>
           </div>
         </form>
+
+        <hr>
+
+        <form data-bind="submit: sendNote">
+
+          <div class="form-group">
+            <textarea class="form-control" rows="8" name="note">Let us know if there is anything else that we can do to help.
+
+Thanks.</textarea>
+
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-envelope"></i> Send Message
+            </button>
+          </div>
+        </form>
+
       </div>
     </div>
   </div>
@@ -461,6 +479,17 @@ afterLoad(function() {
              url: 'confirm-order',
              data: { content_top: content_top,
                      content_bottom: content_bottom} })
+     .done(function (data) {
+       window.location.href= './';
+    });
+  }
+
+  viewModel.sendNote= function(data) {
+    var note= $("textarea[name='note']").val();
+
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: 'send-note',
+             data: { note: note } })
      .done(function (data) {
        window.location.href= './';
     });
