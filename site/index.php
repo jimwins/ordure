@@ -136,7 +136,7 @@ $f3->route('GET|HEAD /sales-tax-policy', function($f3, $args) {
 $f3->route('POST /contact', function ($f3, $args) {
 
   if (preg_match('/(seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
-    $f3->error(500, "Go away.");
+    $f3->error(500, "Sorry, your comment looks like spam.");
   }
 
   $headers= array();
