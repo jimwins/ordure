@@ -35,6 +35,7 @@
             <div class="form-group col-sm-12">
               <label for="name">Name</label>
               <input type="text" class="form-control" name="name" required
+                     autocomplete="name"
                      placeholder="Vincent Van Gogh"
                      value="{{ @billing_address.name }}">
             </div>
@@ -42,6 +43,7 @@
             <div class="form-group col-sm-12">
               <label for="company">Company (optional)</label>
               <input type="text" class="form-control" name="company"
+                     autocomplete="organization"
                      placeholder="(optional)"
                      value="{{ @billing_address.company }}">
             </div>
@@ -49,6 +51,7 @@
             <div class="form-group col-sm-12">
               <label for="phone">Phone (optional)</label>
               <input type="text" class="form-control" name="phone"
+                     autocomplete="tel-national"
                      placeholder="213-627-7223"
                      value="{{ @billing_address.phone }}">
             </div>
@@ -56,27 +59,32 @@
             <div class="form-group col-sm-12">
               <label for="address1">Address</label>
               <input type="text" class="form-control" name="address1" required
+                     autocomplete="address-line1"
                      value="{{ @billing_address.address1 }}"
                      placeholder="436 S Main St">
               <input type="text" class="form-control" name="address2" 
+                     autocomplete="address-line2"
                      value="{{ @billing_address.address2 }}"
                      placeholder="Apt 2-B">
             </div>
             <div class="form-group col-sm-5">
               <label for="city">City</label>
               <input type="text" class="form-control" name="city" required
+                     autocomplete="address-level-2"
                      value="{{ @billing_address.city }}"
                      placeholder="Los Angeles">
             </div>
             <div class="form-group col-sm-2">
               <label for="state">State</label>
               <input type="text" class="form-control" name="state" required
+                     autocomplete="address-level-1"
                      value="{{ @billing_address.state }}"
                      placeholder="CA">
             </div>
             <div class="form-group col-sm-3">
               <label for="zip">ZIP</label>
               <input type="text" class="form-control" name="zip5" required
+                     autocomplete="postal-code"
                      value="{{ @billing_address.zip5 }}"
                      placeholder="90013">
             </div>
@@ -85,6 +93,10 @@
               <input type="text" class="form-control" name="zip4"
                      value="{{ @billing_address.zip4 }}"
                      placeholder="0000">
+            </div>
+            <div class="form-group col-sm-12">
+              <label for="country">Country</label>
+              <p class="form-control-static">United States</p>
             </div>
           </div>
 
@@ -148,6 +160,7 @@
             <div class="form-group col-sm-12">
               <label for="name">Name</label>
               <input type="text" class="form-control" name="name"
+                     autocomplete="name"
                      placeholder="Paul Gauguin"
                      value="{{ @shipping_address.name }}">
             </div>
@@ -155,6 +168,7 @@
             <div class="form-group col-sm-12">
               <label for="company">Company (optional)</label>
               <input type="text" class="form-control" name="company"
+                     autocomplete="organization"
                      placeholder="(optional)"
                      value="{{ @shipping_address.company }}">
             </div>
@@ -162,6 +176,7 @@
             <div class="form-group col-sm-12">
               <label for="phone">Phone (optional)</label>
               <input type="text" class="form-control" name="phone"
+                     autocomplete="tel-national"
                      placeholder="213-627-7223"
                      value="{{ @shipping_address.phone }}">
             </div>
@@ -169,27 +184,32 @@
             <div class="form-group col-sm-12">
               <label for="address1">Address</label>
               <input type="text" class="form-control" name="address1"
+                     autocomplete="address-line1"
                      value="{{ @shipping_address.address1 }}"
                      placeholder="436 S Main St">
               <input type="text" class="form-control" name="address2" 
+                     autocomplete="address-line2"
                      value="{{ @shipping_address.address2 }}"
                      placeholder="Apt 2-B">
             </div>
             <div class="form-group col-sm-5">
               <label for="city">City</label>
               <input type="text" class="form-control" name="city"
+                     autocomplete="address-level2"
                      value="{{ @shipping_address.city }}"
                      placeholder="Los Angeles">
             </div>
             <div class="form-group col-sm-2">
               <label for="state">State</label>
               <input type="text" class="form-control" name="state"
+                     autocomplete="address-level1"
                      value="{{ @shipping_address.state }}"
                      placeholder="CA">
             </div>
             <div class="form-group col-sm-3">
               <label for="zip">ZIP</label>
               <input type="text" class="form-control" name="zip5"
+                     autocomplete="postal-code"
                      value="{{ @shipping_address.zip5 }}"
                      placeholder="90013">
             </div>
@@ -198,6 +218,10 @@
               <input type="text" class="form-control" name="zip4"
                      value="{{ @shipping_address.zip4 }}"
                      placeholder="0000">
+            </div>
+            <div class="form-group col-sm-12">
+              <label for="country">Country</label>
+              <p class="form-control-static">United States</p>
             </div>
           </div>
 
