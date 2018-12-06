@@ -91,13 +91,13 @@ loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
             enableShippingAddress: true,
             shippingAddressEditable: false,
             shippingAddressOverride: {
-              recipientName: '{{ @shipping_address.name ? @shipping_address.name : @sale.name }}',
-              line1: '{{ @shipping_address.address1 }}',
-              line2: '{{ @shipping_address.address2 }}',
-              city: '{{ @shipping_address.city }}',
+              recipientName: {{ (@shipping_address.name ? @shipping_address.name : @sale.name) | json }},
+              line1: {{ @shipping_address.address1 | json }},
+              line2: {{ @shipping_address.address2 | json }},
+              city: {{ @shipping_address.city | json }},
               countryCode: 'US',
-              postalCode: '{{ @shipping_address.zip5 }}',
-              state: '{{ @shipping_address.state }}',
+              postalCode: {{ @shipping_address.zip5 | json }},
+              state: {{ @shipping_address.state | json }},
               phone: ''
             }
           }, function (err, tokenizationPayload) {
