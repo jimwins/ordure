@@ -113,6 +113,14 @@ class Page {
 
 }
 
+class Helper extends \Prefab {
+  function json($val) {
+    return json_encode($val);
+  }
+}
+
+\Template::instance()->filter('json','\Helper::instance()->json');
+
 $f3->route('GET|HEAD /*', 'Page->getPage');
 $f3->route('GET|HEAD /', 'Page->getPage');
 
