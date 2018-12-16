@@ -17,11 +17,6 @@
   <check if="{{ isset(@DEBUG) && @DEBUG }}">
     <link rel="stylesheet" type="text/css" href="{{ @BASE }}/debug.css">
   </check>
-  <check if="{{ !isset(@DEBUG) || !@DEBUG }}">
-    <!-- Directa Serif Heavy -->
-    <link rel="stylesheet" type="text/css"
-          href="{{ @STATIC }}/fonts/MyFontsWebfontsKit.css">
-  </check>
   <check if="{{ isset(@EXTRA_HEAD) }}">
     {{ @EXTRA_HEAD | raw }}
   </check>
