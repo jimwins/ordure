@@ -1542,7 +1542,7 @@ class Sale {
     $sale->paid= '(SELECT SUM(amount)
                      FROM sale_payment
                     WHERE sale_id = sale.id)';
-    $sales= $sale->find(array('status != "new" AND modified BETWEEN ? AND ?',
+    $sales= $sale->find(array('status NOT IN ("new","cart") AND modified BETWEEN ? AND ?',
                               (new \Datetime($start_date))->format("Y-m-d H:i:s"),
                               (new \Datetime($end_date))->format("Y-m-d H:i:s")),
                         array('order' => 'id'));
