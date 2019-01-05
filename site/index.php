@@ -105,6 +105,8 @@ class Page {
       } else {
         $f3->error(404);
       }
+    } elseif (is_file($path)) {
+      \Web::instance()->send($path, NULL, 0, false);
     } else {
       $f3->error(404);
     }
