@@ -3,7 +3,6 @@ FROM php:7.3.0-fpm-alpine
 LABEL maintainer="Jim Winstead <jimw@trainedmonkey.com>"
 
 RUN apk add --no-cache \
-      git \
       mysql-client \
       tzdata
 
