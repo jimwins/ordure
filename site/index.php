@@ -2,7 +2,7 @@
 require '../vendor/autoload.php';
 
 $f3= \Base::instance();
-$f3->config('../config.ini');
+$f3->config($_ENV['ORDURE_CONFIG'] ?: '../config.ini');
 
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
