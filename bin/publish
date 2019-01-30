@@ -13,14 +13,12 @@ fi
 
 mysqldump --opt scat \
           brand department item product prop65_warning | \
-  sed -e 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/' | \
   gzip -9 > /tmp/scat.sql.gz
 
 mysqldump --opt ordure \
           page redirect | \
-  sed -e 's/utf8mb4_0900_ai_ci/utf8mb4_general_ci/' | \
   gzip -9 > /tmp/ordure.sql.gz
 
 scp /tmp/scat.sql.gz /tmp/ordure.sql.gz $HOST:
 
-ssh $HOST "(zcat ordure.sql.gz | /usr/local/mysql/bin/mysql ordure) && (zcat scat.sql.gz | /usr/local/mysql/bin/mysql catalog) && sudo -u sphinxsearch /usr/bin/indexer --rotate ordure"
+ssh $HOST "(zcat ordure.sql.gz | mysql ordure) && (zcat scat.sql.gz | mysql catalog) && indexer --rotate ordure"
