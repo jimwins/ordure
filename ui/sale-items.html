@@ -57,13 +57,20 @@
     </tr>
     <tr>
       <th colspan="5" class="text-right">
-        Estimated tax to be collected:
+<check if="{{ in_array(@sale.status, [ 'cart', 'unpaid' ]) }}">
+  <true>
+        Estimated tax:
+  </true>
+  <false>
+        Tax:
+  </false>
+</check>
       </th>
       <td class="text-right">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
             && !@sale.tax_calculated }}">
   <true>
-        <span class="text-danger">----------</span>
+        <span class="text-danger">TBD</span>
   </true>
   <false>
         {{ @amount(@sale.tax) }}
@@ -77,7 +84,7 @@
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
             && !@sale.tax_calculated }}">
   <true>
-        <span class="text-danger">----------</span>
+        <span class="text-danger">TBD</span>
   </true>
   <false>
         {{ @amount(@sale.total) }}
