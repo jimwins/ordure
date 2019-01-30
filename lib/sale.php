@@ -340,6 +340,23 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
+      $stages= [ 'login', 'shipping', 'payment' ];
+      $stage= $f3->get('REQUEST.stage');
+
+      if (!in_array($stage, $stages)) {
+        if ($sale->shipping_address_id) {
+          $stage= 'payment';
+        }
+        elseif ($sale->person_id || ($sale->email && $sale->name)) {
+          $stage= 'shipping';
+        }
+        else {
+          $stage= 'login';
+        }
+      }
+
+      $f3->set('stage', $stage);
+
       echo Template::instance()->render('sale-checkout.html');
     } else {
       $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
