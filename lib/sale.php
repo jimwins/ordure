@@ -61,6 +61,7 @@ class Sale {
 
     if ($f3->get('FEATURE_cart')) {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
+      $f3->route("GET|HEAD /cart/checkout", 'Sale->cart_checkout');
       $f3->route("POST /cart/add-item", 'Sale->add_item');
       $f3->route("POST /cart/update", 'Sale->update_items');
       $f3->route("POST /cart/update-person", 'Sale->set_person');
@@ -317,6 +318,29 @@ class Sale {
                 '/', $domain, true, false); // JavaScript accessible
 
       echo Template::instance()->render('sale-cart.html');
+    } else {
+      $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
+    }
+  }
+
+  function cart_checkout($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
+
+    if ($uuid) {
+      error_log("Loading $uuid.");
+      $sale= $this->load($f3, $uuid, 'uuid');
+
+      $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+                $_SERVER['HTTP_HOST'] : false);
+      SetCookie('cartDetails',
+                json_encode(array('items' => count($f3->get('items')),
+                                  'total' => $sale->total)),
+                0 /* session cookie */,
+                '/', $domain, true, false); // JavaScript accessible
+
+      echo Template::instance()->render('sale-checkout.html');
     } else {
       $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
     }
@@ -626,7 +650,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
   }
 
   function remove_address($f3, $args) {
@@ -684,7 +708,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
   }
 
   function ship_to_billing_address($f3, $args) {
@@ -717,7 +741,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
   }
 
   function set_shipping($f3, $args) {
@@ -842,7 +866,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
   }
 
   function add_exemption($f3, $args) {
