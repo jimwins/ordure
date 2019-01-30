@@ -2,7 +2,7 @@
   <thead>
     <tr>
       <th></th>
-      <th class="text-right">Qty</th>
+      <th>Quantity</th>
       <th>Code</th>
       <th>Name</th>
       <th class="text-right">Price</th>
@@ -15,14 +15,14 @@
       <td></td>
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'}}">
   <true>
-      <td class="text-right">
+      <td>
         <input type="text" style="width: 4em; text-align: right"
                class="form-control input-sm"
                name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
       </td>
   </true>
   <false>
-      <td class="text-right">{{ @data.quantity }}</td>
+      <td>{{ @data.quantity }}</td>
   </false>
 </check>
       <td><small>{{ @data.code }}</small></td>
@@ -41,7 +41,7 @@
     <tr>
       <th colspan="3">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'}}">
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-default btn-sm">
           <i class="fa fa-refresh"></i> Update Quantities
         </button>
 </check>
