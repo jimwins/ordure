@@ -1792,15 +1792,13 @@ class Sale {
 
     $f3->set('content_top', Markdown::instance()->convert("Thank you for shopping at Raw Materials Art Supplies!
     
-Your order will be reviewed, and we will receive another email within one business day with information on how to pay for your order, as well as the estimated shipping time."));
+Your order will be reviewed, and you will receive another email within one business day with information on how to pay for your order, as well as the estimated shipping time."));
 
     $f3->clear('call_to_action');
     $f3->clear('call_to_action_url');
     $f3->clear('comment');
 
-    $f3->set('content_bottom', Markdown::instance()->convert("Let us know if there is anything else that we can do to help.
-
-Thanks."));
+    $f3->set('content_bottom', Markdown::instance()->convert("Let us know if there is anything else that we can do to help."));
 
     $html= Template::instance()->render('email-invoice.html');
 
