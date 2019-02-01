@@ -1,11 +1,8 @@
 <set title="{{ sprintf('Sale %07d @ Raw Materials Art Supplies', @sale.id) }}">
 <include href="header.html" />
 <div class="row">
-  <div class="col-md-8">
-    <include href="sale-invoice.html" />
-  </div>
 
-  <div class="col-md-4">
+  <div class="col-md-4 col-md-push-8">
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">Status</h3>
@@ -56,6 +53,10 @@
 </check>
       </div>
     </div>
+  </div>
+
+  <div class="col-md-8 col-md-pull-4">
+    <include href="sale-invoice.html" />
   </div>
 
 </div>
