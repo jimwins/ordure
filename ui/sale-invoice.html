@@ -23,20 +23,20 @@
           <div class="panel-heading">
             <h3 class="panel-title">
               <i class="fa fa-address-card-o"></i>
-              Billing Address
+              Shipping Address
             </h3>
           </div>
           <div class="panel-body">
-            <check if="{{ @billing_address.id }}">
+            <check if="{{ @shipping_address.id }}">
               <true>
-                <div>{{ @billing_address.name }}</div>
-                <div>{{ @billing_address.company }}</div>
-                <div>{{ @billing_address.phone }}</div>
-                <div>{{ @billing_address.address1 }}</div>
-                <div>{{ @billing_address.address2 }}</div>
+                <div>{{ @shipping_address.name }}</div>
+                <div>{{ @shipping_address.company }}</div>
+                <div>{{ @shipping_address.phone }}</div>
+                <div>{{ @shipping_address.address1 }}</div>
+                <div>{{ @shipping_address.address2 }}</div>
                 <div>
-                  {{ @billing_address.city }}, {{ @billing_address.state }}
-                  {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
+                  {{ @shipping_address.city }}, {{ @shipping_address.state }}
+                  {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
                 </div>
               </true>
               <false>
@@ -51,27 +51,33 @@
           <div class="panel-heading">
             <h3 class="panel-title">
               <i class="fa fa-address-card-o"></i>
-              Shipping Address
+              Billing Address
             </h3>
           </div>
           <div class="panel-body">
-            <check if="{{ !@shipping_address.id ||
-                          @shipping_address.id == @billing_address.id }}">
+            <check if="{{ !@billing_address.id }}">
               <true>
-                <div>
-                  Same as billing address.
-                </div>
+                Not specified.
               </true>
               <false>
-                <div>{{ @shipping_address.name }}</div>
-                <div>{{ @shipping_address.company }}</div>
-                <div>{{ @shipping_address.phone }}</div>
-                <div>{{ @shipping_address.address1 }}</div>
-                <div>{{ @shipping_address.address2 }}</div>
-                <div>
-                  {{ @shipping_address.city }}, {{ @shipping_address.state }}
-                  {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
-                </div>
+                <check if="@shipping_address.id == @billing_address.id }}">
+                  <true>
+                    <div>
+                      Same as shipping address.
+                    </div>
+                  </true>
+                  <false>
+                    <div>{{ @billing_address.name }}</div>
+                    <div>{{ @billing_address.company }}</div>
+                    <div>{{ @billing_address.phone }}</div>
+                    <div>{{ @billing_address.address1 }}</div>
+                    <div>{{ @billing_address.address2 }}</div>
+                    <div>
+                      {{ @billing_address.city }}, {{ @billing_address.state }}
+                      {{ @billing_address.zip5 }}{{ @billing_address.zip4 ? "-" . @billing_address.zip4 : "" }}
+                    </div>
+                  </false>
+                </check>
               </false>
             </check>
           </div>
