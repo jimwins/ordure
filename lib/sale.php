@@ -454,7 +454,8 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $f3->reroute('/cart?uuid=' . $sale->uuid .
+                 '&added=' . rawurlencode($item->code));
   }
 
   function remove_item($f3, $args) {
