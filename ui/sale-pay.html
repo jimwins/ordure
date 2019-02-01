@@ -1,11 +1,7 @@
 <set title="{{ sprintf('Sale %07d @ Raw Materials Art Supplies', @sale.id) }}">
 <include href="header.html" />
 <div class="row">
-  <div class="col-md-8">
-    <include href="sale-invoice.html" />
-  </div>
-
-  <div class="col-md-4">
+  <div class="col-md-push-8 col-md-4">
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="pay-credit-card-heading">
@@ -198,6 +194,10 @@
 
     </div><!-- /.panel-group -->
   </div><!-- /.col-sm-4 -->
+
+  <div class="col-md-pull-4 col-md-8">
+    <include href="sale-invoice.html" />
+  </div>
 
 </div>
 <set script="handle-payment.js" />

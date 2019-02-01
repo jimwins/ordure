@@ -18,6 +18,7 @@ class Sale {
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
+    $f3->route("GET|HEAD /sale/@sale/checkout", 'Sale->pay');
     $f3->route("GET|HEAD /sale/@sale/paid", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/thanks", 'Sale->status');
     $f3->route("GET|HEAD /sale/@sale/status", 'Sale->status');
@@ -41,7 +42,7 @@ class Sale {
                'Sale->process_other_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
-    $f3->route("POST /sale/@sale/set-address [ajax]", 'Sale->set_address');
+    $f3->route("POST /sale/@sale/set-address", 'Sale->set_address');
     $f3->route("POST /sale/@sale/remove-address [ajax]",
                'Sale->remove_address');
     $f3->route("POST /sale/@sale/set-in-store-pickup [ajax]",
@@ -49,6 +50,8 @@ class Sale {
     $f3->route("POST /sale/@sale/set-shipping [ajax]", 'Sale->set_shipping');
     $f3->route("POST /sale/@sale/ship-to-billing [ajax]",
                'Sale->ship_to_billing_address');
+    $f3->route("POST /sale/@sale/bill-to-shipping",
+               'Sale->bill_to_shipping_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
@@ -384,7 +387,12 @@ class Sale {
       $f3->reroute('./');
     }
 
-    echo Template::instance()->render('sale-pay.html');
+    if ($f3->get('REQUEST.billing') || !$sale->billing_address_id) {
+      echo Template::instance()->render('sale-billing.html');
+    } else {
+      $f3->set('action', 'pay');
+      echo Template::instance()->render('sale-pay.html');
+    }
   }
 
   function status($f3, $args) {
@@ -607,14 +615,9 @@ class Sale {
   }
 
   function set_address($f3, $args) {
-    $sale_uuid= $f3->get('PARAMS.sale');
+    $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
 
-    if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
-        $f3->error(403);
-    } else {
-      $sale_uuid= $f3->get('COOKIE.cartID');
-    }
+    $type= $f3->get('REQUEST.type');
 
     if (!$sale_uuid)
       $f3->error(404);
@@ -623,24 +626,23 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    /* If we got an email and there's no person_id, we set them on the sale */
-    $email= $f3->get('REQUEST.email');
-    if ($email && !$sale->person_id) {
-      $sale->email= trim($email);
-      $sale->name= trim($f3->get('REQUEST.name'));
+    if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
+        $type != 'billing' &&
+        \Auth::authenticated_user($f3) != 1) {
+      $f3->error(403);
     }
 
-    if (!in_array($sale->status, array('new','cart','review')))
+    if (!in_array($sale->status, array('new','cart','review','unpaid')))
       $f3->error(500);
-
-    $type= $f3->get('REQUEST.type');
 
     $address= new DB\SQL\Mapper($db, 'sale_address');
     if (($address_id= $f3->get('REQUEST.id'))) {
+      // Can't change address #1, it's special
+      if ($address_id == 1) $f3->error(500);
       $address->load(array('id = ?', $address_id))
         or $f3->error(404);
     }
-    
+
     $address->name= trim($f3->get('REQUEST.name'));
     $address->company= trim($f3->get('REQUEST.company'));
     $address->address1= trim($f3->get('REQUEST.address1'));
@@ -662,13 +664,15 @@ class Sale {
 
     $sale->save();
 
-    $this->update_shipping_and_tax($f3, $sale);
+    if ($type == 'shipping') {
+      $this->update_shipping_and_tax($f3, $sale);
+    }
 
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
+    $f3->reroute('./checkout?uuid=' . $sale->uuid);
   }
 
   function remove_address($f3, $args) {
@@ -726,7 +730,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
+    $f3->reroute('./checkout?uuid=' . $sale->uuid);
   }
 
   function ship_to_billing_address($f3, $args) {
@@ -759,7 +763,31 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
+    $f3->reroute('./checkout?uuid=' . $sale->uuid);
+  }
+
+  function bill_to_shipping_address($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if (!in_array($sale->status, [ 'new', 'review', 'cart', 'unpaid' ]))
+      $f3->error(500);
+
+    $sale->billing_address_id= $sale->shipping_address_id;
+
+    $sale->save();
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('./checkout');
   }
 
   function set_shipping($f3, $args) {
@@ -884,7 +912,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart/checkout?uuid=' . $sale->uuid);
+    $f3->reroute('./checkout?uuid=' . $sale->uuid);
   }
 
   function add_exemption($f3, $args) {
