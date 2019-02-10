@@ -146,11 +146,10 @@ loadScript('{{ @STATIC }}/code/combined-2018-07-15.js', function() {
   _paq.push(['enableLinkTracking']);
   (function() {
     var u=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@PIWIK_ROOT}}/";
-    var st=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@STATIC}}/piwik/";
     _paq.push(['setTrackerUrl', u+'piwik.php']);
     _paq.push(['setSiteId', {{ @PIWIK_SITE }}]);
     var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
-    g.defer=true; g.async=true; g.src=st+'piwik.js'; s.parentNode.insertBefore(g,s);
+    g.defer=true; g.async=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
   })();
 </script>
 <noscript><p><img src="{{ @PIWIK_ROOT }}/piwik.php?idsite={{ @PIWIK_SITE }}" style="border:0;" alt="" /></p></noscript>
