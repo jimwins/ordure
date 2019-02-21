@@ -203,6 +203,8 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
 
   $rows= $db->exec($q, $fn);
 
+  touch('/tmp/last-loaded-prices');
+
   echo "Loaded $rows prices.";
 });
 

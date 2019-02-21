@@ -17,6 +17,8 @@ class Catalog {
       $f3->route("GET|HEAD /$CATALOG/search", 'Catalog->search');
     }
 
+    $f3->route("GET|HEAD /$CATALOG/status", 'Catalog->status');
+
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
@@ -368,6 +370,16 @@ class Catalog {
 
     echo Template::instance()->render('catalog-oembed.json',
                                       'application/json');
+  }
+
+  function status($f3, $args) {
+    $file= '/tmp/last-loaded-prices';
+    if (file_exists($file) &&
+        filemtime($file) > time() - (15 * 60)) {
+      echo "Prices are current.";
+      return;
+    }
+    echo "ERROR: Prices are not current.";
   }
 
   function search($f3, $args) {
