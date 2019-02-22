@@ -74,7 +74,12 @@ $f3->set('ONERROR', function ($f3) {
         $redir= new DB\SQL\Mapper($db, 'catalog_redirect');
         if ($redir->load(array('? LIKE source', $path))) {
           $q= $f3->get('QUERY');
-          $f3->reroute('/' . $catalog . '/' . $redir->dest . ($q ? "?$q" : ""));
+          if (($pos= strpos($redir->source, '%'))) {
+            $dest= $redir->dest . substr($path, $pos);
+          } else {
+            $dest= $redir->dest;
+          }
+          $f3->reroute('/' . $catalog . '/' . $dest . ($q ? "?$q" : ""));
         }
       } else {
         $redir= new DB\SQL\Mapper($db, 'redirect');
