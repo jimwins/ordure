@@ -72,7 +72,7 @@ $f3->set('ONERROR', function ($f3) {
       if (!strncmp($path, '/' . $catalog . '/', strlen($catalog)+2)) {
         $path= substr($path, strlen($catalog)+2);
         $redir= new DB\SQL\Mapper($db, 'catalog_redirect');
-        if ($redir->load(array('source LIKE ?', $path . '%'))) {
+        if ($redir->load(array('? LIKE source', $path))) {
           $q= $f3->get('QUERY');
           $f3->reroute('/' . $catalog . '/' . $redir->dest . ($q ? "?$q" : ""));
         }
