@@ -64,15 +64,25 @@ $f3->set('ONERROR', function ($f3) {
     $code= $f3->get('ERROR.code');
 
     if ($code == "404") {
-      $redir= new DB\SQL\Mapper($db, 'redirect');
-
       $path= $f3->get('PATH');
 
       if ($path == '/') die("Confused. Hang on.");
 
-      if ($redir->load(array('source LIKE ?', $path . '%'))) {
-        $q= $f3->get('QUERY');
-        $f3->reroute($redir->dest . ($q ? "?$q" : "")); 
+      $catalog= $f3->get('CATALOG');
+      if (!strncmp($path, '/' . $catalog . '/', strlen($catalog)+2)) {
+        $path= substr($path, strlen($catalog)+2);
+        $redir= new DB\SQL\Mapper($db, 'catalog_redirect');
+        if ($redir->load(array('source LIKE ?', $path . '%'))) {
+          $q= $f3->get('QUERY');
+          $f3->reroute('/' . $catalog . '/' . $redir->dest . ($q ? "?$q" : ""));
+        }
+      } else {
+        $redir= new DB\SQL\Mapper($db, 'redirect');
+
+        if ($redir->load(array('source LIKE ?', $path . '%'))) {
+          $q= $f3->get('QUERY');
+          $f3->reroute($redir->dest . ($q ? "?$q" : ""));
+        }
       }
     }
 
