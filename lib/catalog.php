@@ -19,6 +19,8 @@ class Catalog {
 
     $f3->route("GET|HEAD /$CATALOG/status", 'Catalog->status');
 
+    $f3->route("GET|HEAD /$CATALOG/wordforms.txt", 'Catalog->wordforms');
+
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
   }
 
@@ -380,6 +382,17 @@ class Catalog {
       return;
     }
     echo "ERROR: Prices are not current.";
+  }
+
+  function wordforms($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $q= "SELECT CONCAT(source, ' > ', dest) wordform FROM wordform";
+    $wordforms= $db->exec($q);
+
+    foreach ($wordforms as $wordform) {
+      echo $wordform['wordform'], "\n";
+    }
   }
 
   function search($f3, $args) {
