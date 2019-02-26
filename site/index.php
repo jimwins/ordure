@@ -141,23 +141,6 @@ class Helper extends \Prefab {
 $f3->route('GET|HEAD /*', 'Page->getPage');
 $f3->route('GET|HEAD /', 'Page->getPage');
 
-$f3->route('GET|HEAD /sales-tax-policy', function($f3, $args) {
-
-  $db= $f3->get('DBH');
-
-  $result= \Web::instance()->request($f3->get('TAXCLOUD_POLICY_URL'));
-
-  $page = array(
-    'title' => 'Sales Tax Policy @ Raw Materials Art Supplies',
-    'content' => $result['body'],
-  );
-
-  $f3->set('PAGE', $page);
-
-  echo Template::instance()->render("page.html");
-
-});
-
 $f3->route('POST /contact', function ($f3, $args) {
 
   if (preg_match('/(seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
