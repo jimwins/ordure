@@ -22,6 +22,8 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/wordforms.txt", 'Catalog->wordforms');
 
     $f3->route("GET|HEAD /oembed", 'Catalog->oembed');
+
+    $f3->route("GET|HEAD /$CATALOG/sitemap.xml", 'Catalog->sitemap');
   }
 
 
@@ -372,6 +374,38 @@ class Catalog {
 
     echo Template::instance()->render('catalog-oembed.json',
                                       'application/json');
+  }
+
+  function sitemap($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $base= $f3->get('BASE');
+    $cat= $f3->get('CATALOG');
+
+    $q= "SELECT CONCAT((SELECT CONCAT(dept.slug, '/', subdept.slug)
+                          FROM department dept
+                          JOIN department subdept
+                            ON dept.id = subdept.parent
+                         WHERE product.department = subdept.id), '/', slug)
+                  AS slug,
+                DATE_FORMAT(modified, '%Y-%m-%dT%TZ') AS modified
+           FROM product
+          WHERE active
+          ORDER BY 1";
+
+    $urls= $db->exec($q);
+
+    echo '<?xml version="1.0" encoding="UTF-8"?>', "\n",
+         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', "\n";
+    foreach ($urls as $url) {
+      echo "  <url>\n",
+           '    <loc>https://', $_SERVER['HTTP_HOST'], '/',
+                                $cat, "/", $url['slug'], "</loc>\n",
+           '    <lastmod>', $url['modified'], "</lastmod>\n",
+           "  </url>\n";
+      echo $wordform['wordform'], "\n";
+    }
+    echo '</urlset>', "\n";
   }
 
   function status($f3, $args) {
