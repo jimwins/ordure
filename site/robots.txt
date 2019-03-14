@@ -1,3 +1,5 @@
+Sitemap: https://rawmaterialsla.com/sitemap.xml
+
 User-agent: *
 Disallow: /sale/
 Disallow: /cart
