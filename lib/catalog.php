@@ -192,9 +192,25 @@ class Catalog {
     $product->brand_name = '(SELECT name
                                FROM brand
                               WHERE brand = brand.id)';
+    $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
+                                                        "uuid", image.uuid,
+                                                        "name", image.name,
+                                                        "alt_text", image.alt_text,
+                                                        "width", image.width,
+                                                        "height", image.height,
+                                                        "ext", image.ext))
+                        FROM product_to_image
+                        LEFT JOIN image ON image.id = product_to_image.image_id
+                       WHERE product_to_image.product_id = product.id
+                       GROUP BY product.id)';
     $product->load(array('slug = ? AND department = ?',
                          $f3->get('PARAMS.product'),
                          $dept->id));
+    $product->media= json_decode($product->media, true);
+    if (!$product->media) {
+      $product->media= [ [ 'src' => $product->image,
+                           'alt_text' => $product->name ] ];
+    }
     $f3->set('product', $product);
 
     $active= "";

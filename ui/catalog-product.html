@@ -21,20 +21,46 @@
     <div class="row">
       <div class="col-sm-9">
         {{ @markdown(@product.description) | raw }}
-
       </div>
 
       <div class="col-sm-3">
-        <check if="@product.image">
-          <div class="thumbnail pull-right">
-            <img src="{{ @STATIC . @product.image }}" width="240">
-            <check if="{{ ! @NO_PINTEREST }}">
-            <div class="caption text-center">
-              <a href="//www.pinterest.com/pin/create/button/?url={{ urlencode('http://' . $_SERVER['HTTP_HOST'] . @URI) }}&media={{ urlencode('http:' . @STATIC . @product.image) }}&description={{ urlencode(@product.name) }}" data-pin-do="buttonPin" data-pin-config="beside" data-pin-color="white"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_white_20.png" /></a>
+        <div class="thumbnail pull-right">
+          <check if="count(@product.media) > 1">
+            <div id="carousel-product" class="carousel slide"
+                 data-ride="carousel"
+                 style="width: 240px; height: 240px; overflow: hidden">
+              <ol class="carousel-indicators">
+                <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
+                  <li data-target="#carousel-product" data-slide-to="{{ @index }}" class="{{ @index == 1 ? 'active' : '' }}">
+                </repeat>
+              </ol>
+              <div class="carousel-inner" role="listbox">
+          </check>
+          <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
+            <div class="item {{ @index == 1 ? 'active' : '' }}">
+              <img class="center-block" src="{{ @STATIC }}{{ @item.src ? @item.src : ('/i/st/' . @item.uuid . '.jpg') }}" alt="{{ @item.alt_text }}" style="width: auto; height: 240px; max-height:240px">
+              <check if="{{ ! @NO_PINTEREST }}">
+                <div class="caption text-center">
+                  <a href="//www.pinterest.com/pin/create/button/?url={{ urlencode('https://' . $_SERVER['HTTP_HOST'] . @URI) }}&media={{ urlencode('https:' . @STATIC . (@item.src ?: ('/i/st/' . @item.uuid . '.jpg'))) }}&description={{ urlencode(@product.name) }}" data-pin-do="buttonPin" data-pin-config="beside" data-pin-color="white"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_white_20.png" /></a>
+                </div>
+              </check>
             </div>
-            </check>
-          </div>
-        </check>
+          </repeat>
+          <check if="count(@product.media) > 1">
+              </div>
+              <a class="left carousel-control" href="#carousel-product"
+                 role="button" data-slide="prev">
+                <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                <span class="sr-only">Previous</span>
+              </a>
+              <a class="right carousel-control" href="#carousel-product"
+                 role="button" data-slide="next">
+                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                <span class="sr-only">Next</span>
+              </a>
+            </div>
+          </check>
+        </div>
       </div>
     </div>
 

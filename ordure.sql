@@ -1,11 +1,12 @@
+--
 -- Database: ordure
 -- ------------------------------------------------------
--- Server version	8.0.11
+-- Server version	8.0.13
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+ SET NAMES utf8mb4 ;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -19,7 +20,7 @@
 
 DROP TABLE IF EXISTS `auth`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `auth` (
   `person_id` int(10) unsigned NOT NULL,
   `password_hash` varchar(255) DEFAULT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE `auth` (
 
 DROP TABLE IF EXISTS `auth_token`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `auth_token` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `selector` char(12) DEFAULT NULL,
@@ -56,11 +57,27 @@ CREATE TABLE `auth_token` (
 DROP TABLE IF EXISTS `brand`;
 /*!50001 DROP VIEW IF EXISTS `brand`*/;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `brand` AS SELECT 
  1 AS `id`,
  1 AS `name`,
  1 AS `slug`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary view structure for view `catalog_redirect`
+--
+
+DROP TABLE IF EXISTS `catalog_redirect`;
+/*!50001 DROP VIEW IF EXISTS `catalog_redirect`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `catalog_redirect` AS SELECT 
+ 1 AS `id`,
+ 1 AS `source`,
+ 1 AS `dest`,
+ 1 AS `added`,
+ 1 AS `modified`*/;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -70,7 +87,7 @@ SET character_set_client = @saved_cs_client;
 DROP TABLE IF EXISTS `department`;
 /*!50001 DROP VIEW IF EXISTS `department`*/;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `department` AS SELECT 
  1 AS `id`,
  1 AS `parent`,
@@ -80,13 +97,31 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `image`
+--
+
+DROP TABLE IF EXISTS `image`;
+/*!50001 DROP VIEW IF EXISTS `image`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `image` AS SELECT 
+ 1 AS `id`,
+ 1 AS `uuid`,
+ 1 AS `name`,
+ 1 AS `alt_text`,
+ 1 AS `width`,
+ 1 AS `height`,
+ 1 AS `ext`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `item`
 --
 
 DROP TABLE IF EXISTS `item`;
 /*!50001 DROP VIEW IF EXISTS `item`*/;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `item` AS SELECT 
  1 AS `id`,
  1 AS `product`,
@@ -119,7 +154,7 @@ SET character_set_client = @saved_cs_client;
 
 DROP TABLE IF EXISTS `loyalty`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `loyalty` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -139,7 +174,7 @@ CREATE TABLE `loyalty` (
 
 DROP TABLE IF EXISTS `page`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `page` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(255) DEFAULT '',
@@ -159,7 +194,7 @@ CREATE TABLE `page` (
 
 DROP TABLE IF EXISTS `person`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `person` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `role` enum('customer','employee','vendor') DEFAULT 'customer',
@@ -179,7 +214,7 @@ CREATE TABLE `person` (
 DROP TABLE IF EXISTS `product`;
 /*!50001 DROP VIEW IF EXISTS `product`*/;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `product` AS SELECT 
  1 AS `id`,
  1 AS `department`,
@@ -195,13 +230,26 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary view structure for view `product_to_image`
+--
+
+DROP TABLE IF EXISTS `product_to_image`;
+/*!50001 DROP VIEW IF EXISTS `product_to_image`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `product_to_image` AS SELECT 
+ 1 AS `product_id`,
+ 1 AS `image_id`*/;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary view structure for view `prop65_warning`
 --
 
 DROP TABLE IF EXISTS `prop65_warning`;
 /*!50001 DROP VIEW IF EXISTS `prop65_warning`*/;
 SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
+SET character_set_client = utf8mb4;
 /*!50001 CREATE VIEW `prop65_warning` AS SELECT 
  1 AS `id`,
  1 AS `warning`*/;
@@ -213,7 +261,7 @@ SET character_set_client = @saved_cs_client;
 
 DROP TABLE IF EXISTS `redirect`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `redirect` (
   `source` varchar(255) NOT NULL,
   `dest` varchar(255) NOT NULL,
@@ -227,7 +275,7 @@ CREATE TABLE `redirect` (
 
 DROP TABLE IF EXISTS `sale`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `uuid` varchar(50) DEFAULT NULL,
@@ -255,7 +303,7 @@ CREATE TABLE `sale` (
 
 DROP TABLE IF EXISTS `sale_address`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale_address` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -278,7 +326,7 @@ CREATE TABLE `sale_address` (
 
 DROP TABLE IF EXISTS `sale_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
@@ -303,7 +351,7 @@ CREATE TABLE `sale_item` (
 
 DROP TABLE IF EXISTS `sale_note`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale_note` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned DEFAULT NULL,
@@ -322,7 +370,7 @@ CREATE TABLE `sale_note` (
 
 DROP TABLE IF EXISTS `sale_payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
@@ -341,7 +389,7 @@ CREATE TABLE `sale_payment` (
 
 DROP TABLE IF EXISTS `sale_shipment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `sale_shipment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
@@ -362,7 +410,7 @@ CREATE TABLE `sale_shipment` (
 
 DROP TABLE IF EXISTS `scat_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+ SET character_set_client = utf8mb4 ;
 CREATE TABLE `scat_item` (
   `retail_price` decimal(9,2) NOT NULL DEFAULT '0.00',
   `discount_type` enum('percentage','relative','fixed') DEFAULT NULL,
@@ -374,6 +422,22 @@ CREATE TABLE `scat_item` (
   PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Temporary view structure for view `wordform`
+--
+
+DROP TABLE IF EXISTS `wordform`;
+/*!50001 DROP VIEW IF EXISTS `wordform`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8mb4;
+/*!50001 CREATE VIEW `wordform` AS SELECT 
+ 1 AS `id`,
+ 1 AS `source`,
+ 1 AS `dest`,
+ 1 AS `added`,
+ 1 AS `modified`*/;
+SET character_set_client = @saved_cs_client;
 
 --
 -- Dumping routines for database 'ordure'
@@ -435,6 +499,24 @@ DELIMITER ;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `catalog_redirect`
+--
+
+/*!50001 DROP VIEW IF EXISTS `catalog_redirect`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`scat`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `catalog_redirect` AS select `scat`.`redirect`.`id` AS `id`,`scat`.`redirect`.`source` AS `source`,`scat`.`redirect`.`dest` AS `dest`,`scat`.`redirect`.`added` AS `added`,`scat`.`redirect`.`modified` AS `modified` from `scat`.`redirect` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `department`
 --
 
@@ -448,6 +530,24 @@ DELIMITER ;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `department` AS select `scat`.`department`.`id` AS `id`,`scat`.`department`.`parent_id` AS `parent`,`scat`.`department`.`name` AS `name`,`scat`.`department`.`slug` AS `slug`,0 AS `pos` from `scat`.`department` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `image`
+--
+
+/*!50001 DROP VIEW IF EXISTS `image`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`scat`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `image` AS select `scat`.`image`.`id` AS `id`,`scat`.`image`.`uuid` AS `uuid`,`scat`.`image`.`name` AS `name`,`scat`.`image`.`alt_text` AS `alt_text`,`scat`.`image`.`width` AS `width`,`scat`.`image`.`height` AS `height`,`scat`.`image`.`ext` AS `ext` from `scat`.`image` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -489,6 +589,24 @@ DELIMITER ;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `product_to_image`
+--
+
+/*!50001 DROP VIEW IF EXISTS `product_to_image`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`scat`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `product_to_image` AS select `scat`.`product_to_image`.`product_id` AS `product_id`,`scat`.`product_to_image`.`image_id` AS `image_id` from `scat`.`product_to_image` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `prop65_warning`
 --
 
@@ -502,6 +620,24 @@ DELIMITER ;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`%` SQL SECURITY DEFINER */
 /*!50001 VIEW `prop65_warning` AS select `scat`.`prop65_warning`.`id` AS `id`,`scat`.`prop65_warning`.`warning` AS `warning` from `scat`.`prop65_warning` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `wordform`
+--
+
+/*!50001 DROP VIEW IF EXISTS `wordform`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = latin1 */;
+/*!50001 SET character_set_results     = latin1 */;
+/*!50001 SET collation_connection      = latin1_swedish_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`scat`@`%` SQL SECURITY DEFINER */
+/*!50001 VIEW `wordform` AS select `scat`.`wordform`.`id` AS `id`,`scat`.`wordform`.`source` AS `source`,`scat`.`wordform`.`dest` AS `dest`,`scat`.`wordform`.`added` AS `added`,`scat`.`wordform`.`modified` AS `modified` from `scat`.`wordform` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
