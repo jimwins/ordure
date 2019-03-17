@@ -19,11 +19,11 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-8">
+      <div class="col-sm-6">
         {{ @markdown(@product.description) | raw }}
       </div>
 
-      <div class="col-sm-4">
+      <div class="col-sm-6">
         <div class="thumbnail pull-right">
           <check if="count(@product.media) > 1">
             <div id="carousel-product" class="carousel slide"
