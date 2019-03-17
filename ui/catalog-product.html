@@ -31,7 +31,7 @@
                  style="width: 384px; height: 384px; overflow: hidden">
               <ol class="carousel-indicators">
                 <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
-                  <li data-target="#carousel-product" data-slide-to="{{ @index }}" class="{{ @index == 1 ? 'active' : '' }}">
+                  <li data-target="#carousel-product" data-slide-to="{{ @index - 1 }}" class="{{ @index == 1 ? 'active' : '' }}">
                 </repeat>
               </ol>
               <div class="carousel-inner" role="listbox">
