@@ -19,16 +19,16 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-9">
+      <div class="col-sm-8">
         {{ @markdown(@product.description) | raw }}
       </div>
 
-      <div class="col-sm-3">
+      <div class="col-sm-4">
         <div class="thumbnail pull-right">
           <check if="count(@product.media) > 1">
             <div id="carousel-product" class="carousel slide"
                  data-ride="carousel"
-                 style="width: 240px; height: 240px; overflow: hidden">
+                 style="width: 384px; height: 384px; overflow: hidden">
               <ol class="carousel-indicators">
                 <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
                   <li data-target="#carousel-product" data-slide-to="{{ @index }}" class="{{ @index == 1 ? 'active' : '' }}">
@@ -38,7 +38,7 @@
           </check>
           <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
             <div class="item {{ @index == 1 ? 'active' : '' }}">
-              <img class="center-block" src="{{ @STATIC }}{{ @item.src ? @item.src : ('/i/st/' . @item.uuid . '.jpg') }}" alt="{{ @item.alt_text }}" style="width: auto; height: 240px; max-height:240px">
+              <img class="center-block" src="{{ @STATIC }}{{ @item.src ? @item.src : ('/i/st/' . @item.uuid . '.jpg') }}" alt="{{ @item.alt_text }}" style="width: auto; height: 384px; max-height:384px">
               <check if="{{ ! @NO_PINTEREST }}">
                 <div class="caption text-center">
                   <a href="//www.pinterest.com/pin/create/button/?url={{ urlencode('https://' . $_SERVER['HTTP_HOST'] . @URI) }}&media={{ urlencode('https:' . @STATIC . (@item.src ?: ('/i/st/' . @item.uuid . '.jpg'))) }}&description={{ urlencode(@product.name) }}" data-pin-do="buttonPin" data-pin-config="beside" data-pin-color="white"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_white_20.png" /></a>
