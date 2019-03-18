@@ -207,7 +207,7 @@ class Catalog {
                          $f3->get('PARAMS.product'),
                          $dept->id));
     $product->media= json_decode($product->media, true);
-    if (!$product->media) {
+    if (!$product->media && $product->image) {
       $product->media= [ [ 'src' => $product->image,
                            'alt_text' => $product->name ] ];
     }
