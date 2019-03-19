@@ -37,14 +37,40 @@ class GiftCard {
       $f3->error(500, $err['message']);
     }
 
-    $headers= array();
-    $headers[]= "From: " . $f3->get('CONTACT');
-    $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
 
-    @mail($f3->get('CONTACT'),
-          "Sale: Gift Card",
-          Template::instance()->render('email-gift-card-sale.txt'),
-          implode("\r\n", $headers));
+    $text= Template::instance()->render('email-gift-card-sale.txt');
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'text' => $text,
+        'subject' => "Sale: Gift Card",
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+      ],
+      'recipients' => [
+        [
+          'address' => [
+            'name' => '',
+            'email' => $f3->get('CONTACT_SALES'),
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+        'transactional' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      error_log(sprintf("SparkPost failure: %s (%s)",
+                        $e->getMessage(), $e->getCode()));
+    }
 
     $f3->reroute('thanks');
   }
