@@ -147,16 +147,43 @@ $f3->route('POST /contact', function ($f3, $args) {
     $f3->error(500, "Sorry, your comment looks like spam.");
   }
 
-  $headers= array();
-  $headers[]= "From: " . $f3->get('CONTACT');
-  $headers[]= "Reply-To: " . $f3->get('REQUEST.email');
-
   $template= preg_replace('/[^a-z]/', '', $f3->get('REQUEST.template'));
 
-  @mail($f3->get('CONTACT'),
-        $f3->get('REQUEST.subject'),
-        Template::instance()->render('email-' . $template . '.txt'),
-        implode("\r\n", $headers));
+  $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+  $sparky= new \SparkPost\SparkPost($httpClient,
+                         [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+  $text= Template::instance()->render('email-' . $template . '.txt');
+
+  $promise= $sparky->transmissions->post([
+    'content' => [
+      'text' => $text,
+      'subject' => $f3->get('REQUEST.subject'),
+      'from' => array('name' => 'Raw Materials Art Supplies',
+                      'email' => $f3->get('CONTACT_SALES')),
+      'reply_to' => $f3->get('REQUEST.email')
+    ],
+    'recipients' => [
+      [
+        'address' => [
+          'name' => '',
+          'email' => $f3->get('CONTACT'),
+        ],
+      ],
+    ],
+    'options' => [
+      'inlineCss' => true,
+      'transactional' => true,
+    ],
+  ]);
+
+  try {
+    $response= $promise->wait();
+    // XXX handle response
+  } catch (\Exception $e) {
+    error_log(sprintf("SparkPost failure: %s (%s)",
+                      $e->getMessage(), $e->getCode()));
+  }
 
   $db= $f3->get('DBH');
 
