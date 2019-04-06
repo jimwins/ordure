@@ -53,7 +53,7 @@
       <th colspan="5" class="text-right">
         Shipping &amp; handling:
       </th>
-      <td class="text-right">{{ @amount(@sale.shipping) }}</td>
+      <td class="text-right" id="shipping">{{ @amount(@sale.shipping) }}</td>
     </tr>
     <tr>
       <th colspan="5" class="text-right">
@@ -66,7 +66,7 @@
   </false>
 </check>
       </th>
-      <td class="text-right">
+      <td class="text-right" id="tax">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
             && !@sale.tax_calculated }}">
   <true>
@@ -80,7 +80,7 @@
     </tr>
     <tr>
       <th colspan="5" class="text-right">Total:</th>
-      <td class="text-right">
+      <td class="text-right" id="total">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
             && !@sale.tax_calculated }}">
   <true>
@@ -102,8 +102,8 @@
           <check if="{{ @data.method == 'paypal' }}">
             Paid by PayPal
           </check>
-          <check if="{{ @data.method == 'bitcoin' }}">
-            Paid with Bitcoin
+          <check if="{{ @data.method == 'amazon' }}">
+            Paid with Amazon Pay
           </check>
           <check if="{{ @data.method == 'gift' }}">
             Paid with Gift Card 

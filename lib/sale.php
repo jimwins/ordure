@@ -72,6 +72,8 @@ class Sale {
       $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
       $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
       $f3->route("POST /cart/place-order", 'Sale->place_order');
+      $f3->route("POST /cart/amz-get-details", 'Sale->amz_get_details');
+      $f3->route("POST /cart/amz-process-order", 'Sale->amz_process_order');
       $f3->route("GET /cart/forget", 'Sale->forget_cart');
     }
   }
@@ -343,8 +345,12 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
-      $stages= [ 'login', 'shipping', 'payment' ];
+      $stages= [ 'login', 'shipping', 'payment', 'amz-select' ];
       $stage= $f3->get('REQUEST.stage');
+
+      if ($f3->get('REQUEST.access_token')) {
+        $stage= 'amz-select';
+      }
 
       if (!in_array($stage, $stages)) {
         if ($sale->shipping_address_id) {
@@ -364,6 +370,193 @@ class Sale {
     } else {
       $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
     }
+  }
+
+  function get_amz_client($f3) {
+    $config= [
+      'merchant_id' => $f3->get('AMZ_MERCHANT_ID'),
+      'access_key' => $f3->get('AMZ_ACCESS_KEY'),
+      'secret_key' => $f3->get('AMZ_SECRET_KEY'),
+      'client_id' => $f3->get('AMZ_CLIENT_ID'),
+      'region' => $f3->get('AMZ_REGION'),
+      'currency_code' => $f3->get('AMZ_CURRENCY_CODE'),
+      'sandbox' => (bool)$f3->get('DEBUG'),
+    ];
+
+    return new \AmazonPay\Client($config);
+  }
+
+  function amz_get_details($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
+
+    if (!$uuid) {
+      $f3->error(500);
+    }
+
+    $db= $f3->get('DBH');
+
+    $client= $this->get_amz_client($f3);
+
+    error_log("Loading $uuid.");
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    $order_reference_id= $f3->get('REQUEST.order_reference_id');
+    if ($order_reference_id) {
+      $sale->amz_order_reference_id=
+        $f3->get('REQUEST.order_reference_id');
+    }
+
+    $params= [
+      'amount' => $sale->total,
+      'currency_code' => $config['currency_code'],
+      'seller_order_id' => $sale->id,
+      'store_name' => 'Raw Materials Art Supplies',
+      'seller_note' => 'Your order of art supplies',
+      'amazon_order_reference_id' => $sale->amz_order_reference_id,
+    ];
+
+    $res= $client->setOrderReferenceDetails($params);
+    if ($client->success)
+    {
+      $params['access_token']= $f3->get('REQUEST.access_token');
+      $res= $client->getOrderReferenceDetails($params);
+      $details= $res->toArray();
+
+      /* Save details */
+      $sale->name= $details['GetOrderReferenceDetailsResult']
+                           ['OrderReferenceDetails']
+                           ['Buyer']['Name'];
+      $sale->email= $details['GetOrderReferenceDetailsResult']
+                            ['OrderReferenceDetails']
+                            ['Buyer']['Email'];
+
+      $amz_address= $details['GetOrderReferenceDetailsResult']
+                            ['OrderReferenceDetails']
+                            ['Destination']
+                            ['PhysicalDestination'];
+
+      /* We always just create new address records */
+      $address= new DB\SQL\Mapper($db, 'sale_address');
+
+      $address->name= $amz_address['Name'];
+      $address->address1= $amz_address['AddressLine1'];
+      $address->address2= $amz_address['AddressLine2'];
+      $address->city= $amz_address['City'];
+      $address->state= $amz_address['StateOrRegion'];
+      $address->zip5= $amz_address['PostalCode'];
+      $address->phone= $amz_address['Phone'];
+      $address->verified= 0;
+
+      $address->save();
+
+      $sale->shipping_address_id= $address->id;
+    }
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    $f3->set('PARAMS.sale', $uuid);
+    return $this->json($f3, $args);
+  }
+
+  function amz_process_order($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    if (!$uuid) {
+      $f3->error(404);
+    }
+
+    $db= $f3->get('DBH');
+
+    $client= $this->get_amz_client($f3);
+
+    $sale= $this->load($f3, $uuid, 'uuid');
+    if ($sale->status != 'cart')
+      $f3->error(500);
+
+    $params= [
+      'amazon_order_reference_id' => $sale->amz_order_reference_id,
+      'mws_auth_token' => null,
+    ];
+
+    $res= $client->confirmOrderReference($params);
+    if ($client->success)
+    {
+      $params['authorization_amount']= $sale->total;
+      $params['authorization_reference_id']= uniqid();
+      $params['seller_authorization_note']=
+        'Authorizing and capturing the payment';
+      $params['transaction_timeout']= 0;
+
+      $params['capture_now']= false;
+      $params['soft_descriptor']= null;
+
+      $res= $client->authorize($params);
+
+      if ($client->success) {
+        $details= $res->toArray();
+        error_log(json_encode($details));
+
+        if ($details['AuthorizeResult']
+                    ['AuthorizationDetails']
+                    ['AuthorizationStatus']
+                    ['State']
+              != 'Open')
+        {
+          // XXX Send email to admin
+
+          error_log(json_encode($details));
+
+          // XXX turn reason into friendlier text
+          $f3->error(500,
+                     $details['AuthorizeResult']
+                             ['AuthorizationDetails']
+                             ['AuthorizationStatus']
+                             ['ReasonDescription']);
+        }
+
+        $payment= new DB\SQL\Mapper($db, 'sale_payment');
+        $payment->sale_id= $sale->id;
+        $payment->method= 'amazon';
+        $payment->amount=
+          $details['AuthorizeResult']
+                  ['AuthorizationDetails']
+                  ['AuthorizationAmount']
+                  ['Amount'];
+        $payment->data= json_encode($details['AuthorizeResult']
+                                            ['AuthorizationDetails']);
+        $payment->save();
+
+        self::capture_sales_tax($f3, $sale);
+
+        $sale->status= 'paid';
+        $sale->save();
+      }
+
+    }
+
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+
+    $db= $f3->get('DBH');
+    $note= new DB\SQL\Mapper($db, 'sale_note');
+    $note->sale_id= $sale->id;
+    $note->person_id= $sale->person_id;
+    $note->content= $comment;
+    $note->save();
+
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    self::send_order_email($f3, $comment);
+    self::send_order_placed_email($f3);
+
+    $this->forget_cart($f3, $args);
+
+    $f3->reroute("/sale/" . $sale->uuid);
   }
 
   function forget_cart($f3, $args) {
@@ -1262,8 +1455,8 @@ class Sale {
 
     $f3->abort(); // let client go
 
-    // recopy
-    $sale->copyTo('sale');
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
   }
@@ -1334,8 +1527,8 @@ class Sale {
 
     $f3->abort(); // let client go
 
-    // recopy
-    $sale->copyTo('sale');
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
   }
@@ -1484,8 +1677,8 @@ class Sale {
 
     $f3->abort(); // let client go
 
-    // recopy
-    $sale->copyTo('sale');
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
   }
@@ -1520,8 +1713,8 @@ class Sale {
 
     $f3->abort(); // let client go
 
-    // recopy
-    $sale->copyTo('sale');
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
   }
@@ -1558,8 +1751,8 @@ class Sale {
     $note->content= $comment;
     $note->save();
 
-    // recopy
-    $sale->copyTo('sale');
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3, $comment);
     self::send_order_placed_email($f3);

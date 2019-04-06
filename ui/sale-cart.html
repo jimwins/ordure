@@ -1,5 +1,7 @@
 <set title="Shopping Cart @ Raw Materials Art Supplies">
 
+<set header_include="amazon-pay.html" />
+
 <include href="header.html" />
 
 <div class="row">
@@ -24,18 +26,27 @@
         <form class="row" method="GET" action="/cart/checkout">
           <input type="hidden" name="uuid" value="{{ @sale.uuid }}">
 
-          <div class="form-group col-sm-12">
-            <check if="{{ @REQUEST.added }}">
-              <a href="/{{ @REQUEST.added }}"
-                 class="btn btn-link btn-lg btn-block">
-                <i class="fa fa-shopping-cart"></i>
-                Return to shopping
-              </a>
-            </check>
-            <button type="submit" class="btn btn-primary btn-lg btn-block">
-              <i class="fa fa-sign-in"></i>
-              Check out
-            </button>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-sm-4">
+                <check if="{{ @REQUEST.added }}">
+                  <a href="/{{ @REQUEST.added }}"
+                     class="btn btn-default btn-lg btn-block">
+                    <i class="fa fa-shopping-cart"></i>
+                    Return to shopping
+                  </a>
+                </check>
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary btn-lg btn-block">
+                  <i class="fa fa-sign-in"></i>
+                  Check out
+                </button>
+              </div>
+              <div class="col-sm-4">
+                <div id="AmazonPayButton"></div>
+              </div>
+            </div>
           </div>
         </form>
 
@@ -50,4 +61,31 @@
   </div>
 
 </div>
+<script type="text/javascript">
+  function showButton() {
+    var authRequest;
+    OffAmazonPayments.Button("AmazonPayButton", "{{ @AMZ_MERCHANT_ID }}", {
+      type:  "PwA",
+      color: "Gold",
+      size:  "Large",
+
+      authorization: function() {
+	loginOptions= {
+          scope: "profile payments:widget payments:shipping_address",
+	  popup: "true"
+	};
+	authRequest=
+          amazon.Login.authorize(loginOptions,
+                                 "https://ordure.muck.rawm.us/cart/checkout"); 
+      },
+
+      onError: function(error) {
+	alert("The following error occurred: "
+	       + error.getErrorCode()
+	       + ' - ' + error.getErrorMessage());
+      }
+    });
+  };
+</script>
+
 <include href="footer.html" />

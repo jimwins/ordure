@@ -1,0 +1,121 @@
+<include href="amazon-pay.html" />
+
+<style>
+#addressBookWidgetDiv {
+  min-width: 300px;
+  max-width: 600px;
+  min-height: 228px;
+  max-height: 400px;
+}
+
+
+#walletWidgetDiv {
+  min-width: 300px;
+  max-width:600px;
+  min-height: 228px;
+  max-height: 400px;
+}
+</style>
+
+<form id="orderForm" method="POST" action="{{ @BASE }}/cart/amz-process-order">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Complete Order
+      </h3>
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label>Shipping Address</label>
+        <div id="addressBookWidgetDiv"
+             style="width:100%; height:240px;">
+        </div> 
+      </div>
+
+      <div class="form-group">
+        <label>Payment Info</label>
+        <div id="walletWidgetDiv" style="width:100%; height:240px;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="comment">Any special requests?</label>
+        <textarea class="form-control" rows="6" name="comment"></textarea>
+      </div>
+
+      <br>
+
+      <p class="alert alert-danger">
+        Please note that we reserve the right to reject orders due to
+        unforeseen circumstances.
+      </p>
+
+    </div>
+    <div class="panel-footer">
+      <input type="hidden" name="access_token"
+             value="{{ @REQUEST.access_token }}">
+      <button id="pay" disabled type="submit" class="btn btn-primary btn-block">
+        Submit Order
+      </button>
+    </div>
+  </div>
+</form>
+
+<script>
+function showButton() {
+  new OffAmazonPayments.Widgets.AddressBook({
+    sellerId: '{{ @AMZ_MERCHANT_ID }}',
+    onOrderReferenceCreate: function(orderReference) {
+      $.post('/cart/amz-get-details',
+             { order_reference_id: orderReference.getAmazonOrderReferenceId(),
+               access_token: '{{ @REQUEST.access_token }}' })
+        .done(function (data) {
+        });
+    },
+    onAddressSelect: function(orderReference) {
+      $.post('/cart/amz-get-details',
+             { access_token: '{{ @REQUEST.access_token }}' })
+        .done(function (data) {
+          // update our sale info
+          $('#shipping').text('$' + data.sale.shipping);
+          $('#tax').text('$' + data.sale.tax);
+          $('#total').text('$' + data.sale.total);
+        });
+    },
+    design: {
+      designMode: 'responsive'
+    },
+    onReady: function(orderReference) {
+      // Enter code here that you want to be executed 
+      // when the address widget has been rendered. 
+    },
+
+    onError: function(error) {
+      // Your error handling code.
+      // During development you can use the following
+      // code to view error messages:
+      console.log(error.getErrorCode() + ': ' + error.getErrorMessage());
+      // See "Handling Errors" for more information.
+    }
+  }).bind("addressBookWidgetDiv");
+
+  new OffAmazonPayments.Widgets.Wallet({
+    sellerId: '{{ @AMZ_MERCHANT_ID }}',
+    design: {
+      designMode: 'responsive'
+    },
+
+    onPaymentSelect: function(orderReference) {
+      $('#pay').prop('disabled', false);
+    },
+    
+    onError: function(error) {
+      // Your error handling code.
+      // During development you can use the following
+      // code to view error messages:
+      console.log(error.getErrorCode() + ': ' + error.getErrorMessage());
+      // See "Handling Errors" for more information.
+    }
+  }).bind("walletWidgetDiv");
+}
+</script>
