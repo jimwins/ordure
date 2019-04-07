@@ -1476,7 +1476,8 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     $amount= (int)(($sale->total - $sale->paid) * 100);
 
@@ -1532,6 +1533,7 @@ class Sale {
     $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
+    self::send_order_paid_email($f3);
   }
 
   function process_paypal_payment($f3, $args) {
@@ -1541,7 +1543,8 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     $shipping_address= new DB\SQL\Mapper($db, 'sale_address');
     $shipping_address->load(array('id = ?',
@@ -1604,10 +1607,12 @@ class Sale {
     $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_email($f3);
+    self::send_order_paid_email($f3);
   }
 
   function get_giftcard_balance($f3, $args) {
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     $curl = curl_init();
 
@@ -2152,7 +2157,7 @@ Your order will be reviewed, and you will receive another email within one busin
     $f3->set('preheader', "Thank you for shopping at Raw Materials Art Supplies!  Your order is being processed.");
 
     $sale= $f3->get('sale');
-    $method= $sale->shipping_address_id == 1
+    $method= $sale['shipping_address_id'] == 1
                ? "is ready for pick up" : "has been shipped";
     $f3->set('content_top', Markdown::instance()->convert("Thank you for shopping at Raw Materials Art Supplies!
 
