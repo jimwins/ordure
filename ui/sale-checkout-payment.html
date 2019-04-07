@@ -1,68 +1,160 @@
-<form method="POST" action="{{ @BASE }}/cart/place-order">
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
   <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">
-        Complete Order
-      </h3>
+    <div class="panel-heading" role="tab" id="pay-credit-card-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse"
+           data-parent="#accordion" href="#pay-credit-card"
+           aria-expanded="true" area-controls="pay-credit-card">
+          <i class="fa fa-credit-card fa-lg"></i>
+          Pay with Credit Card
+        </a>
+      </h4>
     </div>
-    <div class="panel-body">
-      <p>
-        <strong>Almost done!</strong>
-        We are currently manually reviewing all orders before we accept
-        payment, so once you submit your order, we will email you within
-        one business day with information on how to pay for your order,
-        as well as the estimated shipping time.
-      </p>
+    <div id="pay-credit-card" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-credit-card-heading">
+      <div class="panel-body">
+        <noscript>
+          <p class="alert alert-danger">
+            Sorry, you must have Javascript enabled in order to pay
+            online.
+          </p>
+        </noscript>
+        <form method="POST"
+              action="/sale/{{ @sale.uuid }}/process-creditcard-payment"
+              data-ajax="true"
+              id="payment-form">
+          <div class="payment-errors alert alert-danger hidden"></div>
 
-      <div class="form-group">
-        <label>Your contact info:</label>
-        <p class="form-control-static">
-          {{ @sale.name }} &lt;{{ @sale.email }}&gt;
-        </p>
-        <small><a href="/cart/checkout/?stage=login">(change)</a></small>
+          <div class="form-group">
+            <label>
+              <span>Amount to be paid</span>
+              <input type="text" class="form-control" disabled
+                     value="{{ @amount(@sale.total - @sale.paid) }}">
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Card number</span>
+              <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Expiration (MM/YY)</span>
+            </label>
+            <div>
+              <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-month"  data-stripe="exp_month" placeholder="MM">
+              <span> / </span>
+              <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-year"  data-stripe="exp_year" placeholder="YY">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>
+              <span>Security code (CVC):</span>
+              <input type="text" class="form-control" autocomplete="cc-csc"  size="4" data-stripe="cvc" placeholder="XXX">
+            </label>
+          </div>
+
+          <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
+
+          <input type="hidden" name="amount" value="1000"><!-- dummy -->
+
+          <button type="submit" class="btn btn-primary">
+            Pay {{ @amount(@sale.total - @sale.paid) }}
+          </button>
+
+        </form>
       </div>
-
-      <div class="form-group">
-        <label>Shipping address:</label>
-        <div class="form-control-static">
-          <check if="{{ @sale.shipping_address_id == 1 }}">
-            <true>
-              <strong>We will prepare your order for in-store pick-up.</strong>
-            </true>
-            <false>
-              <div>{{ @shipping_address.name }}</div>
-              <div>{{ @shipping_address.company }}</div>
-              <div>{{ @shipping_address.phone }}</div>
-              <div>{{ @shipping_address.address1 }}</div>
-              <div>{{ @shipping_address.address2 }}</div>
-              <div>
-                {{ @shipping_address.city }}, {{ @shipping_address.state }}
-                {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
-              </div>
-            </false>
-          </check>
-        </div>
-        <small><a href="/cart/checkout/?stage=shipping">(change)</a></small>
-      </div>
-
-      <div class="form-group">
-        <label for="comment">Any special requests?</label>
-        <textarea class="form-control" rows="6" name="comment"></textarea>
-      </div>
-
-      <br>
-
-      <p class="alert alert-danger">
-        Please note that we reserve the right to reject orders due to
-        unforeseen circumstances.
-      </p>
-
-    </div>
-    <div class="panel-footer">
-      <button type="submit" class="btn btn-primary btn-block">
-        Submit Order
-      </button>
     </div>
   </div>
-</form>
 
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="pay-paypal-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse"
+           data-parent="#accordion" href="#pay-paypal"
+           aria-expanded="true" area-controls="pay-paypal">
+          <i class="fa fa-paypal fa-lg"></i>
+          Pay with PayPal
+        </a>
+      </h4>
+    </div>
+    <div id="pay-paypal" class="panel-collapse collapse" role="tabpanel" aria-labelledby="pay-paypal-heading">
+      <div class="panel-body">
+        <div class="paypal-prompt">
+          <div class="paypal-errors alert alert-danger hidden"></div>
+          <div class="form-group">
+            <label>
+              <span>Amount to be paid</span>
+              <input type="text" class="form-control" disabled
+                     value="{{ @amount(@sale.total - @sale.paid) }}">
+            </label>
+          </div>
+
+          <script src="https://www.paypalobjects.com/api/button.js?"
+                  data-merchant="braintree"
+                  data-id="paypal-button"
+                  data-button="checkout"
+                  data-color="gold"
+                  data-size="medium"
+                  data-shape="pill"
+                  data-button_type="submit"
+                  data-button_disabled="false"></script>
+        </div>
+        <div class="paypal-waiting hidden">
+          <div class="progress progress-striped active"
+               style="height: 1.5em">
+            <div class="progress-bar" role="progressbar"
+                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"
+                 style="width: 100%">
+              Processing PayPal payment&hellip;.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="pay-giftcard-heading">
+      <h4 class="panel-title">
+        <a role="button" data-toggle="collapse"
+           data-parent="#accordion" href="#pay-giftcard"
+           aria-expanded="true" area-controls="pay-giftcard">
+          <i class="fa fa-gift fa-lg"></i>
+          Pay with Gift Card
+        </a>
+      </h4>
+    </div>
+    <div id="pay-giftcard" class="panel-collapse collapse" role="tabpanel" aria-labelledby="pay-giftcard-heading">
+      <div class="panel-body">
+        <form id="giftcard-check">
+          <div class="errors alert alert-danger hidden"></div>
+          <div class="form-group">
+            <label for="giftcard">Gift Card Number</label>
+            <input type="text" class="form-control" name="giftcard"
+                   placeholder="Enter the 11-digit code.">
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Check Balance
+          </button>
+        </form>
+        <form id="giftcard-use" action="process-giftcard-payment"
+              class="hidden">
+          <div class="errors alert alert-danger hidden"></div>
+          <div class="form-group">
+            <label>
+              <span>Gift card balance</span>
+              <input type="text" class="form-control" disabled
+                     name="balance" value="0">
+            </label>
+          </div>
+          <input type="hidden" name="amount" value="{{ @sale.total - @sale.paid }}">
+          <button type="submit" class="btn btn-primary">
+            Pay
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.panel-group -->

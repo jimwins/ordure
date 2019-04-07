@@ -1,0 +1,68 @@
+<form method="POST" action="{{ @BASE }}/cart/place-order">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Complete Order
+      </h3>
+    </div>
+    <div class="panel-body">
+      <p>
+        <strong>Almost done!</strong>
+        We are currently manually reviewing all orders before we accept
+        payment, so once you submit your order, we will email you within
+        one business day with information on how to pay for your order,
+        as well as the estimated shipping time.
+      </p>
+
+      <div class="form-group">
+        <label>Your contact info:</label>
+        <p class="form-control-static">
+          {{ @sale.name }} &lt;{{ @sale.email }}&gt;
+        </p>
+        <small><a href="/cart/checkout/?stage=login">(change)</a></small>
+      </div>
+
+      <div class="form-group">
+        <label>Shipping address:</label>
+        <div class="form-control-static">
+          <check if="{{ @sale.shipping_address_id == 1 }}">
+            <true>
+              <strong>We will prepare your order for in-store pick-up.</strong>
+            </true>
+            <false>
+              <div>{{ @shipping_address.name }}</div>
+              <div>{{ @shipping_address.company }}</div>
+              <div>{{ @shipping_address.phone }}</div>
+              <div>{{ @shipping_address.address1 }}</div>
+              <div>{{ @shipping_address.address2 }}</div>
+              <div>
+                {{ @shipping_address.city }}, {{ @shipping_address.state }}
+                {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
+              </div>
+            </false>
+          </check>
+        </div>
+        <small><a href="/cart/checkout/?stage=shipping">(change)</a></small>
+      </div>
+
+      <div class="form-group">
+        <label for="comment">Any special requests?</label>
+        <textarea class="form-control" rows="6" name="comment"></textarea>
+      </div>
+
+      <br>
+
+      <p class="alert alert-danger">
+        Please note that we reserve the right to reject orders due to
+        unforeseen circumstances.
+      </p>
+
+    </div>
+    <div class="panel-footer">
+      <button type="submit" class="btn btn-primary btn-block">
+        Submit Order
+      </button>
+    </div>
+  </div>
+</form>
+

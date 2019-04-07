@@ -68,4 +68,8 @@
   </div>
 
 </div>
+
+<check if="{{ @stage == 'payment' }}">
+  <set script="handle-payment.js" />
+</check>
 <include href="footer.html" />

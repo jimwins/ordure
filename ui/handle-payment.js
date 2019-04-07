@@ -47,7 +47,7 @@ loadScript('https://js.stripe.com/v2/',
                  url: $form.attr('action'),
                  data: { stripeToken: token }})
          .done(function (data) {
-           window.location.href= "./thanks";
+           window.location.href= "/sale/{{ @sale.uuid }}/thanks";
          })
          .fail(function (jqXHR, textStatus, errorThrown) {
            stripeShowError($form,
@@ -117,10 +117,10 @@ loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
 
             // Send tokenizationPayload.nonce to server
             $.ajax({ dataType: 'json', method: 'POST',
-                     url: 'process-paypal-payment',
+                     url: '/sale/{{ @sale.uuid }}/process-paypal-payment',
                      data: { nonce: tokenizationPayload.nonce }})
              .done(function (data) {
-               window.location.href= "./thanks";
+               window.location.href= "/sale/{{ @sale.uuid }}/thanks";
              })
              .fail(function (jqXHR, textStatus, errorThrown) {
                $('.paypal-waiting').addClass('hidden');
@@ -181,9 +181,9 @@ $("#giftcard-use").on("submit", function (ev) {
            data: { card: card }})
    .done(function (data) {
      if (data.paid) {
-       window.location.href= "./thanks";
+       window.location.href= "/sale/{{ @sale.uuid }}/thanks";
      } else {
-       window.location.href= "./pay";
+       window.location.href= "/sale/{{ @sale.uuid }}/pay";
      }
    })
    .fail(function (jqXHR, textStatus, errorThrown) {
@@ -206,9 +206,9 @@ $("#other-use").on("submit", function (ev) {
            url: $form.attr('action') })
    .done(function (data) {
      if (data.paid) {
-       window.location.href= "./thanks";
+       window.location.href= "/sale/{{ @sale.uuid }}/thanks";
      } else {
-       window.location.href= "./pay";
+       window.location.href= "/sale/{{ @sale.uuid }}/pay";
      }
    })
    .fail(function (jqXHR, textStatus, errorThrown) {
