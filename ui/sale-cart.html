@@ -61,6 +61,25 @@
               as long as four to six weeks.)
             </p>
           </check>
+          <check if="{{ in_array('hazmat', @special_conditions) }}">
+            <p class="lead alert alert-warning">
+              Your order contains items that are considered hazarous materials,
+              additional shipping charges will apply.
+            </p>
+          </check>
+          <check if="{{ in_array('truck', @special_conditions) }}">
+            <p class="lead alert alert-danger">
+              Your order contains items that are only available for in-store
+              pick-up or local delivery.
+            </p>
+          </check>
+          <check if="{{ in_array('oversized', @special_conditions) }}">
+            <p class="lead alert alert-danger">
+              Your order contains items that fall outside the scope of our
+              standard shipping rates because of their size and/or weight.
+              Additional charges will apply.
+            </p>
+          </check>
 
           <div class="form-group">
             <div class="row">

@@ -308,21 +308,48 @@ class Sale {
   function get_shipping_estimate($f3) {
     $db= $f3->get('DBH');
     $items= $f3->get('items');
-    $stock_limited= 0;
+    $special_order= $stock_limited= 0;
+    $special= [];
 
-    foreach ($items as $item) {
+    foreach ($items as $sale_item) {
+      // Check stock
       $scat_item= new DB\SQL\Mapper($db, 'scat_item');
-      $scat_item->load(array('code = ?', $item['code']));
+      $scat_item->load(array('code = ?', $sale_item['code']));
+      // no details? must be special order
       if ($scat_item->dry()) {
-        return 'special_order';
+        $special_order++;
       }
-      error_log("stock: {$scat_item->stock}, quantity: {$item['quantity']}");
-      if ($scat_item->stock < $item['quantity']) {
+      // no stock and not stocked? special order.
+      if (!$scat_item->stock && !$scat_item->minimum_quantity) {
+        $special_order++;
+      }
+      // more in order than in stock? stock is limited.
+      if ($scat_item->stock < $sale_item['quantity']) {
         $stock_limited++;
+      }
+
+      // Check item details
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->load(array('code = ?', $sale_item['code']));
+      // hazmat? (extra charge)
+      if ($item->hazmat) {
+        $special['hazmat']++;
+      }
+      // oversized? (extra charge)
+      $size= [$item->height, $item->length, $item->width ];
+      sort($size, SORT_NUMERIC);
+      if ($size[0] > 12 || $size[1] > 24 || $size[2] > 24) {
+        $special['oversized']++;
+      }
+      // truck? (only local)
+      if ($item->oversized) {
+        $special['truck']++;
       }
     }
 
-    return $stock_limited ? 'stock_limited' : 'immediate';
+    return [ $special_order ? 'special_order' :
+               $stock_limited ? 'stock_limited' : 'immediate',
+             array_keys($special) ];
   }
 
   function cart($f3, $args) {
@@ -334,8 +361,10 @@ class Sale {
       error_log("Loading $uuid.");
       $sale= $this->load($f3, $uuid, 'uuid');
 
-      $shipping_estimate= $this->get_shipping_estimate($f3, $sale);
+      list($shipping_estimate, $special_conditions)=
+        $this->get_shipping_estimate($f3, $sale);
       $f3->set('shipping_estimate', $shipping_estimate);
+      $f3->set('special_conditions', $special_conditions);
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
