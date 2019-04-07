@@ -27,6 +27,16 @@
     <div class="panel-body">
       <div class="form-group">
         <label>Shipping Address</label>
+        <div id="shipping_error" class="alert alert-danger"
+             style="display: none"></div>
+        <!--
+        <div>
+          <label>
+            <input type="checkbox" id="in_store_pickup" name="in_store_pickup">
+            Pick up your order at the store
+          </label>
+        </div>
+        -->
         <div id="addressBookWidgetDiv"
              style="width:100%; height:240px;">
         </div> 
@@ -62,7 +72,16 @@
 </form>
 
 <script>
+
 function showButton() {
+  $('#in_store_pickup').on('change', function (ev) {
+    if (this.checked) {
+      $('#addressBookWidgetDiv').hide()
+    } else {
+      $('#addressBookWidgetDiv').show()
+    }
+  });
+
   new OffAmazonPayments.Widgets.AddressBook({
     sellerId: '{{ @AMZ_MERCHANT_ID }}',
     onOrderReferenceCreate: function(orderReference) {
@@ -80,7 +99,23 @@ function showButton() {
           $('#shipping').text('$' + data.sale.shipping);
           $('#tax').text('$' + data.sale.tax);
           $('#total').text('$' + data.sale.total);
+          $('#shipping_error').hide();
+          var local= [ "90013","90009","90030","90050","90051","90052","90053","90054","90055","90060","90072","90074","90075","90076","90078","90080","90081","90082","90083","90086","90087","90088","90093","90079","90014","90071","90189","90099","90021","90012","90017","90015","90033","90090","90070","90057","90026","90011","90031","90007","90096","90006","90023","90063","90089","90058","90037","90005","90010","90029","90020","90004","90032","90018","90065","90062","90255","90001","90270","90039","90022","91754","90042","90019","90038","90003","90091","91803","91204","91205","90028","90040","90027","90201","90041","90036","90008","90002","91030","91209","91221","91222","91224","91225","91226","90016","91804","91801","91210","90043","91756","90044","91031","91802","91896","91899","91755","91714","91715","90047","91716","91203","90202","90305","90048","90068","90280","60602" ];
+          window.address_ok= (data.special_conditions.indexOf('truck') == -1 ||
+                              local.indexOf(data.shipping_address.zip5) >= 0);
+          if (!window.address_ok) {
+            $('#shipping_error').text("Your order includes items that require in-store pick-up or local delivery.").show();
+          }
+          enablePayButton();
         });
+    },
+    onError: function(error) {
+      if (error.getErrorCode() == 'ITP') {
+        return;
+      }
+      if (error.getErrorCode() == 'BuyerSessionExpired') {
+        window.location.href= '/cart'; // Go back to the cart page
+      }
     },
     design: {
       designMode: 'responsive'
@@ -106,7 +141,8 @@ function showButton() {
     },
 
     onPaymentSelect: function(orderReference) {
-      $('#pay').prop('disabled', false);
+      window.payment_ok= true;
+      enablePayButton();
     },
     
     onError: function(error) {
@@ -117,5 +153,8 @@ function showButton() {
       // See "Handling Errors" for more information.
     }
   }).bind("walletWidgetDiv");
+}
+function enablePayButton() {
+  $('#pay').prop('disabled', !(window.address_ok && window.payment_ok));
 }
 </script>
