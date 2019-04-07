@@ -251,6 +251,11 @@ class Sale {
     }
     $f3->set('shipments', $shipments_out);
 
+    list($shipping_estimate, $special_conditions)=
+      $this->get_shipping_estimate($f3, $sale, $items);
+    $f3->set('shipping_estimate', $shipping_estimate);
+    $f3->set('special_conditions', $special_conditions);
+
     return $sale;
   }
 
@@ -360,11 +365,6 @@ class Sale {
     if ($uuid) {
       error_log("Loading $uuid.");
       $sale= $this->load($f3, $uuid, 'uuid');
-
-      list($shipping_estimate, $special_conditions)=
-        $this->get_shipping_estimate($f3, $sale);
-      $f3->set('shipping_estimate', $shipping_estimate);
-      $f3->set('special_conditions', $special_conditions);
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
@@ -843,13 +843,27 @@ class Sale {
     if ($sale->shipping_manual)
       return;
 
-    // shipping_address_id == 1 means it is an in-store pick-up
-    if ($sale->subtotal >= 100.00 || $sale->shipping_address_id == 1) {
-      $sale->shipping= 0.00;
-    } else {
-      $sale->shipping= 9.99;
+    $sale->shipping_tax= 0; // reset the tax
+    $sale->shipping= 0.00;
+
+    // Calculate shipping if not in-store pick-up
+    if ($sale->shipping_address_id != 1) {
+      if ($sale->subtotal < 100.00) {
+        $sale->shipping+= 9.99;
+      }
+
+      $special_conditions= $f3->get('special_conditions');
+
+      if (in_array('hazmat', $special_conditions)) {
+        $sale->shipping+= 5.00;
+      }
+      if (in_array('oversized', $special_conditions)) {
+        $sale->shipping+= 20.00;
+      }
+      if (in_array('truck', $special_conditions)) {
+        $sale->shipping= 50.00;
+      }
     }
-    $sale->shipping_tax= 0;
 
     $sale->save();
   }
@@ -1437,7 +1451,12 @@ class Sale {
                             'billing_address' => $f3->get('billing_address'),
                             'shipping_address' => $f3->get('shipping_address'),
                             'items' => $f3->get('items'),
-                            'payments' => $f3->get('payments')),
+                            'payments' => $f3->get('payments'),
+                            'shipping_estimate' =>
+                              $f3->get('shipping_estimate'),
+                            'special_conditions' =>
+                              $f3->get('special_conditions'),
+                            ),
                      JSON_PRETTY_PRINT);
   }
 
