@@ -6,7 +6,14 @@
 
 <div class="row">
   <div class="col-sm-12">
-    <include href="sale-header.html" />
+    <div class="alert alert-warning">
+      <p class="lead">
+        <strong>Hello!</strong> We are currently only able to ship orders to the United States (including APO/FPO/DPO addresses).
+      </p>
+      <p class="lead">
+        You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
+      </p>
+    </div>
   </div>
 </div>
 
@@ -21,10 +28,39 @@
       </div>
       <form method="POST" action="{{ @BASE }}/cart/update">
         <include href="sale-items.html" />
+        <check if="{{ @REQUEST.added }}">
+          <input type="hidden" name="added" value="{{ @REQUEST.added }}">
+        </check>
       </form>
       <div class="panel-body">
         <form class="row" method="GET" action="/cart/checkout">
           <input type="hidden" name="uuid" value="{{ @sale.uuid }}">
+
+          <check if="{{ @shipping_estimate == 'immediate' }}">
+            <p class="lead alert alert-success">
+              These are in stock at the store and eligble for immediate
+              shipment or pick-up. We will contact you if any problems
+              arise in having your order ready!
+            </p>
+          </check>
+          <check if="{{ @shipping_estimate == 'stock_limited' }}">
+            <p class="lead alert alert-warning">
+              Not all of the items in your cart are currently in stock,
+              so your order will take additional time to prepare. We will
+              email you with an estimated pick-up/shipping date once your
+              order has been processed. (Most orders of out of stock items
+              are ready in about one week.)
+            </p>
+          </check>
+          <check if="{{ @shipping_estimate == 'special_order' }}">
+            <p class="lead alert alert-info">
+              Your order contains special order items that will take extra
+              time to prepare. We will email you with an esimated
+              pick-up/shipping date once your order has been reviewed. (Most
+              special order items are ready in about one week, some can take
+              as long as four to six weeks.)
+            </p>
+          </check>
 
           <div class="form-group">
             <div class="row">

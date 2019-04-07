@@ -305,6 +305,26 @@ class Sale {
     $f3->reroute("../{$new_sale->uuid}/edit");
   }
 
+  function get_shipping_estimate($f3) {
+    $db= $f3->get('DBH');
+    $items= $f3->get('items');
+    $stock_limited= 0;
+
+    foreach ($items as $item) {
+      $scat_item= new DB\SQL\Mapper($db, 'scat_item');
+      $scat_item->load(array('code = ?', $item['code']));
+      if ($scat_item->dry()) {
+        return 'special_order';
+      }
+      error_log("stock: {$scat_item->stock}, quantity: {$item['quantity']}");
+      if ($scat_item->stock < $item['quantity']) {
+        $stock_limited++;
+      }
+    }
+
+    return $stock_limited ? 'stock_limited' : 'immediate';
+  }
+
   function cart($f3, $args) {
     $uuid= $f3->get('COOKIE.cartID');
 
@@ -313,6 +333,9 @@ class Sale {
     if ($uuid) {
       error_log("Loading $uuid.");
       $sale= $this->load($f3, $uuid, 'uuid');
+
+      $shipping_estimate= $this->get_shipping_estimate($f3, $sale);
+      $f3->set('shipping_estimate', $shipping_estimate);
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
@@ -782,7 +805,9 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('/cart?uuid=' . $sale->uuid);
+    $added= $f3->get('REQUEST.added');
+    $f3->reroute('/cart?uuid=' . $sale->uuid .
+                 ($added ? '&added=' . rawurlencode($added) : ''));
   }
 
   function update_shipping($f3, $sale) {
