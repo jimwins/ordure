@@ -63,11 +63,40 @@ loadScript('https://js.stripe.com/v2/',
 
 });
 
-loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
+loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
            function() {
-  loadScript('https://js.braintreegateway.com/web/3.6.2/js/paypal.min.js',
-             function() {
+  paypal.Buttons({
+    createOrder: function (data, actions) {
+      return actions.order.create({
+        purchase_units: [{
+          amount: {
+            value: '{{ @sale.total - @sale.due }}' // Required
+          }
+        }]
+      });
+    },
+    onApprove: function(data, actions) {
+      // Capture the funds from the transaction
+      return actions.order.capture().then(function(details) {
+      debugger
+        return fetch('/sale/{{ @sale.uuid }}/process-paypal-payment', {
+          method: 'post',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded'
+          },
+          body: "order_id=" + details.id
+        }).then(function (data) {
+          // XXX error handling?
+          debugger
+          if (data.ok) {
+            window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+          }
+        });
+      });
+    }
+  }).render('#paypal-button');
 
+/*
     var paypalButton= document.getElementById('paypal-button');
 
     // Create a Client component
@@ -134,8 +163,7 @@ loadScript('https://js.braintreegateway.com/web/3.6.2/js/client.min.js',
         });
       });
     });
-
-  });
+*/
 });
 
 $("#giftcard-check").on("submit", function (ev) {

@@ -36,7 +36,7 @@ class Sale {
                'Sale->process_giftcard_payment');
     $f3->route("POST /sale/@sale/process-creditcard-payment",
                'Sale->process_creditcard_payment');
-    $f3->route("POST /sale/@sale/process-paypal-payment [ajax]",
+    $f3->route("POST /sale/@sale/process-paypal-payment",
                'Sale->process_paypal_payment');
     $f3->route("POST /sale/@sale/process-other-payment [ajax]",
                'Sale->process_other_payment');
@@ -1537,61 +1537,35 @@ class Sale {
   }
 
   function process_paypal_payment($f3, $args) {
-    $gateway= new Braintree_Gateway(array(
-      'accessToken' => $f3->get('VZERO_TOKEN'))
-    );
-
     $db= $f3->get('DBH');
 
     $uuid= $f3->get('PARAMS.sale');
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    $shipping_address= new DB\SQL\Mapper($db, 'sale_address');
-    $shipping_address->load(array('id = ?',
-                                  $order->shipping_address_id ? 
-                                  $order->shipping_address_id :
-                                  $order->billing_address_id));
+    $order_id= $f3->get('REQUEST.order_id');
+    error_log("ORDER_ID = $order_id");
 
-    $nonce= $f3->get('REQUEST.nonce');
+    $client_id= $f3->get('PAYPAL_CLIENT_ID');
+    $secret= $f3->get('PAYPAL_SECRET');
 
-    list($firstName, $lastName)= explode(' ', $sale->name, 2);
-
-    $result= $gateway->transaction()->sale([
-      "amount" => $sale->total,
-      'merchantAccountId' => 'USD',
-      "paymentMethodNonce" => $nonce,
-      "orderId" => sprintf("%07d", $sale->id),
-      "shipping" => [
-        "firstName" => $firstName,
-        "lastName" => $lastName,
-        "company" => $shipping_address->company,
-        "streetAddress" => $shipping_address->address1,
-        "extendedAddress" => $shipping_address->address2,
-        "locality" => $shipping_address->city,
-        "region" => $shipping_address->state,
-        "postalCode" => $shipping_address->zip5,
-        "countryCodeAlpha2" => "US"
-      ],
-      "options" => [
-        "submitForSettlement" => true,
-      ],
-    ]);
-
-    error_log($result);
-
-    if (!$result->success) {
-      $f3->error(500, $result->message);
+    if ($f3->get('DEBUG')) {
+      $env= new \PayPalCheckoutSdk\Core\SandboxEnvironment($client_id, $secret);
+    } else {
+      $env=
+        new \PayPalCheckoutSdk\Core\ProductionEnvironment($client_id, $secret);
     }
+
+    $client= new \PayPalCheckoutSdk\Core\PayPalHttpClient($env);
+
+    $response= $client->execute(
+      new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
+    );
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
     $payment->method= 'paypal';
-    $payment->amount= $result->transaction->amount;
-    $payment->data= json_encode(array(
-      'id' => $result->transaction->id,
-      'sellerProtectionStatus' =>
-        $result->paypalDetails->sellerProtectionStatus,
-    ));
+    $payment->amount= $response->result->purchase_units[0]->amount->value;
+    $payment->data= json_encode($response->result);
     $payment->save();
 
     self::capture_sales_tax($f3, $sale);
@@ -1599,7 +1573,7 @@ class Sale {
     $sale->status= 'paid';
     $sale->save();
 
-    echo json_encode(array());
+    echo json_encode(array('message' => 'Success!'));
 
     $f3->abort(); // let client go
 

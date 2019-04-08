@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0e73c9a6c2bd83aa065990a69ff5661b",
+    "content-hash": "820ee01ffbd1fed31aec732ceaa3af3f",
     "packages": [
         {
             "name": "amzn/amazon-pay-sdk-php",
@@ -143,37 +143,30 @@
             "time": "2018-06-11T17:15:25+00:00"
         },
         {
-            "name": "braintree/braintree_php",
-            "version": "3.38.0",
+            "name": "braintree/braintreehttp",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/braintree/braintree_php.git",
-                "reference": "0affc87b538b048514901c9865765235e5cdd9b6"
+                "url": "https://github.com/braintree/braintreehttp_php.git",
+                "reference": "204e36494d9e4b31033328df96af54b17f68b698"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/braintree/braintree_php/zipball/0affc87b538b048514901c9865765235e5cdd9b6",
-                "reference": "0affc87b538b048514901c9865765235e5cdd9b6",
+                "url": "https://api.github.com/repos/braintree/braintreehttp_php/zipball/204e36494d9e4b31033328df96af54b17f68b698",
+                "reference": "204e36494d9e4b31033328df96af54b17f68b698",
                 "shasum": ""
             },
             "require": {
-                "ext-curl": "*",
-                "ext-dom": "*",
-                "ext-hash": "*",
-                "ext-openssl": "*",
-                "ext-xmlwriter": "*",
-                "php": ">=5.4.0"
+                "ext-curl": "*"
             },
             "require-dev": {
-                "phpunit/phpunit": "3.7.*"
+                "phpunit/phpunit": "^5.7",
+                "wiremock-php/wiremock-php": "1.43.2"
             },
             "type": "library",
             "autoload": {
-                "psr-0": {
-                    "Braintree": "lib/"
-                },
                 "psr-4": {
-                    "Braintree\\": "lib/Braintree"
+                    "BraintreeHttp\\": "lib/BraintreeHttp"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -183,11 +176,10 @@
             "authors": [
                 {
                     "name": "Braintree",
-                    "homepage": "https://www.braintreepayments.com"
+                    "email": "code@getbraintree.com"
                 }
             ],
-            "description": "Braintree PHP Client Library",
-            "time": "2018-12-11T19:33:05+00:00"
+            "time": "2018-04-17T20:53:31+00:00"
         },
         {
             "name": "clue/stream-filter",
@@ -680,6 +672,55 @@
                 "random"
             ],
             "time": "2018-07-04T16:31:37+00:00"
+        },
+        {
+            "name": "paypal/paypal-checkout-sdk",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paypal/Checkout-PHP-SDK.git",
+                "reference": "b321066fdce122cd63368b559d54674bdf2f12a8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paypal/Checkout-PHP-SDK/zipball/b321066fdce122cd63368b559d54674bdf2f12a8",
+                "reference": "b321066fdce122cd63368b559d54674bdf2f12a8",
+                "shasum": ""
+            },
+            "require": {
+                "braintree/braintreehttp": "0.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PayPalCheckoutSdk\\": "lib/PayPalCheckoutSdk",
+                    "Sample\\": "samples/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PayPal",
+                    "homepage": "https://github.com/paypal/Checkout-PHP-SDK/contributors"
+                }
+            ],
+            "description": "PayPal's PHP SDK for Checkout REST APIs",
+            "homepage": "http://github.com/paypal/Checkout-PHP-SDK/",
+            "keywords": [
+                "checkout",
+                "orders",
+                "payments",
+                "paypal",
+                "rest",
+                "sdk"
+            ],
+            "time": "2019-02-04T06:59:08+00:00"
         },
         {
             "name": "php-http/curl-client",
