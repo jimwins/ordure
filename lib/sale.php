@@ -441,7 +441,9 @@ class Sale {
       'sandbox' => (bool)$f3->get('DEBUG'),
     ];
 
-    return new \AmazonPay\Client($config);
+    $client= new \AmazonPay\Client($config);
+    $client->setLogger($f3->get('log'));
+    return $client;
   }
 
   function amz_get_details($f3, $args) {
@@ -640,6 +642,68 @@ class Sale {
     $this->forget_cart($f3, $args);
 
     $f3->reroute("/sale/" . $sale->uuid);
+  }
+
+  function capture_payments($f3, $sale) {
+    $db= $f3->get('DBH');
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payments= $payment->find(array('sale_id = ?', $sale->id));
+
+    foreach ($payments as $pay) {
+      if ($pay->method == 'amazon' && !$pay->captured) {
+        $client= $this->get_amz_client($f3);
+
+        $data= json_decode($pay->data);
+
+        $params= [
+          'amazon_authorization_id' => $data->AmazonAuthorizationId,
+          'capture_reference_id' => uniqid(),
+          'capture_amount' => $pay->amount,
+          'seller_capture_note' => 'Thank you for your order!',
+          'mws_auth_token' => null,
+        ];
+
+        $f3->get('log')->debug("Capturing: " . json_encode($params, JSON_PRETTY_PRINT));
+
+        $res= $client->capture($params);
+
+        if ($client->success) {
+          $details= $res->toArray();
+
+          /* Save details */
+          $status= $details['CaptureResponse']
+                           ['CaptureResult']
+                           ['CaptureDetails']
+                           ['CaptureStatus']
+                           ['State'];
+
+          if ($status == 'Completed') {
+            $when= $details['CaptureResponse']
+                           ['CaptureResult']
+                           ['CaptureDetails']
+                           ['CaptureStatus']
+                           ['CreationTimestamp'];
+            # XXX should convert to local timezone since that's how we roll
+            $pay->captured= (new \Datetime($when))->format('Y-m-d H:i:s');
+
+          }
+          elseif ($status == 'Pending') {
+            $f3->get('log')->warning("Payment {$pay->id} still pending.");
+          }
+          elseif ($status == 'Declined') {
+            $f3->get('log')->error("Payment {$pay->id} declined!");
+          }
+          else {
+            $f3->get('log')->error("Didn't understand Amazon response for {$pay->id}!");
+          }
+
+          $pay->save();
+        } else {
+          $f3->error(500, "Error processing Amazon payment.");
+        }
+      }
+    }
   }
 
   function forget_cart($f3, $args) {
@@ -1283,9 +1347,7 @@ class Sale {
 
     $sale_uuid= $f3->get('PARAMS.sale');
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sale->load(array('uuid = ?', $sale_uuid))
-      or $f3->error(404);
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
 
     $status= $f3->get('REQUEST.status');
 
@@ -1293,6 +1355,10 @@ class Sale {
                                  'shipped','cancelled','onhold'))) {
       // XXX better error handling
       $f3->error(500, "Didn't understand requested status.");
+    }
+
+    if ($status == 'shipped') {
+      $this->capture_payments($f3, $sale);
     }
 
     $sale->status= $status;
@@ -2118,6 +2184,9 @@ class Sale {
 
     $sale->status= 'shipped';
     $sale->save();
+
+    // Capture any pending payments
+    $this->capture_payments($f3, $sale);
 
     echo "Success!";
   }
