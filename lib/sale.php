@@ -667,7 +667,8 @@ class Sale {
   }
 
   function status($f3, $args) {
-    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $uuid= $f3->get('PARAMS.sale');
+    $this->load($f3, $uuid, 'uuid');
     echo Template::instance()->render('sale-status.html');
   }
 
@@ -1593,6 +1594,24 @@ class Sale {
       ];
     }
 
+    /* PayPal doesn't understand taxable shipping, so treat as an item */
+    if ($sale->shipping > 0.00) {
+      $paypal_items[]= [
+        'name' => "Shipping",
+        'unit_amount' => [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $sale->shipping),
+        ],
+        'tax' => [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $sale->shipping_tax),
+        ],
+        'quantity' => 1,
+        'sku' => 'ZZ-SHIPPING',
+        'category' => 'PHYSICAL_GOODS',
+      ];
+    }
+
     $order= [
       'intent' => 'CAPTURE',
       'application_context' => [
@@ -1608,11 +1627,7 @@ class Sale {
             'breakdown' => [
               'item_total' => [
                 'currency_code' => 'USD',
-                'value' => sprintf('%.2f', $sale->subtotal),
-              ],
-              'shipping' => [
-                'currency_code' => 'USD',
-                'value' => sprintf('%.2f', $sale->shipping),
+                'value' => sprintf('%.2f', $sale->subtotal + $sale->shipping),
               ],
               'tax_total' => [
                 'currency_code' => 'USD',
@@ -1637,6 +1652,8 @@ class Sale {
         ]
       ],
     ];
+
+    //$f3->get('log')->debug(json_encode($order, JSON_PRETTY_PRINT));
 
     $client= $this->get_paypal_client($f3);
 
