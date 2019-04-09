@@ -91,7 +91,7 @@ function showButton() {
         .done(function (data) {
         });
     },
-    onAddressSelect: function(orderReference) {
+    onAddressSelect: function(addressBook) {
       $.post('/cart/amz-get-details',
              { access_token: '{{ @REQUEST.access_token }}' })
         .done(function (data) {

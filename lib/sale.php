@@ -460,6 +460,11 @@ class Sale {
         $f3->get('REQUEST.order_reference_id');
     }
 
+    if (!$sale->amz_order_reference_id) {
+      // We don't have order_reference_id yet, so ignore this call
+      return;
+    }
+
     $params= [
       'amount' => $sale->total,
       'currency_code' => $config['currency_code'],
@@ -470,8 +475,7 @@ class Sale {
     ];
 
     $res= $client->setOrderReferenceDetails($params);
-    if ($client->success)
-    {
+    if ($client->success) {
       $params['access_token']= $f3->get('REQUEST.access_token');
       $res= $client->getOrderReferenceDetails($params);
       $details= $res->toArray();
@@ -504,6 +508,12 @@ class Sale {
       $address->save();
 
       $sale->shipping_address_id= $address->id;
+    } else {
+      $details= $res->toArray();
+
+      $f3->get('log')->debug(json_encode($details, JSON_PRETTY_PRINT));
+
+      $f3->error(500, "Sorry, an unexpected error occured.");
     }
 
     $sale->save();
@@ -527,7 +537,7 @@ class Sale {
 
     $sale= $this->load($f3, $uuid, 'uuid');
     if ($sale->status != 'cart')
-      $f3->error(500);
+      $f3->error(500, "This is not an active shopping cart.");
 
     $params= [
       'amazon_order_reference_id' => $sale->amz_order_reference_id,
@@ -535,8 +545,7 @@ class Sale {
     ];
 
     $res= $client->confirmOrderReference($params);
-    if ($client->success)
-    {
+    if ($client->success) {
       $params['authorization_amount']= $sale->total;
       $params['authorization_reference_id']= uniqid();
       $params['seller_authorization_note']=
@@ -551,6 +560,8 @@ class Sale {
       if ($client->success) {
         $details= $res->toArray();
 
+        $f3->get('log')->debug(json_encode($details, JSON_PRETTY_PRINT));
+
         if ($details['AuthorizeResult']
                     ['AuthorizationDetails']
                     ['AuthorizationStatus']
@@ -560,11 +571,18 @@ class Sale {
           // XXX Send email to admin
 
           // XXX turn reason into friendlier text
-          $f3->error(500,
-                     $details['AuthorizeResult']
-                             ['AuthorizationDetails']
-                             ['AuthorizationStatus']
-                             ['ReasonDescription']);
+          $code= $details['AuthorizeResult']
+                         ['AuthorizationDetails']
+                         ['AuthorizationStatus']
+                         ['ReasonCode'];
+          $reasons= [
+            'TransactionTimedOut' =>
+              "The transaction timed out. Click on the 'Cart' link at the top of the page to restart the payment process.",
+            'InvalidPaymentMethod' => "There were problem with the payment method. Please try again, possibly with a different payment method.",
+            'AmazonRejected' => "Amazon has rejected the transaction.",
+            'ProcessingFailure' => "Amazon could not process the transaction because of an internal processing error.",
+          ];
+          $f3->error(500, $reasons[$code]);
         }
 
         $payment= new DB\SQL\Mapper($db, 'sale_payment');
@@ -583,8 +601,19 @@ class Sale {
 
         $sale->status= 'paid';
         $sale->save();
-      }
+      } else {
+        $details= $res->toArray();
 
+        $f3->get('log')->debug(json_encode($details, JSON_PRETTY_PRINT));
+
+        $f3->error(500, $details['Error']['Message']);
+      }
+    } else {
+      $details= $res->toArray();
+
+      $f3->get('log')->debug(json_encode($details, JSON_PRETTY_PRINT));
+
+      $f3->error(500, $details['Error']['Message']);
     }
 
     // save comment
@@ -1849,7 +1878,7 @@ class Sale {
 
     $sale= $this->load($f3, $uuid, 'uuid');
     if ($sale->status != 'cart')
-      $f3->error(500);
+      $f3->error(500, "There's no cart here.");
 
     if (!$sale->email) {
       $f3->reroute('/cart?error=email');
