@@ -368,6 +368,11 @@ class Sale {
     if ($uuid) {
       $sale= $this->load($f3, $uuid, 'uuid');
 
+      if ($sale->status != 'cart') {
+        $this->forget_cart($f3, $args);
+        $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
+      }
+
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
       SetCookie('cartDetails',
@@ -669,6 +674,9 @@ class Sale {
   function status($f3, $args) {
     $uuid= $f3->get('PARAMS.sale');
     $this->load($f3, $uuid, 'uuid');
+    if ($uuid == $f3->get('COOKIE.cartID')) {
+      $this->forget_cart($f3, $args);
+    }
     echo Template::instance()->render('sale-status.html');
   }
 
