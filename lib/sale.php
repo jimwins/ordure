@@ -1292,7 +1292,7 @@ class Sale {
     if (!in_array($status, array('new','review','unpaid','paid','processing',
                                  'shipped','cancelled','onhold'))) {
       // XXX better error handling
-      $f3->error(500);
+      $f3->error(500, "Didn't understand requested status.");
     }
 
     $sale->status= $status;
