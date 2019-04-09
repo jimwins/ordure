@@ -22,6 +22,8 @@
     "easypost/easypost-php": "~3.0",
     "spomky-labs/otphp": "^8.3",
     "amzn/amazon-pay-sdk-php": "^3.4",
-    "paypal/paypal-checkout-sdk": "1.0.0"
+    "paypal/paypal-checkout-sdk": "1.0.0",
+    "monolog/monolog": "^1.24",
+    "graylog2/gelf-php": "^1.6"
   }
 }
