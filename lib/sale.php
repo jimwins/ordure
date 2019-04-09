@@ -36,6 +36,8 @@ class Sale {
                'Sale->process_giftcard_payment');
     $f3->route("POST /sale/@sale/process-creditcard-payment",
                'Sale->process_creditcard_payment');
+    $f3->route("GET /sale/@sale/get-paypal-order",
+               'Sale->get_paypal_order');
     $f3->route("POST /sale/@sale/process-paypal-payment",
                'Sale->process_paypal_payment');
     $f3->route("POST /sale/@sale/process-other-payment [ajax]",
@@ -160,6 +162,7 @@ class Sale {
 
   function load($f3, $sale_id, $type= 'id') {
     $db= $f3->get('DBH');
+    $f3->get('log')->info("Loading $sale_id by $type.");
 
     $sale= new DB\SQL\Mapper($db, 'sale');
     $sale->subtotal= '(SELECT SUM(quantity *
@@ -363,7 +366,6 @@ class Sale {
     /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
 
     if ($uuid) {
-      error_log("Loading $uuid.");
       $sale= $this->load($f3, $uuid, 'uuid');
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
@@ -386,7 +388,6 @@ class Sale {
     /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
 
     if ($uuid) {
-      error_log("Loading $uuid.");
       $sale= $this->load($f3, $uuid, 'uuid');
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
@@ -451,7 +452,6 @@ class Sale {
 
     $client= $this->get_amz_client($f3);
 
-    error_log("Loading $uuid.");
     $sale= $this->load($f3, $uuid, 'uuid');
 
     $order_reference_id= $f3->get('REQUEST.order_reference_id');
@@ -550,7 +550,6 @@ class Sale {
 
       if ($client->success) {
         $details= $res->toArray();
-        error_log(json_encode($details));
 
         if ($details['AuthorizeResult']
                     ['AuthorizationDetails']
@@ -559,8 +558,6 @@ class Sale {
               != 'Open')
         {
           // XXX Send email to admin
-
-          error_log(json_encode($details));
 
           // XXX turn reason into friendlier text
           $f3->error(500,
@@ -656,7 +653,6 @@ class Sale {
 
       /* No cart yet? Create one. */
       if (!$sale_uuid) {
-        error_log("Creating cart.");
         $sale= $this->create($f3, 'cart');
         $sale_uuid= $sale->uuid;
 
@@ -666,7 +662,7 @@ class Sale {
         SetCookie('cartID', $sale_uuid, null /* don't expire */,
                   '/', $domain, true, true);
       } else {
-        error_log("Loading cart from UUID '$sale_uuid'.");
+        $f3->get('log')->info("Loading cart from UUID '$sale_uuid'.");
       }
     }
 
@@ -1119,8 +1115,6 @@ class Sale {
                                $e->getMessage(), $e->getCode())));
     }
 
-    error_log($response->getBody());
-
     $data= json_decode($response->getBody());
 
     if (json_last_error() != JSON_ERROR_NONE) {
@@ -1217,16 +1211,12 @@ class Sale {
     $uri= "https://api.taxcloud.net/1.0/taxcloud/AddExemptCertificate?apiKey=" .
             $f3->get('TAXCLOUD_KEY');
 
-    error_log(json_encode($data));
-
     try {
       $response= $client->post($uri, [ 'json' => $data ]);
     } catch (\Exception $e) {
       $f3->error(500, (sprintf("Request failed: %s (%s)",
                                $e->getMessage(), $e->getCode())));
     }
-
-    error_log($response->getBody());
 
     $data= json_decode($response->getBody());
 
@@ -1366,7 +1356,6 @@ class Sale {
       $f3->error(500, "cURL Error #:" . $err);
     }
 
-    error_log($response);
     $data= json_decode($response);
 
     foreach ($data->CartItemsResponse as $response) {
@@ -1438,7 +1427,7 @@ class Sale {
 
     if ($err) {
       // XXX do something
-      error_log("cURL Error #:" . $err);
+      $f3->get('log')->error("cURL Error #:" . $err);
     }
   }
 
@@ -1486,7 +1475,7 @@ class Sale {
     $token= $f3->get('REQUEST.stripeToken');
 
     if (!strlen($token)) {
-      error_log("No token.");
+      $f3->get('log')->error("No token");
       $f3->error(500, "There was an error processing your card.");
     }
 
@@ -1504,7 +1493,7 @@ class Sale {
 
       // XXX Send email to admin
 
-      error_log(json_encode($body));
+      $f3->get('log')->debug(json_encode($body));
 
       $f3->error(500, $err['message']);
     }
@@ -1536,15 +1525,7 @@ class Sale {
     self::send_order_paid_email($f3);
   }
 
-  function process_paypal_payment($f3, $args) {
-    $db= $f3->get('DBH');
-
-    $uuid= $f3->get('PARAMS.sale');
-    $sale= $this->load($f3, $uuid, 'uuid');
-
-    $order_id= $f3->get('REQUEST.order_id');
-    error_log("ORDER_ID = $order_id");
-
+  function get_paypal_client($f3) {
     $client_id= $f3->get('PAYPAL_CLIENT_ID');
     $secret= $f3->get('PAYPAL_SECRET');
 
@@ -1555,7 +1536,99 @@ class Sale {
         new \PayPalCheckoutSdk\Core\ProductionEnvironment($client_id, $secret);
     }
 
-    $client= new \PayPalCheckoutSdk\Core\PayPalHttpClient($env);
+    return new \PayPalCheckoutSdk\Core\PayPalHttpClient($env);
+  }
+
+  function get_paypal_order($f3, $args) {
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    $ship_to= $f3->get('shipping_address');
+
+    $items= $f3->get('items');
+    $paypal_items= [];
+    foreach ($items as $item) {
+      $paypal_items[]= [
+        'name' => $item['name'],
+        'unit_amount' => [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $item['sale_price']),
+        ],
+        'tax' => [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $item['tax']),
+        ],
+        'quantity' => $item['quantity'],
+        'sku' => $item['code'],
+        'category' => 'PHYSICAL_GOODS',
+      ];
+    }
+
+    $order= [
+      'intent' => 'CAPTURE',
+      'application_context' => [
+        'shipping_preference' => 'SET_PROVIDED_ADDRESS',
+        'user_action' => 'PAY_NOW',
+      ],
+      'purchase_units' => [
+        [
+          'reference_id' => $sale->uuid,
+          'amount' => [
+            'currency_code' => 'USD',
+            'value' => sprintf('%.2f', $sale->total),
+            'breakdown' => [
+              'item_total' => [
+                'currency_code' => 'USD',
+                'value' => sprintf('%.2f', $sale->subtotal),
+              ],
+              'shipping' => [
+                'currency_code' => 'USD',
+                'value' => sprintf('%.2f', $sale->shipping),
+              ],
+              'tax_total' => [
+                'currency_code' => 'USD',
+                'value' => sprintf('%.2f', $sale->tax),
+              ],
+            ],
+          ],
+          'items' => $paypal_items,
+          'shipping' => [
+            'name' => [
+              'full_name' => $ship_to['name'],
+            ],
+            'address' => [
+              'address_line_1' => $ship_to['address1'],
+              'address_line_2' => $ship_to['address2'],
+              'admin_area_2' => $ship_to['city'],
+              'admin_area_1' => $ship_to['state'],
+              'postal_code' => $ship_to['zip5'],
+              'country_code' => 'US',
+            ]
+          ]
+        ]
+      ],
+    ];
+
+    $client= $this->get_paypal_client($f3);
+
+    $request= new \PayPalCheckoutSdk\Orders\OrdersCreateRequest();
+    $request->prefer('return=representation');
+    $request->body= json_encode($order);
+
+    $response= $client->execute($request);
+
+    echo json_encode($response->result);
+  }
+
+  function process_paypal_payment($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    $order_id= $f3->get('REQUEST.order_id');
+
+    $client= $this->get_paypal_client($f3);
 
     $response= $client->execute(
       new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
@@ -1614,7 +1687,6 @@ class Sale {
     // have to strip jsonp wrapping
     $response= substr($response, 1, -2);
 
-    error_log($response);
     $data= json_decode($response);
 
     // turn soft errors into hard ones
@@ -1673,9 +1745,6 @@ class Sale {
       'amount' => $amount
     );
 
-    error_log($f3->get('GIFT_BACKEND') . '/add-txn.php?' .
-                     http_build_query($data));
-
     curl_setopt_array($curl, array(
       CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/add-txn.php?' .
                      http_build_query($data),
@@ -1698,8 +1767,6 @@ class Sale {
     // have to strip jsonp wrapping
     $response= substr($response, 1, -2);
     $data= json_decode($response);
-
-    error_log($response);
 
     // turn soft errors into hard ones
     if ($data->error) {
@@ -1987,8 +2054,10 @@ class Sale {
       $shipment->ship_date= (new \Datetime($xml->ShipDate))->format("Y-m-d");
       $shipment->shipping_cost= $xml->ShippingCost;
     } catch (\Exception $e) {
-      error_log(sprintf("ShipStation shipment info failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("ShipStation shipment info failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
 
     $shipment->save();
@@ -2050,8 +2119,10 @@ class Sale {
       $response= $promise->wait();
       // XXX handle response
     } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
   }
 
@@ -2116,8 +2187,10 @@ Your order will be reviewed, and you will receive another email within one busin
       $response= $promise->wait();
       // XXX handle response
     } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
   }
 
@@ -2185,8 +2258,10 @@ Your order is now being processed, and you will receive another email when your 
       $response= $promise->wait();
       // XXX handle response
     } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
   }
 
@@ -2272,8 +2347,10 @@ Your order is now being processed, and you will receive another email when your 
       $response= $promise->wait();
       // XXX handle response
     } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
   }
 
@@ -2356,8 +2433,10 @@ Your order is now being processed, and you will receive another email when your 
       $response= $promise->wait();
       // XXX handle response
     } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
     }
   }
 

@@ -67,18 +67,17 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
            function() {
   paypal.Buttons({
     createOrder: function (data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          amount: {
-            value: '{{ @sale.total - @sale.due }}' // Required
-          }
-        }]
-      });
+      return fetch('/sale/{{ @sale.uuid }}/get-paypal-order')
+        .then(function(res) {
+          return res.json()
+        })
+        .then(function(data) {
+          return data.id
+        })
     },
     onApprove: function(data, actions) {
       // Capture the funds from the transaction
       return actions.order.capture().then(function(details) {
-      debugger
         return fetch('/sale/{{ @sale.uuid }}/process-paypal-payment', {
           method: 'post',
           headers: {
@@ -87,7 +86,6 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
           body: "order_id=" + details.id
         }).then(function (data) {
           // XXX error handling?
-          debugger
           if (data.ok) {
             window.location.href= "/sale/{{ @sale.uuid }}/thanks"
           }
