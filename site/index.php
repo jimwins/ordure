@@ -4,6 +4,21 @@ require '../vendor/autoload.php';
 $f3= \Base::instance();
 $f3->config($_ENV['ORDURE_CONFIG'] ?: '../config.ini');
 
+$log= new \Monolog\Logger("ordure");
+
+$log_server= $f3->get('GRAYLOG_SERVER');
+if ($log_server) {
+  $transport= new \Gelf\Transport\UdpTransport($log_server, 12201);
+  $publisher= new \Gelf\Publisher($transport);
+  $gelfHandler= new \Monolog\Handler\GelfHandler($publisher);
+  $log->pushHandler($gelfHandler);
+} else {
+  $phpHandler= new \Monolog\Handler\ErrorLogHandler();
+  $log->pushHandler($phpHandler);
+}
+
+$f3->set('log', $log);
+
 $f3->set('DBH', new DB\SQL($f3->get('db.dsn'),
                            $f3->get('db.user'),
                            $f3->get('db.password'),
