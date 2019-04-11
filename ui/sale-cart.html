@@ -131,7 +131,7 @@
 	};
 	authRequest=
           amazon.Login.authorize(loginOptions,
-                                 "https://ordure.muck.rawm.us/cart/checkout"); 
+                                 "https://{{ @HOST }}/cart/checkout"); 
       },
 
       onError: function(error) {
