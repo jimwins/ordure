@@ -34,6 +34,30 @@
       <form method="POST" action="{{ @BASE }}/cart/update">
         <include href="sale-items.html" />
       </form>
+      <check if="{{ @sale.shipping_address_id }}">
+        <div class="panel-body">
+          <h4>Shipping address:</h4>
+          <check if="{{ @sale.shipping_address_id == 1 }}">
+            <true>
+              <strong>We will prepare your order for in-store pick-up.</strong>
+            </true>
+            <false>
+              <div>{{ @shipping_address.name }}</div>
+              <div>{{ @shipping_address.company }}</div>
+              <div>{{ @shipping_address.phone }}</div>
+              <div>{{ @shipping_address.address1 }}</div>
+              <div>{{ @shipping_address.address2 }}</div>
+              <div>
+                {{ @shipping_address.city }}, {{ @shipping_address.state }}
+                {{ @shipping_address.zip5 }}{{ @shipping_address.zip4 ? "-" . @shipping_address.zip4 : "" }}
+              </div>
+            </false>
+          </check>
+          <div>
+            <small><a href="/cart/checkout/?stage=shipping">(change)</a></small>
+          </div>
+        </div>
+      </check>
       <div class="panel-body">
 <check if="{{ @sale.email && @sale.subtotal && @billing_address.id }}">
         <form class="row" method="POST" action="/cart/place-order">
