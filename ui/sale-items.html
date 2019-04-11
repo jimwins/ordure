@@ -51,7 +51,14 @@
     </tr>
     <tr>
       <th colspan="5" class="text-right">
-        Shipping &amp; handling:
+        <check if="{{ @sale.shipping == 50.00 }}">
+          <true>
+            Local delivery:
+          </true>
+          <false>
+            Shipping &amp; handling:
+          </false>
+        </check>
       </th>
       <td class="text-right" id="shipping">{{ @amount(@sale.shipping) }}</td>
     </tr>
