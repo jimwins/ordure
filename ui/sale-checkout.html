@@ -34,7 +34,7 @@
       <form method="POST" action="{{ @BASE }}/cart/update">
         <include href="sale-items.html" />
       </form>
-      <check if="{{ @sale.shipping_address_id }}">
+      <check if="{{ @stage != 'amz-select' && @sale.shipping_address_id }}">
         <div class="panel-body">
           <h4>Shipping address:</h4>
           <check if="{{ @sale.shipping_address_id == 1 }}">
