@@ -799,6 +799,8 @@ class Sale {
 
     $line->insert();
 
+    // reload sale so shipping gets recalculated correctly
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
     $this->update_shipping_and_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
