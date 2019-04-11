@@ -356,7 +356,7 @@ class Sale {
     }
 
     return [ $special_order ? 'special_order' :
-               $stock_limited ? 'stock_limited' : 'immediate',
+               ($stock_limited ? 'stock_limited' : 'immediate'),
              array_keys($special) ];
   }
 
