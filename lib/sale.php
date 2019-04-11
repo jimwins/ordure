@@ -442,7 +442,7 @@ class Sale {
     ];
 
     $client= new \AmazonPay\Client($config);
-    if ($f3->get('DEBUG') {
+    if ($f3->get('DEBUG')) {
       $client->setLogger($f3->get('log'));
     }
     return $client;
