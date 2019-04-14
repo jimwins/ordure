@@ -38,7 +38,7 @@ class Rewards {
       $req->sender_email= $email;
       $req->sender_ip= $f3->get('IP');
       $req->sender_nickname= $f3->get('REQUEST.name');
-      if ($f3->get('REQUEST.scriptable') {
+      if ($f3->get('REQUEST.scriptable')) {
         $req->js_on= $f3->get('REQUEST.scriptable');
       }
 
