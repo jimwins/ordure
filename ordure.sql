@@ -292,6 +292,7 @@ CREATE TABLE `sale` (
   `email` varchar(255) DEFAULT NULL,
   `tax_exemption` varchar(50) DEFAULT NULL,
   `tax_calculated` datetime DEFAULT NULL,
+  `amz_order_reference_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -374,9 +375,10 @@ DROP TABLE IF EXISTS `sale_payment`;
 CREATE TABLE `sale_payment` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `sale_id` int(10) unsigned NOT NULL,
-  `method` enum('credit','bitcoin','paypal','gift','other') NOT NULL,
+  `method` enum('credit','amazon','paypal','gift','other') NOT NULL,
   `amount` decimal(9,3) NOT NULL,
   `processed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `captured` datetime DEFAULT NULL,
   `data` mediumblob,
   PRIMARY KEY (`id`),
   KEY `sale_id` (`sale_id`)
