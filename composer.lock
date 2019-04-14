@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "da4032e6002b7740b9c93be0df1f5252",
+    "content-hash": "1482849562bb5b143a9df88797e988b2",
     "packages": [
         {
             "name": "amzn/amazon-pay-sdk-php",
@@ -180,6 +180,43 @@
                 }
             ],
             "time": "2018-04-17T20:53:31+00:00"
+        },
+        {
+            "name": "cleantalk/php-antispam",
+            "version": "2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CleanTalk/php-antispam.git",
+                "reference": "9830fe5580740d54e5b781be3bfa2404a87e336c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CleanTalk/php-antispam/zipball/9830fe5580740d54e5b781be3bfa2404a87e336c",
+                "reference": "9830fe5580740d54e5b781be3bfa2404a87e336c",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "lib\\": "lib"
+                },
+                "files": [
+                    "lib/cleantalk-php-patch.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0"
+            ],
+            "description": "PHP API for antispam service cleantalk.org. Invisible protection from spam, no captches, no puzzles, no animals and no math.",
+            "homepage": "http://cleantalk.org",
+            "keywords": [
+                "anti-spam",
+                "antispam",
+                "api",
+                "spam"
+            ],
+            "time": "2019-01-18T11:05:26+00:00"
         },
         {
             "name": "clue/stream-filter",

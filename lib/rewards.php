@@ -28,6 +28,34 @@ class Rewards {
       return;
     }
 
+    // Verify email address with CleanTalk to cut down on spam
+    $email= $f3->get('REQUEST.email');
+    $key= $f3->get('CLEANTALK_ACCESS_KEY');
+    if ($key && $email) {
+      $req= new \lib\CleantalkRequest();
+      $req->auth_key= $key;
+      $req->agent= 'php-api';
+      $req->sender_email= $email;
+      $req->sender_ip= $f3->get('IP');
+      $req->sender_nickname= $f3->get('REQUEST.name');
+      if ($f3->get('REQUEST.scriptable') {
+        $req->js_on= $f3->get('REQUEST.scriptable');
+      }
+
+      $ct= new \lib\Cleantalk();
+      $ct->server_url= 'http://moderate.cleantalk.org/api2.0/';
+
+      $res= $ct->isAllowUser($req);
+
+      if ($res->allow == 1) {
+        $f3->get('log')->info("User allowed. Reason = " . $res->comment);
+      } else {
+        $f3->get('log')->info("User forbidden. Reason = " . $res->comment);
+        $f3->error(500,
+          "Sorry, there was a problem processing your email address.");
+      }
+    }
+
     $loyalty= new DB\SQL\Mapper($db, 'loyalty');
     
     $loyalty->name= $f3->get('REQUEST.name');

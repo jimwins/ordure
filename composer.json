@@ -24,6 +24,7 @@
     "amzn/amazon-pay-sdk-php": "^3.4",
     "paypal/paypal-checkout-sdk": "1.0.0",
     "monolog/monolog": "^1.24",
-    "graylog2/gelf-php": "^1.6"
+    "graylog2/gelf-php": "^1.6",
+    "cleantalk/php-antispam": "^2.3"
   }
 }
