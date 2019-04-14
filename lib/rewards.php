@@ -36,6 +36,7 @@ class Rewards {
     $loyalty->loyalty_number=
       preg_replace('/\D+/', '', $f3->get('REQUEST.phone'));
     $loyalty->code= $f3->get('REQUEST.code');
+    $loyalty->subscribe= (int)$f3->get('REQUEST.subscribe');
 
     $loyalty->save();
 

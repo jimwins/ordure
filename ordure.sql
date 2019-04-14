@@ -160,10 +160,12 @@ CREATE TABLE `loyalty` (
   `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `name` varchar(25) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `subscribe` tinyint(4) NOT NULL DEFAULT '0',
   `phone` varchar(255) DEFAULT NULL,
   `loyalty_number` varchar(32) DEFAULT NULL,
   `code` varchar(255) DEFAULT NULL,
   `processed` tinyint(1) NOT NULL DEFAULT '0',
+  `verified` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
