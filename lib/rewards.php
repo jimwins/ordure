@@ -38,9 +38,11 @@ class Rewards {
       $req->sender_email= $email;
       $req->sender_ip= $f3->get('IP');
       $req->sender_nickname= $f3->get('REQUEST.name');
-      if ($f3->get('REQUEST.scriptable')) {
-        $req->js_on= $f3->get('REQUEST.scriptable');
-      }
+      $req->js_on= $f3->get('REQUEST.scriptable');
+      // Calculate how long they took to fill out the form
+      $when= $f3->get('REQUEST.when');
+      $now= $f3->get('TIME');
+      $req->submit_time= (int)($now - $when);
 
       $ct= new \lib\Cleantalk();
       $ct->server_url= 'http://moderate.cleantalk.org/api2.0/';

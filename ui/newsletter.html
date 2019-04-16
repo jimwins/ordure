@@ -10,8 +10,14 @@
              name="phone" placeholder="213-627-7223">
     </div>
     <input type="hidden" name="subscribe" value="1">
+    <input type="hidden" name="when" value="{{ @TIME }}">
+    <input type="hidden" name="scriptable" value="0">
     <button type="submit" class="btn btn-primary">
       Sign up
     </button>
+    <script>
+      let date= new Date()
+      document.currentScript.parentNode.scriptable.value= date.getFullYear()
+    </script>
   </form>
 </div>
