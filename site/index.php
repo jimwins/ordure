@@ -1,6 +1,8 @@
 <?php
 require '../vendor/autoload.php';
 
+use Respect\Validation\Validator as v;
+
 $f3= \Base::instance();
 $f3->config($_ENV['ORDURE_CONFIG'] ?: '../config.ini');
 
@@ -157,6 +159,11 @@ $f3->route('GET|HEAD /*', 'Page->getPage');
 $f3->route('GET|HEAD /', 'Page->getPage');
 
 $f3->route('POST /contact', function ($f3, $args) {
+  $email= trim($f3->get('REQUEST.email'));
+
+  if (!v::email()->validate($email)) {
+    $f3->error(500, "Sorry, you must provide a valid email address.");
+  }
 
   if (preg_match('/(seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
     $f3->error(500, "Sorry, your comment looks like spam.");
@@ -189,6 +196,8 @@ $f3->route('POST /contact', function ($f3, $args) {
     'options' => [
       'inlineCss' => true,
       'transactional' => true,
+      // Don't mess with URLs
+      'click_tracking' => false,
     ],
   ]);
 
