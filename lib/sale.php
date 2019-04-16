@@ -718,11 +718,6 @@ class Sale {
   }
 
   function pay($f3, $args) {
-    $gateway= new Braintree_Gateway(array(
-      'accessToken' => $f3->get('VZERO_TOKEN'))
-    );
-    $f3->set('VZERO_CLIENT_TOKEN', $gateway->clientToken()->generate());
-
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     if ($sale->status != 'unpaid') {
