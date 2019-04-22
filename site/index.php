@@ -97,6 +97,12 @@ $f3->set('ONERROR', function ($f3) {
             $dest= $redir->dest;
           }
           $f3->reroute('/' . $catalog . '/' . $dest . ($q ? "?$q" : ""));
+        } else {
+          if ($redir->load(['? LIKE CONCAT(source, "/%")', $path])) {
+            $f3->reroute('/' . $catalog . '/' .
+                         preg_replace("!^({$redir->source})/!",
+                                      $redir->dest . '/', $path));
+          }
         }
       } else {
         $redir= new DB\SQL\Mapper($db, 'redirect');
