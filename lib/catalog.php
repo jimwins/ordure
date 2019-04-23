@@ -327,11 +327,13 @@ class Catalog {
 
     $cat= $f3->get('CATALOG');
     $base= $f3->get('BASE');
-    if (preg_match("!^http://[-a-z.]+$base/$cat/([-a-z.]+)/([-a-z.]+)/([-a-z.]+)!i",
+    if (preg_match("!^https?://[-a-z.]+$base/$cat/([-a-z.]+)/([-a-z.]+)/([-a-z.]+)!i",
                    $url, $m)) {
       $f3->set('PARAMS.dept', $m[1]);
       $f3->set('PARAMS.subdept', $m[2]);
       $f3->set('PARAMS.product', $m[3]);
+    } else {
+      $f3->error(500, "Couldn't figure out product for link.");
     }
 
     $dept= new DB\SQL\Mapper($db, 'department');
@@ -341,6 +343,10 @@ class Catalog {
 
     $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
       or $f3->error(404);
+
+    if ($dept->dry()) {
+      $f3->error(404);
+    }
 
     $f3->set('dept', $dept->cast());
 
@@ -353,6 +359,9 @@ class Catalog {
       or $f3->error(404);
 
     $f3->set('subdept', $dept);
+    if ($dept->dry()) {
+      $f3->error(404);
+    }
 
     $product= new DB\SQL\Mapper($db, 'product');
     $product->brand_name = '(SELECT name
@@ -360,6 +369,10 @@ class Catalog {
                               WHERE brand = brand.id)';
     $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
+
+    if ($product->dry()) {
+      $f3->error(404);
+    }
 
     $active= " AND active";
 
