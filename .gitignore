@@ -7,3 +7,4 @@ static/
 vendor/
 tmp/
 .htaccess
+hosts.yml
