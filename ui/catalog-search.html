@@ -33,6 +33,22 @@
             </repeat>
           </tbody>
         </table>
+        <script>
+gtag('event', 'view_item_list', {
+  "items": [
+<repeat group="{{ @products }}" value="{{ @product }}" counter="{{ @index }}">
+<check if="{{ @index > 1 }}">,</check>
+{
+  'list_name': "Search Results",
+  'id': "{{ @product.id }}",
+  'name': "{{ @product.name }}",
+  'brand': "{{ @product.brand_name }}",
+  'list_position': {{ @index }}
+}
+</repeat>
+  ]
+});
+        </script>
       </true>
       <false>
         <p class="alert alert-warning">
