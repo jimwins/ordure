@@ -137,12 +137,16 @@ class Sale {
                status != "shipped" AND
                status != "cart"'));
 
+    if ($f3->get('REQUEST.yesterday')) {
+      $which.= " AND DATE(created) = DATE(NOW() - INTERVAL 1 DAY)";
+    }
+
     $f3->set('which', ($f3->get('REQUEST.all') ?
                        'all' :
                        ($f3->get('REQUEST.carts') ?
                         'carts' : 'default')));
 
-    $sales= $sale->find(array($which),
+    $sales= $sale->find($which,
                         array('order' => 'id'));
 
     $sales_out= array();
