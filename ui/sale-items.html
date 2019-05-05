@@ -59,6 +59,9 @@
             Shipping &amp; handling:
           </false>
         </check>
+        <check if="{{ @sale.status == 'cart' }}">
+          <br>or pick up in store for no charge.
+        </check>
       </th>
       <td class="text-right" id="shipping">{{ @amount(@sale.shipping) }}</td>
     </tr>
