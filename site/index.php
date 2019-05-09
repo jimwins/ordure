@@ -171,7 +171,7 @@ $f3->route('POST /contact', function ($f3, $args) {
     $f3->error(500, "Sorry, you must provide a valid email address.");
   }
 
-  if (preg_match('/(seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
+  if (preg_match('/(bitcoin|sexy?.*girl|seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
     $f3->error(500, "Sorry, your comment looks like spam.");
   }
 
