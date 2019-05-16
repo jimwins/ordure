@@ -86,6 +86,26 @@ class Rewards {
                                             $subscriber);
     }
 
+    // Sign them up for Rewards+
+    if ($f3->get('REQUEST.plus') && $f3->get('REQUEST.phone')) {
+      $client= new GuzzleHttp\Client();
+
+      $uri= "https://app2.simpletexting.com/v1/group/contact/add";
+
+      $data= [
+        'token' => $f3->get('SIMPLETEXTING_TOKEN'),
+        'group' => $f3->get('SIMPLETEXTING_GROUP'),
+        'phone' => $f3->get('REQUEST.phone'),
+      ];
+
+      try {
+        $response= $client->post($uri, [ 'form_params' => $data ]);
+      } catch (\Exception $e) {
+        $f3->error(500, (sprintf("Request failed: %s (%s)",
+                                 $e->getMessage(), $e->getCode())));
+      }
+    }
+
     $page= new DB\SQL\Mapper($db, 'page');
 
     $page->load(array('slug=?', 'reward-thanks'))
