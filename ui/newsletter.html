@@ -1,6 +1,7 @@
 <div id="newsletter" class="well" style="background: #eee">
   <form action="{{ @BASE }}/process-rewards" method="POST">
     <p>Sign up for our newsletter to learn about the latest deals, events and new products, and for the <a href="{{ @BASE }}/rewards">rewards program</a> to earn points on your purchases.</p>
+    <p>Get bigger deals and more rewards when you sign up for texts with Rewards+! Gain access to special sales, giveaways, new product samples, and invites to exclusive events.</p>
     <div class="form-group">
       <input type="text" class="form-control"
              name="email" placeholder="jane.doe@example.com">
@@ -8,6 +9,11 @@
     <div class="form-group">
       <input type="text" class="form-control"
              name="phone" placeholder="213-627-7223">
+    </div>
+    <div class="checkbox">
+      <label>
+        <input type="checkbox" name="plus" value="1"> Sign me up for Rewards+. <small>(You may receive up to 6 text messages per month. Message and data rates may apply. Reply STOP to end or HELP for help.)</small>
+      </label>
     </div>
     <input type="hidden" name="subscribe" value="1">
     <input type="hidden" name="when" value="{{ @TIME }}">
