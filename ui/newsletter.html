@@ -1,7 +1,12 @@
 <div id="newsletter" class="well" style="background: #eee">
   <form action="{{ @BASE }}/process-rewards" method="POST">
-    <p>Sign up for our newsletter to learn about the latest deals, events and new products, and for the <a href="{{ @BASE }}/rewards">rewards program</a> to earn points on your purchases.</p>
-    <p>Get bigger deals and more rewards when you sign up for texts with Rewards+! Gain access to special sales, giveaways, new product samples, and invites to exclusive events. (You’re gonna need a bigger cart.)</p>
+    <p>Sign up for our newsletter and <a href="/rewards">rewards program</a> to
+    learn about the latest deals, events and new products, and to earn points on
+    your purchases.</p>
+    <p>You can also get bigger deals and more rewards when you sign up for our
+    <strong>Rewards+</strong> texts. Gain access to special sales, giveaways,
+    new product samples, and invites to exclusive events. (You're gonna need
+    a bigger cart.)</p>
     <div class="form-group">
       <input type="text" class="form-control"
              name="email" placeholder="jane.doe@example.com">
@@ -12,13 +17,13 @@
     </div>
     <div class="checkbox">
       <label>
-        <input type="checkbox" name="plus" value="1"> Sign me up for Rewards+. <small>(You may receive up to 6 text messages per month. Message and data rates may apply. Reply STOP to end or HELP for help.)</small>
+        <input type="checkbox" name="plus" value="1"> Send me Rewards+ text messages. <small>(You may receive up to 6 messages per month. Message and data rates may apply. Reply STOP to end.)</small>
       </label>
     </div>
     <input type="hidden" name="subscribe" value="1">
     <input type="hidden" name="when" value="{{ @TIME }}">
     <input type="hidden" name="scriptable" value="0">
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary btn-block">
       Sign up
     </button>
     <script>
