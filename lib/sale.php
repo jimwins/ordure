@@ -1287,6 +1287,15 @@ class Sale {
     $sale->load(array('uuid = ?', $sale_uuid))
       or $f3->error(404);
 
+    if ($f3->get('REQUEST.cert') == 'manual') {
+      $sale->tax_exemption= "manual";
+      $sale->save();
+
+      $this->update_shipping_and_tax($f3, $sale);
+
+      return $this->json($f3, $args);
+    }
+
     $data= array(
       'customerID' => $sale->uuid,
       'exemptCert' => array(
@@ -1380,6 +1389,21 @@ class Sale {
     }
 
     $db= $f3->get('DBH');
+
+    /* Override tax for manual tax exemptions */
+    if ($sale->tax_exemption == 'manual') {
+      $sale->shipping_tax= 0;
+      $item= new DB\SQL\Mapper($db, 'sale_item');
+      $items= $item->find(array('sale_id = ?', $sale->id),
+                           array('order' => 'id'));
+      foreach ($items as $i) {
+        $i->tax= 0;
+        $i->save();
+      }
+      $sale->tax_calculated= date('Y-m-d H:i:s');
+      $sale->save();
+      return;
+    }
 
     $address= new DB\SQL\Mapper($db, 'sale_address');
     $address->load(array('id = ?',
@@ -1501,6 +1525,11 @@ class Sale {
   }
 
   function capture_sales_tax($f3, $sale) {
+    /* Nothing to capture for manual exemptions */
+    if ($sale->tax_exemption == 'manual') {
+      return;
+    }
+
     $curl= curl_init();
 
     $data= array(
