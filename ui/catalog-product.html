@@ -64,6 +64,18 @@
       </div>
     </div>
 
+    <script>
+gtag('event', 'view_item', {
+  "items": [
+    {
+      'id': "p{{ @product.id }}",
+      'name': "{{ @product.name }}",
+      'brand': "{{ @product.brand_name }}"
+    }
+  ]
+});
+    </script>
+
     <check if="{{ count(@variations) > 1 &&
                @product.variation_style == 'tabs' }}">
       <ul class="nav nav-tabs">
