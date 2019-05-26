@@ -229,6 +229,9 @@ class Sale {
                                               ''
                                             END), '')
                        FROM item WHERE id = item_id)";
+    $item->product_id= "(SELECT product FROM item WHERE id = item_id)";
+    $item->product_name= "(SELECT product.name FROM item JOIN product ON product.id = item.product WHERE item.id = item_id)";
+    $item->brand_name= "(SELECT brand.name FROM item JOIN product ON product.id = item.product JOIN brand ON product.brand = brand.id WHERE item.id = item_id)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
