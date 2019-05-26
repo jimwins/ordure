@@ -1,4 +1,21 @@
 <include href="amazon-pay.html" />
+<script>
+gtag('event', 'begin_checkout', {
+  "items": [
+<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+<check if="{{ @index > 1 }}">,</check>
+{
+  'id': "p{{ @item.product_id }}",
+  'name': "{{ @item.product_name }}",
+  'brand': "{{ @item.brand_name }}",
+  'variant': "{{ @item.code }}",
+  'quantity': "{{ @item.quantity }}",
+  'price': "{{ @item.sale_price }}",
+}
+</repeat>
+  ]
+});
+</script>
 
 <style>
 #addressBookWidgetDiv {

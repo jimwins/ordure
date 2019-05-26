@@ -47,7 +47,28 @@ loadScript('https://js.stripe.com/v2/',
                  url: $form.attr('action'),
                  data: { stripeToken: token }})
          .done(function (data) {
-           window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+          gtag('event', 'purchase', {
+             "transaction_id": "{{ @sale.uuid }}",
+             "affiliation": "Online Store",
+             "value": {{ @sale.total }},
+             "currency": "USD",
+             "tax": {{ @sale.tax }},
+             "shipping": {{ @sale.shipping }},
+             "items": [
+          <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+          <check if="{{ @index > 1 }}">,</check>
+          {
+            'id': "p{{ @item.product_id }}",
+            'name': "{{ @item.product_name }}",
+            'brand': "{{ @item.brand_name }}",
+            'variant': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}",
+            'price': "{{ @item.sale_price }}",
+          }
+          </repeat>
+            ]
+          });
+          window.location.href= "/sale/{{ @sale.uuid }}/thanks";
          })
          .fail(function (jqXHR, textStatus, errorThrown) {
            stripeShowError($form,
@@ -86,6 +107,27 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
           body: "order_id=" + details.id
         }).then(function (data) {
           // XXX error handling?
+          gtag('event', 'purchase', {
+             "transaction_id": "{{ @sale.uuid }}",
+             "affiliation": "Online Store",
+             "value": {{ @sale.total }},
+             "currency": "USD",
+             "tax": {{ @sale.tax }},
+             "shipping": {{ @sale.shipping }},
+             "items": [
+          <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+          <check if="{{ @index > 1 }}">,</check>
+          {
+            'id': "p{{ @item.product_id }}",
+            'name': "{{ @item.product_name }}",
+            'brand': "{{ @item.brand_name }}",
+            'variant': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}",
+            'price': "{{ @item.sale_price }}",
+          }
+          </repeat>
+            ]
+          });
           if (data.ok) {
             window.location.href= "/sale/{{ @sale.uuid }}/thanks"
           }

@@ -1,3 +1,20 @@
+<script>
+gtag('event', 'checkout_progress', {
+  "items": [
+<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+<check if="{{ @index > 1 }}">,</check>
+{
+  'id': "p{{ @item.product_id }}",
+  'name': "{{ @item.product_name }}",
+  'brand': "{{ @item.brand_name }}",
+  'variant': "{{ @item.code }}",
+  'quantity': "{{ @item.quantity }}",
+  'price': "{{ @item.sale_price }}",
+}
+</repeat>
+  ]
+});
+</script>
 <form method="POST" action="{{ @BASE }}/cart/place-order">
   <div class="panel panel-default">
     <div class="panel-heading">
