@@ -478,7 +478,7 @@ class Sale {
 
     if (!$sale->amz_order_reference_id) {
       // We don't have order_reference_id yet, so ignore this call
-      return;
+      return $this->json($f3, $args, $uuid);
     }
 
     $params= [
@@ -647,6 +647,10 @@ class Sale {
 
     self::send_order_email($f3, $comment);
     self::send_order_paid_email($f3);
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args, $uuid);
+    }
 
     $this->forget_cart($f3, $args);
 
@@ -1570,8 +1574,8 @@ class Sale {
     }
   }
 
-  function json($f3, $args) {
-    $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+  function json($f3, $args, $uuid= null) {
+    $this->load($f3, $uuid ? $uuid : $f3->get('PARAMS.sale'), 'uuid');
 
     header("Content-type: application/json");
     echo json_encode(array( 'sale' => $f3->get('sale'),

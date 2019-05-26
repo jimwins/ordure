@@ -112,6 +112,7 @@ function showButton() {
       $.post('/cart/amz-get-details',
              { access_token: '{{ @REQUEST.access_token }}' })
         .done(function (data) {
+          if (!data.sale) return;
           // update our sale info
           $('#shipping').text('$' + data.sale.shipping);
           $('#tax').text('$' + data.sale.tax);
@@ -174,4 +175,42 @@ function showButton() {
 function enablePayButton() {
   $('#pay').prop('disabled', !(window.address_ok && window.payment_ok));
 }
+
+var $form= document.getElementById('orderForm')
+
+$form.addEventListener('submit', (ev) => {
+  ev.preventDefault()
+  ev.stopPropagation()
+
+  $.ajax({ dataType: 'json', method: 'POST',
+           url: $form.action,
+           data: $($form).serialize() })
+   .done(function (data) {
+    gtag('event', 'purchase', {
+       "transaction_id": "{{ @sale.uuid }}",
+       "affiliation": "Online Store",
+       "value": {{ @sale.total }},
+       "currency": "USD",
+       "tax": {{ @sale.tax }},
+       "shipping": {{ @sale.shipping }},
+       "items": [
+    <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+    <check if="{{ @index > 1 }}">,</check>
+    {
+      'id': "p{{ @item.product_id }}",
+      'name': "{{ @item.product_name }}",
+      'brand': "{{ @item.brand_name }}",
+      'variant': "{{ @item.code }}",
+      'quantity': "{{ @item.quantity }}",
+      'price': "{{ @item.sale_price }}",
+    }
+    </repeat>
+      ]
+    });
+    window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+  })
+  .fail(function (data) {
+    alert(data.responseJSON.text)
+  })
+})
 </script>
