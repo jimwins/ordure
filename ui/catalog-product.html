@@ -160,7 +160,7 @@ gtag('event', 'view_item', {
                     </td>
                     <check if="{{ @FEATURE_cart }}">
                       <td>
-                        <form class="form-inline"
+                        <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
                               action="/cart/add-item" method="POST">
                           <input type="hidden"
                                  name="item" value="{{ @item.code }}">
