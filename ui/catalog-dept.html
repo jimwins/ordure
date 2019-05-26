@@ -42,11 +42,12 @@
           </tr>
         </thead>
         <tbody>
-          <repeat group="{{ @products }}" value="{{ @product }}">
+          <repeat group="{{ @products }}" value="{{ @product }}" counter="{{ @index }}">
             <tr data-product="{{ @product.id }}">
               <td>{{ @product.brand_name }}</td>
               <td>
-                <a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
+                <a onclick="gtag('event', 'select_content', { 'items' : [ { 'id': 'p{{@product.id}}','name':'{{@product.name}}','list_name':'Department','brand':'{{@product.brand_name}}','list_position':'{{@index}}' }] })"
+                   href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
                   {{ @product.name }}
                 </a>
               </td>
