@@ -505,6 +505,7 @@ class Catalog {
             WHERE MATCH(product.name, description)
                   AGAINST(? IN NATURAL LANGUAGE MODE)
               AND active
+            LIMIT 100
             -- ORDER BY !active, brand.name, name";
       
       $products= $db->exec($q, $term);
