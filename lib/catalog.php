@@ -574,6 +574,7 @@ class Catalog {
      $q= "SELECT *,WEIGHT() weight
             FROM ordure
            WHERE match(?)
+           LIMIT 100
           OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
       
       $products= $sph->exec($q, $term);
