@@ -25,6 +25,10 @@
     "paypal/paypal-checkout-sdk": "1.0.0",
     "monolog/monolog": "^1.24",
     "graylog2/gelf-php": "^1.6",
-    "cleantalk/php-antispam": "^2.3"
+    "cleantalk/php-antispam": "^2.3",
+    "robmorgan/phinx": "^0.10.7"
+  },
+  "require-dev": {
+    "deployer/recipes": "^6.2"
   }
 }
