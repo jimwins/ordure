@@ -36,14 +36,14 @@
         <form class="row" method="GET" action="/cart/checkout">
           <input type="hidden" name="uuid" value="{{ @sale.uuid }}">
 
-          <check if="{{ @shipping_estimate == 'immediate' }}">
+          <check if="{{ @shipping_status == 'immediate' }}">
             <p class="lead alert alert-success">
               These are in stock at the store and eligible for immediate
               shipment or pick-up. We will contact you if any problems
               arise in having your order ready!
             </p>
           </check>
-          <check if="{{ @shipping_estimate == 'stock_limited' }}">
+          <check if="{{ @shipping_status == 'stock_limited' }}">
             <p class="lead alert alert-warning">
               Not all of the items in your cart are currently in stock,
               so your order will take additional time to prepare. We will
@@ -52,7 +52,7 @@
               are ready in about one week.)
             </p>
           </check>
-          <check if="{{ @shipping_estimate == 'special_order' }}">
+          <check if="{{ @shipping_status == 'special_order' }}">
             <p class="lead alert alert-info">
               Your order contains special order items that will take extra
               time to prepare. We will email you with an esimated
@@ -64,20 +64,22 @@
           <check if="{{ in_array('hazmat', @special_conditions) }}">
             <p class="lead alert alert-warning">
               Your order contains items that are considered hazarous materials,
-              additional shipping charges will apply.
+              additional shipping charges have been applied.
             </p>
           </check>
-          <check if="{{ in_array('truck', @special_conditions) }}">
+          <check if="{{ @shipping_rate == 'truck' }}">
             <p class="lead alert alert-danger">
-              Your order contains items that are only available for in-store
-              pick-up or local delivery.
+              Your order contains items that will require truck delivery.
+              You can submit your order for manual review, and we'll contact
+              you with the cost and instructions on how to complete the order.
             </p>
           </check>
-          <check if="{{ in_array('oversized', @special_conditions) }}">
+          <check if="{{ @shipping_rate == 'unknown' }}">
             <p class="lead alert alert-danger">
-              Your order contains items that fall outside the scope of our
-              standard shipping rates because of their size and/or weight.
-              Additional charges will apply.
+              Sorry, our system is unable to calculate the shipping costs
+              for your order due to incomplete information. You can submit
+              your order for manual review, and we'll contact you with the
+              shipping cost and instructions on how to complete the order.
             </p>
           </check>
 
@@ -98,9 +100,11 @@
                   Check out
                 </button>
               </div>
-              <div class="col-sm-4">
-                <div id="AmazonPayButton"></div>
-              </div>
+              <check if="{{ !in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
+                <div class="col-sm-4">
+                  <div id="AmazonPayButton"></div>
+                </div>
+              </check>
             </div>
           </div>
         </form>

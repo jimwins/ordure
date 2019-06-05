@@ -63,7 +63,15 @@
           <br>or pick up in store for no charge.
         </check>
       </th>
+<check if="{{ @FEATURE_cart && (@sale.status == 'cart' || @sale.status == 'review')
+            && in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
+  <true>
+      <td class="text-right text-danger">TBD</td>
+  </true>
+  <false>
       <td class="text-right" id="shipping">{{ @amount(@sale.shipping) }}</td>
+  </false>
+</check>
     </tr>
     <tr>
       <th colspan="5" class="text-right">

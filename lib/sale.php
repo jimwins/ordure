@@ -261,9 +261,10 @@ class Sale {
     }
     $f3->set('shipments', $shipments_out);
 
-    list($shipping_estimate, $special_conditions)=
+    list($shipping_status, $shipping_rate, $special_conditions)=
       $this->get_shipping_estimate($f3, $sale, $items);
-    $f3->set('shipping_estimate', $shipping_estimate);
+    $f3->set('shipping_status', $shipping_status);
+    $f3->set('shipping_rate', $shipping_rate);
     $f3->set('special_conditions', $special_conditions);
 
     return $sale;
@@ -320,11 +321,12 @@ class Sale {
     $f3->reroute("../{$new_sale->uuid}/edit");
   }
 
+  // returns [ shipping_status, shipping_rate, special_conditions ]
   function get_shipping_estimate($f3) {
     $db= $f3->get('DBH');
     $items= $f3->get('items');
-    $special_order= $stock_limited= 0;
-    $special= [];
+    $status= $rate= $special= [];
+    $weight= 0.0;
 
     foreach ($items as $sale_item) {
       // Check stock
@@ -332,15 +334,15 @@ class Sale {
       $scat_item->load(array('code = ?', $sale_item['code']));
       // no details? must be special order
       if ($scat_item->dry()) {
-        $special_order++;
+        $status['special']++;
       }
       // no stock and not stocked? special order.
       if (!$scat_item->stock && !$scat_item->minimum_quantity) {
-        $special_order++;
+        $status['special']++;
       }
       // more in order than in stock? stock is limited.
       if ($scat_item->stock < $sale_item['quantity']) {
-        $stock_limited++;
+        $status['stock_limited']++;
       }
 
       // Check item details
@@ -350,21 +352,43 @@ class Sale {
       if ($item->hazmat) {
         $special['hazmat']++;
       }
-      // oversized? (extra charge)
+      // unknown dimensions?
+      if (!$item->weight || !$item->length) {
+        $rate['unknown']++;
+      }
+      $weight+= $item->weight;
+      // not small?
       $size= [$item->height, $item->length, $item->width ];
       sort($size, SORT_NUMERIC);
-      if ($size[0] > 12 || $size[1] > 24 || $size[2] > 24) {
-        $special['oversized']++;
+      if ($size[0] > 8 || $size[1] > 19 || $size[2] > 25) {
+        $rate['large']++;
+      } else if ($size[0] > 5 || $size[1] > 15 || $size[2] > 18) {
+        $rate['medium']++;
       }
-      // truck? (only local)
+      // truck?
       if ($item->oversized) {
-        $special['truck']++;
+        $rate['truck']++;
       }
     }
 
-    return [ $special_order ? 'special_order' :
-               ($stock_limited ? 'stock_limited' : 'immediate'),
-             array_keys($special) ];
+    // if overweight for medium, might be able to ship as large
+    if ($medium && $weight > 20)
+      $rate['large']++;
+    // if overweight for large, will have to get price quote
+    if ($large && $weight > 30)
+      $rate['unknown']++;
+
+    return [
+      $status['special'] ? 'special_order' :
+        ($status['stock_limited'] ? 'stock_limited' :
+          'immediate'),
+      $rate['unknown'] ? 'unknown' :
+        ($rate['truck'] ? 'truck' :
+          ($rate['large'] ? 'large' :
+            ($rate['medium'] ? 'medium' :
+              'small'))),
+      array_keys($special)
+    ];
   }
 
   function cart($f3, $args) {
@@ -418,7 +442,13 @@ class Sale {
       }
 
       if (!in_array($stage, $stages)) {
-        if ($sale->shipping_address_id) {
+        $shipping_rate= $f3->get('shipping_rate');
+        if ($sale->shipping_address_id &&
+            in_array($shipping_rate, [ 'truck', 'unknown' ]))
+        {
+          $stage= 'review';
+        }
+        elseif ($sale->shipping_address_id) {
           $stage= 'payment';
         }
         elseif ($sale->person_id || ($sale->email && $sale->name)) {
@@ -517,7 +547,12 @@ class Sale {
       $address->address2= $amz_address['AddressLine2'];
       $address->city= $amz_address['City'];
       $address->state= $amz_address['StateOrRegion'];
-      $address->zip5= $amz_address['PostalCode'];
+      $zip5= $amz_address['PostalCode'];
+      if (preg_match('/^(\d{5})-(\d{4})$/', $zip5, $m)) {
+        $zip5= $m[1];
+        $address->zip4= $m[2];
+      }
+      $address->zip5= $zip5;
       $address->phone= $amz_address['Phone'];
       $address->verified= 0;
 
@@ -956,20 +991,25 @@ class Sale {
 
     // Calculate shipping if not in-store pick-up
     if ($sale->shipping_address_id != 1) {
-      if ($sale->subtotal < 100.00) {
-        $sale->shipping+= 9.99;
+      $shipping_status= $f3->get('shipping_status');
+      $shipping_rate= $f3->get('shipping_rate');
+
+      switch ($shipping_rate) {
+      case 'small':
+        $sale->shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
+        break;
+      case 'medium':
+        $sale->shipping= $sale->subtotal < 200.00 ? 19.99 : 0.00;
+        break;
+      case 'large':
+        $sale->shipping= $sale->subtotal < 300.00 ? 29.99 : 0.00;
+        break;
       }
 
       $special_conditions= $f3->get('special_conditions');
 
       if (in_array('hazmat', $special_conditions)) {
-        $sale->shipping+= 5.00;
-      }
-      if (in_array('oversized', $special_conditions)) {
-        $sale->shipping+= 20.00;
-      }
-      if (in_array('truck', $special_conditions)) {
-        $sale->shipping= 50.00;
+        $sale->shipping+= 10.00;
       }
     }
 
@@ -1012,14 +1052,23 @@ class Sale {
         or $f3->error(404);
     }
 
+    /* Split ZIP+4, might all be in zip5 */
+    $zip5= trim($f3->get('REQUEST.zip5'));
+    if (preg_match('/^(\d{5})-(\d{4})$/', $zip5, $m)) {
+      $zip5= $m[1];
+      $zip4= $m[2];
+    } else {
+      $zip4= trim($f3->get('REQUEST.zip4'));
+    }
+
     $address->name= trim($f3->get('REQUEST.name'));
     $address->company= trim($f3->get('REQUEST.company'));
     $address->address1= trim($f3->get('REQUEST.address1'));
     $address->address2= trim($f3->get('REQUEST.address2'));
     $address->city= trim($f3->get('REQUEST.city'));
     $address->state= trim($f3->get('REQUEST.state'));
-    $address->zip5= trim($f3->get('REQUEST.zip5'));
-    $address->zip4= trim($f3->get('REQUEST.zip4'));
+    $address->zip5= $zip5;
+    $address->zip4= $zip4;
     $address->phone= trim($f3->get('REQUEST.phone'));
     $address->verified= 0;
 
@@ -1388,8 +1437,9 @@ class Sale {
   }
 
   function update_sales_tax($f3, $sale) {
-    /* No address? Can't do it. */
-    if (!$sale->shipping_address_id && !$sale->billing_address_id) {
+    /* No address or shipping rate? Can't do it. */
+    if ((!$sale->shipping_address_id && !$sale->billing_address_id) ||
+        in_array($f3->get('shipping_rate'), [ 'truck', 'unknown' ])) {
       $sale->tax_calculated= null;
       $sale->save();
       return;
@@ -1584,8 +1634,8 @@ class Sale {
                             'shipping_address' => $f3->get('shipping_address'),
                             'items' => $f3->get('items'),
                             'payments' => $f3->get('payments'),
-                            'shipping_estimate' =>
-                              $f3->get('shipping_estimate'),
+                            'shipping_status' => $f3->get('shipping_status'),
+                            'shipping_rate' => $f3->get('shipping_rate'),
                             'special_conditions' =>
                               $f3->get('special_conditions'),
                             ),
