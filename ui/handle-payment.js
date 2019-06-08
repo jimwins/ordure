@@ -1,86 +1,95 @@
-loadScript('https://js.stripe.com/v2/',
+loadScript('https://js.stripe.com/v3/',
            function() {
+  var stripe= Stripe('{{ @STRIPE_KEY }}');
+  var elements= stripe.elements();
 
-  Stripe.setPublishableKey('{{ @STRIPE_KEY }}');
-
-  var $form = $('#payment-form');
-  $form.submit(function(event) {
-    // Disable the submit button to prevent repeated clicks:
-    $form.find('[type="submit"]').prop('disabled', true);
-
-    // Validate the amount so it makes sense
-    var amount= $form.find('[name="amount"]').val().trim();
-    amount= amount.replace(/^\$/, ''); // Remove leading $
-    if (isNaN(+amount) || !(+amount)) {
-      $form.find('.payment-errors').text("You must enter a valid amount for the gift card!");
-      $form.find('.payment-errors').removeClass('hidden');
-      $form.find('[type="submit"]').prop('disabled', false); // Re-enable submission
-      return false;
-    }
-
-    // Request a token from Stripe:
-    Stripe.card.createToken($form, stripeResponseHandler);
-
-    // Prevent the form from being submitted:
-    return false;
-  });
-
-  function stripeShowError($form, message) {
-    $form.find('.payment-errors').text(message);
-    $form.find('.payment-errors').removeClass('hidden');
-    $form.find('[type="submit"]').prop('disabled', false);
-  }
-
-  function stripeResponseHandler(status, response) {
-    var $form = $('#payment-form');
-    $form.find('.payment-errors').addClass('hidden');
-
-    if (response.error) {
-      stripeShowError($form, response.error.message);
-    } else {
-      var token= response.id;
-      // Insert the token ID into the form so it gets submitted to the server:
-      $form.append($('<input type="hidden" name="stripeToken">').val(token));
-
-      if ($form.data('ajax')) {
-        $.ajax({ dataType: 'json', method: 'POST',
-                 url: $form.attr('action'),
-                 data: { stripeToken: token }})
-         .done(function (data) {
-          gtag('event', 'purchase', {
-             "transaction_id": "{{ @sale.uuid }}",
-             "affiliation": "Online Store",
-             "value": {{ @sale.total }},
-             "currency": "USD",
-             "tax": {{ @sale.tax }},
-             "shipping": {{ @sale.shipping }},
-             "items": [
-          <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-          <check if="{{ @index > 1 }}">,</check>
-          {
-            'id': "p{{ @item.product_id }}",
-            'name': "{{ @item.product_name }}",
-            'brand': "{{ @item.brand_name }}",
-            'variant': "{{ @item.code }}",
-            'quantity': "{{ @item.quantity }}",
-            'price': "{{ @item.sale_price }}",
-          }
-          </repeat>
-            ]
-          });
-          window.location.href= "/sale/{{ @sale.uuid }}/thanks";
-         })
-         .fail(function (jqXHR, textStatus, errorThrown) {
-           stripeShowError($form,
-                           jqXHR.responseJSON.text ?
-                           jqXHR.responseJSON.text : textStatus); 
-         });
-
-      } else {
-        $form.get(0).submit();
-      }
+  var style= {
+    base: {
+      lineHeight: '1.429'
     }
   };
+
+  var card= elements.create('card', { style: style });
+
+  card.mount('#card-element');
+
+  card.addEventListener('change', function(event) {
+    var displayError= document.getElementById('card-errors');
+    if (event.error) {
+      displayError.textContent= event.error.message;
+      displayError.classList.remove('hidden');
+    } else {
+      displayError.textContent= '';
+      displayError.classList.add('hidden');
+    }
+  });
+
+  var form = document.getElementById('payment-form');
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    stripe.createToken(card).then(function(result) {
+      if (result.error) {
+        // Inform the customer that there was an error.
+        var errorElement= document.getElementById('card-errors');
+        errorElement.textContent= result.error.message;
+        errorElement.classList.remove('hidden');
+      } else {
+        // Send the token to your server.
+        stripeTokenHandler(result.token);
+      }
+    });
+  });
+
+  function stripeTokenHandler(token) {
+    // Insert the token ID into the form so it gets submitted to the server
+    var form= document.getElementById('payment-form');
+    var hiddenInput= document.createElement('input');
+    hiddenInput.setAttribute('type', 'hidden');
+    hiddenInput.setAttribute('name', 'stripeToken');
+    hiddenInput.setAttribute('value', token.id);
+    form.appendChild(hiddenInput);
+
+    // Submit the form
+    if (form.getAttribute('data-ajax')) {
+      $.ajax({ dataType: 'json', method: 'POST',
+               url: form.getAttribute('action'),
+               data: { stripeToken: token.id }})
+       .done(function (data) {
+        gtag('event', 'purchase', {
+           "transaction_id": "{{ @sale.uuid }}",
+           "affiliation": "Online Store",
+           "value": {{ @sale.total }},
+           "currency": "USD",
+           "tax": {{ @sale.tax }},
+           "shipping": {{ @sale.shipping }},
+           "items": [
+        <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+        <check if="{{ @index > 1 }}">,</check>
+        {
+          'id': "p{{ @item.product_id }}",
+          'name': "{{ @item.product_name }}",
+          'brand': "{{ @item.brand_name }}",
+          'variant': "{{ @item.code }}",
+          'quantity': "{{ @item.quantity }}",
+          'price': "{{ @item.sale_price }}",
+        }
+        </repeat>
+          ]
+        });
+        window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+       })
+       .fail(function (jqXHR, textStatus, errorThrown) {
+         var displayError= document.getElementById('card-errors');
+         displayError.textContent= jqXHR.responseJSON.text ?
+                                   jqXHR.responseJSON.text :
+                                   textStatus;
+         displayError.classList.remove('hidden');
+       });
+    } else {
+      form.submit();
+    }
+  }
 
 });
 

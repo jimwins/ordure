@@ -16,17 +16,16 @@
         </div>
         <div id="pay-credit-card" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-credit-card-heading">
           <div class="panel-body">
-            <noscript>
-              <p class="alert alert-danger">
-                Sorry, you must have Javascript enabled in order to pay
-                online.
-              </p>
-            </noscript>
             <form method="POST"
-                  action="process-creditcard-payment" data-ajax="true"
+                  action="/sale/{{ @sale.uuid }}/process-creditcard-payment"
+                  data-ajax="1"
                   id="payment-form">
-              <div class="payment-errors alert alert-danger hidden"></div>
-
+              <noscript>
+                <p class="alert alert-danger">
+                  Sorry, you must have Javascript enabled in order to pay
+                  online.
+                </p>
+              </noscript>
               <div class="form-group">
                 <label>
                   <span>Amount to be paid</span>
@@ -37,34 +36,14 @@
               <div class="form-group">
                 <label>
                   <span>Card number</span>
-                  <input type="text" class="form-control"  autocomplete="cc-number" size="20" data-stripe="number" placeholder="XXXX XXXX XXXX XXXX">
                 </label>
+                <div id="card-element" class="form-control"></div>
               </div>
-              <div class="form-group">
-                <label>
-                  <span>Expiration (MM/YY)</span>
-                </label>
-                <div>
-                  <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-month"  data-stripe="exp_month" placeholder="MM">
-                  <span> / </span>
-                  <input type="text" class="form-control" style="display: inline; width: auto" size="2" autocomplete="cc-exp-year"  data-stripe="exp_year" placeholder="YY">
-                </div>
+              <div id="card-errors" class="alert alert-danger hidden" role="alert">
               </div>
-              <div class="form-group">
-                <label>
-                  <span>Security code (CVC):</span>
-                  <input type="text" class="form-control" autocomplete="cc-csc"  size="4" data-stripe="cvc" placeholder="XXX">
-                </label>
-              </div>
-
-              <input type="hidden" data-stripe="address_zip" value="{{ @billing_address.zip5 }}">
-
-              <input type="hidden" name="amount" value="1000"><!-- dummy -->
-
-              <button type="submit" class="btn btn-primary">
+              <button class="btn btn-primary">
                 Pay {{ @amount(@sale.total - @sale.paid) }}
               </button>
-
             </form>
           </div>
         </div>
