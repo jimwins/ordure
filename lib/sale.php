@@ -70,6 +70,9 @@ class Sale {
       $f3->route("POST /cart/add-item", 'Sale->add_item');
       $f3->route("POST /cart/update", 'Sale->update_items');
       $f3->route("POST /cart/update-person", 'Sale->set_person');
+      $f3->route("POST /cart/calculate-shipping", 'Sale->calculate_shipping');
+      $f3->route("POST /cart/change-shipping-option",
+                 'Sale->change_shipping_option');
       $f3->route("POST /cart/set-address", 'Sale->set_address');
       $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
       $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
@@ -1093,6 +1096,121 @@ class Sale {
     $f3->reroute('./checkout?uuid=' . $sale->uuid);
   }
 
+  function calculate_shipping($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
+        $type != 'billing' &&
+        \Auth::authenticated_user($f3) != 1) {
+      $f3->error(403);
+    }
+
+    if (!in_array($sale->status, array('new','cart','review','unpaid')))
+      $f3->error(500);
+
+    $in= json_decode($f3->get('POST.shippingAddress'));
+
+    $address= new DB\SQL\Mapper($db, 'sale_address');
+
+    /* Split ZIP+4, might all be in zip5 */
+    $zip5= trim($in->postalCode);
+    if (preg_match('/^(\d{5})-(\d{4})$/', $zip5, $m)) {
+      $zip5= $m[1];
+      $zip4= $m[2];
+    }
+
+    $address->name= trim($in->recipient);
+    $address->company= trim($in->organization);
+    $address->address1= trim($in->addressLine[0]);
+    $address->address2= trim($in->addressLine[1]);
+    $address->city= trim($in->city);
+    $address->state= trim($in->region);
+    $address->zip5= $zip5;
+    $address->phone= trim($in->phone);
+    $address->verified= 0;
+
+    $address->save();
+
+    $sale->shipping_address_id= $address->id;
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    // reload to get current total
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    header("Content-type: application/json");
+    echo json_encode([
+      'status' => 'success',
+      'total' => [
+        'amount' => $sale->total * 100,
+        'label' => 'Total',
+        'pending' => false
+      ],
+      'shippingOptions' => [
+        [
+          'id' => 'shipping',
+          'label' => 'Shipping & handling',
+          'amount' => $sale->shipping * 100
+        ],
+        [
+          'id' => 'pickup',
+          'label' => 'FREE In-Store Pickup',
+          'amount' => 0
+        ]
+      ]
+    ]);
+  }
+
+  function change_shipping_option($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
+        $type != 'billing' &&
+        \Auth::authenticated_user($f3) != 1) {
+      $f3->error(403);
+    }
+
+    if (!in_array($sale->status, array('new','cart','review','unpaid')))
+      $f3->error(500);
+
+    if ($f3->get('POST.shippingOption') == 'pickup') {
+      $sale->shipping_address_id= 1;
+    }
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    // reload to get current total
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    header("Content-type: application/json");
+    echo json_encode([
+      'status' => 'success',
+      'total' => [
+        'amount' => $sale->total * 100,
+        'label' => 'Total',
+        'pending' => false
+      ],
+    ]);
+  }
+
   function remove_address($f3, $args) {
     if (\Auth::authenticated_user($f3) != 1)
       $f3->error(403);
@@ -1670,6 +1788,17 @@ class Sale {
     if (!strlen($token)) {
       $f3->get('log')->error("No token");
       $f3->error(500, "There was an error processing your card.");
+    }
+
+    if (($name= trim($f3->get('REQUEST.name')))) {
+      $sale->name= $name;
+    }
+    if (($email= trim($f3->get('REQUEST.email')))) {
+      $sale->email= $email;
+    }
+
+    if (!$sale->email) {
+      $f3->error(500, "We need an email address for this order.");
     }
 
     try {
