@@ -100,9 +100,13 @@
           <tr valign="top">
             <td><a data-bind="if: $parent.admin, click: $parent.removeItem"><i class="fa fa-trash-o"></i></a></td>
             <td class="text-right editable">
-             <span data-key="quantity" data-bind="text: $data.quantity"></span>
+             <span data-key="quantity"
+                   data-bind="text: $data.quantity,
+                              css: { 'text-danger' : $data.quantity() > $data.stock() }">
+             </span>
             </td>
-            <td><small data-bind="text: $data.code"></small></td>
+            <td><small data-bind="text: $data.code,
+                                  css: { 'text-danger' : !$data.weight() || !$data.width() }"></small></td>
             <td>
               <span class="editable">
                 <span data-key="override_name" data-bind="text: $data.name"></span>
