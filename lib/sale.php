@@ -389,10 +389,11 @@ class Sale {
         ($status['stock_limited'] ? 'stock_limited' :
           'immediate'),
       $rate['unknown'] ? 'unknown' :
-        ($rate['truck'] ? 'truck' :
-          ($rate['large'] ? 'large' :
-            ($rate['medium'] ? 'medium' :
-              'small'))),
+        ($weight < 0 ? 'free' :
+          ($rate['truck'] ? 'truck' :
+            ($rate['large'] ? 'large' :
+              ($rate['medium'] ? 'medium' :
+                'small')))),
       array_keys($special)
     ];
   }
