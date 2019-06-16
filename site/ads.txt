@@ -1,0 +1,2 @@
+# we don't publish ads, but hate 404s
+placeholder.example.com, placeholder, DIRECT, placeholder
