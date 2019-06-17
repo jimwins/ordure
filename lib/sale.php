@@ -1873,6 +1873,7 @@ class Sale {
 
     $items= $f3->get('items');
     $paypal_items= [];
+if (0) {
     foreach ($items as $item) {
       $paypal_items[]= [
         'name' => $item['name'],
@@ -1907,6 +1908,7 @@ class Sale {
         'category' => 'PHYSICAL_GOODS',
       ];
     }
+}
 
     $order= [
       'intent' => 'CAPTURE',
