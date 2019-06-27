@@ -56,6 +56,7 @@ loadScript('https://js.stripe.com/v3/',
                url: form.getAttribute('action'),
                data: { stripeToken: token.id }})
        .done(function (data) {
+         <check if="{{ @sale }}">
         gtag('event', 'purchase', {
            "transaction_id": "{{ @sale.uuid }}",
            "affiliation": "Online Store",
@@ -77,6 +78,7 @@ loadScript('https://js.stripe.com/v3/',
         </repeat>
           ]
         });
+        </check>
         window.location.href= "/sale/{{ @sale.uuid }}/thanks";
        })
        .fail(function (jqXHR, textStatus, errorThrown) {
@@ -115,6 +117,7 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
           },
           body: "order_id=" + details.id
         }).then(function (data) {
+         <check if="{{ @sale }}">
           // XXX error handling?
           gtag('event', 'purchase', {
              "transaction_id": "{{ @sale.uuid }}",
@@ -137,6 +140,7 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
           </repeat>
             ]
           });
+          </check>
           if (data.ok) {
             window.location.href= "/sale/{{ @sale.uuid }}/thanks"
           }
