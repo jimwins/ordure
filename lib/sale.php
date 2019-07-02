@@ -1783,7 +1783,9 @@ class Sale {
     $uuid= $f3->get('PARAMS.sale');
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    $amount= (int)(($sale->total - $sale->paid) * 100);
+    bcscale(2);
+    $due= bcsub($sale->total, $sale->paid);
+    $amount= (int)bcmul($due, 100);
 
     \Stripe\Stripe::setApiKey($stripe['secret_key']);
 
