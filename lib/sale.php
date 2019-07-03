@@ -777,12 +777,8 @@ class Sale {
       $f3->reroute('./');
     }
 
-    if ($f3->get('REQUEST.billing') || !$sale->billing_address_id) {
-      echo Template::instance()->render('sale-billing.html');
-    } else {
-      $f3->set('action', 'pay');
-      echo Template::instance()->render('sale-pay.html');
-    }
+    $f3->set('action', 'pay');
+    echo Template::instance()->render('sale-pay.html');
   }
 
   function status($f3, $args) {
