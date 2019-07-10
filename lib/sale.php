@@ -15,6 +15,7 @@ class Sale {
   static function addRoutes($f3) {
     $f3->route("GET|HEAD /sale/new", 'Sale->new_sale');
     $f3->route("GET|HEAD /sale/list", 'Sale->showList');
+    $f3->route("GET|HEAD /sale/list-items", 'Sale->showItemsList');
     $f3->route("GET|HEAD /sale/@sale", 'Sale->dispatch');
     $f3->route("GET|HEAD /sale/@sale/edit", 'Sale->edit');
     $f3->route("GET|HEAD /sale/@sale/pay", 'Sale->pay');
@@ -165,6 +166,41 @@ class Sale {
     }
 
     echo Template::instance()->render('sale-list.html');
+  }
+
+  function showItemsList($f3, $args) {
+    if (\Auth::authenticated_user($f3) != 1) {
+      if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
+        $f3->error(403);
+      }
+    }
+
+    $db= $f3->get('DBH');
+
+    $f3->set('which', 'items');
+
+    $q= "SELECT item.code, item.name, item.width, item.weight,
+                (SELECT stock FROM scat_item WHERE scat_item.code = item.code)
+                  AS stock,
+                SUM(quantity) total
+           FROM sale_item
+           JOIN sale ON sale_item.sale_id = sale.id
+           JOIN item ON sale_item.item_id = item.id
+          WHERE sale.modified BETWEEN NOW() - INTERVAL 2 DAY AND NOW()
+          GROUP BY item.id
+          ORDER BY code";
+
+    $items= $db->exec($q);
+
+    if ($f3->get('REQUEST.json')) {
+      header("Content-type: application/json");
+      echo json_encode($items, JSON_PRETTY_PRINT);
+      return;
+    }
+
+    $f3->set('items', $items);
+
+    echo Template::instance()->render('sale-list-items.html');
   }
 
   function load($f3, $sale_id, $type= 'id') {

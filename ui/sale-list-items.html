@@ -31,40 +31,28 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Created</th>
-            <th>Modified</th>
-            <th>Status</th>
-            <th>Customer</th>
-            <th>Total</th>
+            <th>Quantity<th>
+            <th>Code</th>
+            <th>Name</th>
           </tr>
         </thead>
         <tfoot>
         </tfoot>
         <tbody>
-          <repeat group="{{ @sales }}" value="{{ @sale }}">
+          <repeat group="{{ @items }}" value="{{ @item }}">
             <tr valign="top">
-              <td>
-                <a href="{{ @sale.uuid }}">{{ sprintf("%07d", @sale.id) }}</a>
-                &nbsp; <a href="{{ @sale.uuid }}/json"><i class="fa fa-download"></i></a>
-                &nbsp; <a href="{{ @sale.uuid }}/clone"><i class="fa fa-clone"></i></a>
-              </td>
-              <td nowrap>
-                {{ (new DateTime(@sale.created))->format("M j H:i") }}
-              </td>
-              <td nowrap>
-                {{ (new DateTime(@sale.modified))->format("M j H:i") }}
+              <td align="right" class="{{ (@item.total > @item.stock) ? 'text-danger' : '' }}">
+                {{ @item.total }}
               </td>
               <td>
-                <a href="{{ @sale.uuid }}/edit">
-                  {{ @sale.status }}
+                <a href="/{{ @item.code }}" class="{{ !(@item.width || @item.weight) ? 'text-danger' : '' }}">
+                  {{ @item.code }}
                 </a>
               </td>
               <td>
-                <a href="mailto:{{ @sale.email }}">{{ @sale.name }}</a>
-              </td>
-              <td>
-                {{ @amount(@sale.total) }}
+                <a href="/{{ @item.code }}">
+                  {{ @item.name }}
+                </a>
               </td>
             </tr>
           </repeat>
@@ -91,3 +79,4 @@
 
 </div>
 <include href="footer.html" />
+
