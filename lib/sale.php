@@ -187,6 +187,7 @@ class Sale {
            JOIN sale ON sale_item.sale_id = sale.id
            JOIN item ON sale_item.item_id = item.id
           WHERE sale.modified BETWEEN NOW() - INTERVAL 2 DAY AND NOW()
+            AND sale.status = 'cart'
           GROUP BY item.id
           ORDER BY code";
 
