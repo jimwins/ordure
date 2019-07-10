@@ -31,17 +31,15 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th>Quantity<th>
+            <th class="text-right">Quantity</th>
             <th>Code</th>
             <th>Name</th>
           </tr>
         </thead>
-        <tfoot>
-        </tfoot>
         <tbody>
           <repeat group="{{ @items }}" value="{{ @item }}">
             <tr valign="top">
-              <td align="right" class="{{ (@item.total > @item.stock) ? 'text-danger' : '' }}">
+              <td class="text-right {{ (@item.total > @item.stock) ? 'text-danger' : '' }}">
                 {{ @item.total }}
               </td>
               <td>

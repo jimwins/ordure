@@ -179,6 +179,9 @@ class Sale {
 
     $f3->set('which', 'items');
 
+    $days= (int)$f3->get('REQUEST.days');
+    if (!$days) $days= 2;
+
     $q= "SELECT item.code, item.name, item.width, item.weight,
                 (SELECT stock FROM scat_item WHERE scat_item.code = item.code)
                   AS stock,
@@ -186,7 +189,7 @@ class Sale {
            FROM sale_item
            JOIN sale ON sale_item.sale_id = sale.id
            JOIN item ON sale_item.item_id = item.id
-          WHERE sale.modified BETWEEN NOW() - INTERVAL 2 DAY AND NOW()
+          WHERE sale.modified BETWEEN NOW() - INTERVAL $days DAY AND NOW()
             AND sale.status = 'cart'
           GROUP BY item.id
           ORDER BY code";
