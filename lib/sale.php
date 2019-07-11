@@ -408,7 +408,7 @@ class Sale {
       sort($size, SORT_NUMERIC);
       if ($size[0] > 8 || $size[1] > 19 || $size[2] > 25) {
         $rate['large']++;
-      } else if ($size[0] > 5 || $size[1] > 15 || $size[2] > 18) {
+      } else if ($size[0] > 8 || $size[1] > 15 || $size[2] > 18) {
         $rate['medium']++;
       }
       // truck?
