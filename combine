@@ -1,8 +1,8 @@
 #!/bin/sh
 
-JQUERY=3.3.1
-BOOTSTRAP=3.3.7
-KNOCKOUT=3.4.2
+JQUERY=3.4.1
+BOOTSTRAP=3.4.1
+KNOCKOUT=3.5.0
 FONTAWESOME=4.7.0
 
 date=`date +"%Y-%m-%d"`
@@ -12,7 +12,7 @@ CSS="static/code/combined-$date.css"
 
 curl "http://code.jquery.com/jquery-$JQUERY.min.js" > $JS
 curl "https://maxcdn.bootstrapcdn.com/bootstrap/$BOOTSTRAP/js/bootstrap.min.js" >> $JS
-curl "http://knockoutjs.com/downloads/knockout-$KNOCKOUT.js" >> $JS
+curl "https://knockoutjs.com/downloads/knockout-$KNOCKOUT.js" >> $JS
 curl "https://raw.githubusercontent.com/SteveSanderson/knockout.mapping/master/build/output/knockout.mapping-latest.js" >> $JS
 curl "https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js" >> $JS
 
