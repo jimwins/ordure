@@ -171,6 +171,35 @@ $f3->route('POST /contact', function ($f3, $args) {
     $f3->error(500, "Sorry, you must provide a valid email address.");
   }
 
+  // Use Cleantalk to check for spam
+  $key= $f3->get('CLEANTALK_ACCESS_KEY');
+  if ($key) {
+    $req= new \lib\CleantalkRequest();
+    $req->auth_key= $key;
+    $req->agent= 'php-api';
+    $req->sender_email= $email;
+    $req->sender_ip= $f3->get('IP');
+    $req->sender_nickname= $f3->get('REQUEST.name');
+    $req->js_on= $f3->get('REQUEST.scriptable');
+    $req->message= $f3->get('REQUEST.comment');
+    // Calculate how long they took to fill out the form
+    $when= $f3->get('REQUEST.when');
+    $now= $f3->get('TIME');
+    $req->submit_time= (int)($now - $when);
+
+    $ct= new \lib\Cleantalk();
+    $ct->server_url= 'http://moderate.cleantalk.org/api2.0/';
+
+    $res= $ct->isAllowMessage($req);
+
+    if ($res->allow == 1) {
+      $f3->get('log')->info("Message allowed. Reason = " . $res->comment);
+    } else {
+      $f3->get('log')->info("Message forbidden. Reason = " . $res->comment);
+      $f3->error(500, "Sorry, your message looks like spam.");
+    }
+  }
+
   if (preg_match('/(bitcoin|cryptocurrency|sexy?.*girl|seowriters|goo\\.gl)/i', $f3->get('REQUEST.comment'))) {
     $f3->error(500, "Sorry, your comment looks like spam.");
   }
