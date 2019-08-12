@@ -1634,11 +1634,11 @@ class Sale {
       'deliveredBySeller' => false,
       'origin' => array(
         'Zip4' => '1320',
-        'Zip5' => '90013',
+        'Zip5' => '90014',
         'State' => 'CA',
         'City' => 'Los Angeles',
         'Address2' => '',
-        'Address1' => '436 S Main St',
+        'Address1' => '645 S Los Angeles St',
       ),
       'destination' => array(
         'Zip4' => $address->zip4,
