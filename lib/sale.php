@@ -368,9 +368,8 @@ class Sale {
   }
 
   // returns [ shipping_status, shipping_rate, special_conditions ]
-  function get_shipping_estimate($f3) {
+  function get_shipping_estimate($f3, $sale, $items) {
     $db= $f3->get('DBH');
-    $items= $f3->get('items');
     $status= $rate= $special= [];
     $weight= 0.0;
 
