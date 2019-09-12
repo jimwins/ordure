@@ -999,7 +999,17 @@ class Sale {
       $line->load(array('id = ?', $id))
         or $f3->error(404);
 
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->load(array('id = ?', $line->item_id))
+        or $f3->error(404);
+
       if (!v::numeric()->min(0, true)->validate($val)) {
+        // XXX really should provide feedback
+        continue;
+      }
+
+      if ($val < $item->purchase_quantity) {
+        // XXX really should provide feedback
         continue;
       }
 
