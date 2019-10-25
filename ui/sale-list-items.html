@@ -43,7 +43,7 @@
                 {{ @item.total }}
               </td>
               <td>
-                <a href="/{{ @item.code }}" class="{{ (!@item.width && !@item.weight) ? 'text-danger' : '' }}">
+                <a href="/{{ @item.code }}" class="{{ (!@item.width || !@item.weight) ? 'text-danger' : '' }}">
                   {{ @item.code }}
                 </a>
               </td>
