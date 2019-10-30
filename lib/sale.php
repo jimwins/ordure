@@ -1008,7 +1008,7 @@ class Sale {
         continue;
       }
 
-      if ($val < $item->purchase_quantity) {
+      if ($val > 0 && $val < $item->purchase_quantity) {
         // XXX really should provide feedback
         continue;
       }
