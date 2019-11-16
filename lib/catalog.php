@@ -120,7 +120,8 @@ class Catalog {
     $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
                            FROM item
                            JOIN scat_item ON item.code = scat_item.code
-                          WHERE item.product = product.id)';
+                          WHERE item.product = product.id
+                            AND item.active)';
 
     $products= $product->find(array('department = ? AND active',
                                     $dept->id),
@@ -571,8 +572,9 @@ class Catalog {
                          \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION
                        ));
 
+     $index= $f3->get('sphinx.index') ?: 'ordure';
      $q= "SELECT *,WEIGHT() weight
-            FROM ordure
+            FROM $index
            WHERE match(?)
            LIMIT 100
           OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
