@@ -140,6 +140,11 @@ class Sale {
               'status != "cancelled" AND
                status != "shipped" AND
                status != "cart"'));
+    $status= $f3->get('REQUEST.status');
+    if ($status) {
+      $status= addslashes($status);
+      $which= "status = '$status'";
+    }
 
     if ($f3->get('REQUEST.yesterday')) {
       $which.= " AND DATE(created) = DATE(NOW() - INTERVAL 1 DAY)";
