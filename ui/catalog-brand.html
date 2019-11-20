@@ -23,6 +23,10 @@
       <h1>{{ @brand.name }}</h1>
     </div>
 
+    <p>
+      {{ @markdown(@brand.description) | raw }}
+    </p>
+
     <check if="{{ isset(@dept) }}">
       <div class="page-header" data-department="{{ isset(@subdept) ? @subdept.id : @dept.id }}">
         <h1>
