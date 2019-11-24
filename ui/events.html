@@ -1,0 +1,31 @@
+<div class="list-group">
+  <repeat group="{{@events }}" value="{{ @event }}">
+    <a href="{{ @event->url }}" onclick="return false" id="eventbrite-widget-modal-trigger-{{ @event->id }}" class="list-group-item">
+      <h4 class="list-group-item-heading">
+        <span class="badge pull-right">
+          <check if="{{ @event->is_free }}">
+            <true>FREE</true>
+            <false>${{ round(@event->ticket_availability->minimum_ticket_price->major_value) }}</false>
+          </check>
+        </span>
+        {{ @event->name->html | raw }}
+      </h4>
+      <h5 class="list-group-item-heading">
+        {{ (new DateTime(@event->start->local))->format('D, M j, Y g:i A') }}
+        - {{ (new DateTime(@event->end->local))->format('g:i A') }}
+      </h5>
+      <p class="list-group-item-text">{{ @event->description->html | raw }}</p>
+    </a>
+  </repeat>
+<script src="https://www.eventbrite.com/static/widgets/eb_widgets.js"></script>
+<script type="text/javascript">
+  <repeat group="{{@events }}" value="{{ @event }}">
+    window.EBWidgets.createWidget({
+        widgetType: 'checkout',
+        eventId: '{{ @event->id }}',
+        modal: true,
+        modalTriggerElementId: 'eventbrite-widget-modal-trigger-{{ @event->id }}',
+    });
+  </repeat>
+</script>
+</div>
