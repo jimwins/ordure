@@ -265,7 +265,8 @@ class Catalog {
     $brand= new DB\SQL\Mapper($db, 'brand');
     $brand->products= '(SELECT COUNT(*)
                           FROM product
-                         WHERE brand = brand.id)';
+                         WHERE brand = brand.id
+                           AND product.active)';
 
     $brand->load(array('slug = ?', $f3->get('PARAMS.brand')))
       or $f3->error(404);
@@ -275,7 +276,8 @@ class Catalog {
     $dept= new DB\SQL\Mapper($db, 'department');
     $dept->products= '(SELECT COUNT(*)
                          FROM product
-                        WHERE department = department.id)';
+                        WHERE department = department.id
+                          AND product.active)';
     $departments= $dept->find(array('parent = 0'),
                               array('order' => 'name'));
 
