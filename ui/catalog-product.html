@@ -91,11 +91,13 @@
     <repeat group="{{ @product.media }}" value="{{ @item }}" counter="{{ @index }}">
       <li>
         <img src="{{ @item.src ? @STATIC . @item.src : @MEDIA . '/file/c_fit,w_768,h_768/' . @item.uuid . '.jpg' }}" alt="{{ @item.alt_text }}">
+        <!--
         <check if="{{ ! @NO_PINTEREST }}">
           <div class="caption text-center">
             <a href="//www.pinterest.com/pin/create/button/?url={{ urlencode('https://' . $_SERVER['HTTP_HOST'] . @URI) }}&media={{ urlencode('https:' . @STATIC . (@item.src ?: ('/i/st/' . @item.uuid . '.jpg'))) }}&description={{ urlencode(@product.name) }}" data-pin-do="buttonPin" data-pin-config="beside" data-pin-color="white"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_white_20.png" /></a>
           </div>
         </check>
+        -->
       </li>
     </repeat>
   </ol>
