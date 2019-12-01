@@ -24,7 +24,9 @@
     </div>
 
     <p>
-      {{ @markdown(@brand.description) | raw }}
+      <check if="{{ @brand.description }}">
+        {{ @markdown(@brand.description) | raw }}
+      </check>
     </p>
 
     <check if="{{ isset(@dept) }}">
