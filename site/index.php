@@ -34,6 +34,11 @@ $f3->set('markdown', function($text) {
   $text= Template::instance()->resolve($text);
   return Markdown::instance()->convert($text);
 });
+// Add @first_paragraph() function for templates
+$f3->set('first_paragraph', function($text) {
+  $split= preg_split('!</p>!i', $text, 2);
+  return $split[0]. '</p>';
+});
 
 $f3->set('item_style_color', function($text) {
   if (preg_match('/^color:(.+)/', $text, $m)) {
