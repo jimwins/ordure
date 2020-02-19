@@ -14,7 +14,7 @@
         {{ (new DateTime(@event->start->local))->format('D, M j, Y g:i A') }}
         - {{ (new DateTime(@event->end->local))->format('g:i A') }}
       </h5>
-      <p class="list-group-item-text">{{ @event->description->html | raw }}</p>
+      <p class="list-group-item-text">{{ @first(@event->description->text) }}</p>
     </a>
   </repeat>
 <script src="https://www.eventbrite.com/static/widgets/eb_widgets.js"></script>

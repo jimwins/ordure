@@ -11,6 +11,10 @@ class Events {
 
       echo \Template::instance()->render("events.html", null, [
         'events' => $data->events,
+        'first' => function($text) {
+          $split= preg_split('!\n\n!i', $text, 2);
+          return $split[0];
+        },
       ]);
     });
   }
