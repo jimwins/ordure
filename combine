@@ -2,7 +2,7 @@
 
 JQUERY=3.4.1
 BOOTSTRAP=3.4.1
-KNOCKOUT=3.5.0
+KNOCKOUT=3.5.1
 FONTAWESOME=4.7.0
 
 date=`date +"%Y-%m-%d"`
