@@ -378,6 +378,10 @@ class Sale {
     $status= $rate= $special= [];
     $weight= 0.0;
 
+    if (($override= $f3->get("SHIPPING_STATUS_OVERRIDE"))) {
+      return [ $override, 'unknown', [ 'unknown' ] ];
+    }
+
     foreach ($items as $sale_item) {
       // Check stock
       $scat_item= new DB\SQL\Mapper($db, 'scat_item');

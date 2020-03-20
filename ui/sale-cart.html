@@ -37,6 +37,12 @@
         <form class="row" method="GET" action="/cart/checkout">
           <input type="hidden" name="uuid" value="{{ @sale.uuid }}">
 
+          <check if="{{ @shipping_status == 'closed' }}">
+            <p class="lead alert alert-danger">
+              The online store is temporarily closed. You can save items to
+              your cart, but cannot place orders at this time.
+            </p>
+          </check>
           <check if="{{ @shipping_status == 'immediate' }}">
             <p class="lead alert alert-success">
               These are in stock at the store and eligible for immediate
@@ -95,12 +101,14 @@
                   </a>
                 </check>
               </div>
-              <div class="col-sm-4">
-                <button type="submit" class="btn btn-primary btn-lg btn-block">
-                  <i class="fa fa-sign-in"></i>
-                  Check out
-                </button>
-              </div>
+              <check if="{{ @shipping_status != 'closed' }}">
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <i class="fa fa-sign-in"></i>
+                    Check out
+                  </button>
+                </div>
+              </check>
               <check if="{{ !in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
                 <div class="col-sm-4">
                   <div id="AmazonPayButton"></div>
