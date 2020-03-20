@@ -379,7 +379,7 @@ class Sale {
     $weight= 0.0;
 
     if (($override= $f3->get("SHIPPING_STATUS_OVERRIDE"))) {
-      return [ $override, 'unknown', [ 'unknown' ] ];
+      return [ $override, '', [ '' ] ];
     }
 
     foreach ($items as $sale_item) {
