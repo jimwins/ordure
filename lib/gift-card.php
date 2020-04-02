@@ -72,6 +72,6 @@ class GiftCard {
                         $e->getMessage(), $e->getCode()));
     }
 
-    $f3->reroute('thanks');
+    $f3->reroute('/gift-card/thanks');
   }
 }
