@@ -1,4 +1,4 @@
-FROM php:7.2.26-fpm-alpine
+FROM php:7.4.4-fpm-alpine
 
 LABEL maintainer="Jim Winstead <jimw@trainedmonkey.com>"
 
