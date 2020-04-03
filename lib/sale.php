@@ -407,7 +407,7 @@ class Sale {
         $special['hazmat']++;
       }
       // unknown dimensions?
-      if (!$item->weight || !$item->length) {
+      if ($item->weight == 0 || $item->length == 0) {
         $rate['unknown']++;
       }
       $weight+= $item->weight;
