@@ -2058,15 +2058,12 @@ if (0) {
   }
 
   function get_giftcard_balance($f3, $args) {
-    $uuid= $f3->get('PARAMS.sale');
-    $sale= $this->load($f3, $uuid, 'uuid');
-
     $curl = curl_init();
 
     $data= array('card' => $f3->get('REQUEST.card'));
 
     curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/check-balance.php' .
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/check-balance' .
                      '?card=' . rawurlencode($f3->get('REQUEST.card')),
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -2083,9 +2080,6 @@ if (0) {
     if ($err) {
       $f3->error(500, "cURL Error #:" . $err);
     }
-
-    // have to strip jsonp wrapping
-    $response= substr($response, 1, -2);
 
     $data= json_decode($response);
 
@@ -2109,7 +2103,7 @@ if (0) {
     $curl= curl_init();
 
     curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/check-balance.php' .
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/check-balance' .
                      '?card=' . rawurlencode($f3->get('REQUEST.card')),
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -2127,8 +2121,6 @@ if (0) {
       $f3->error(500, "cURL Error #:" . $err);
     }
 
-    // have to strip jsonp wrapping
-    $response= substr($response, 1, -2);
     $data= json_decode($response);
 
     // turn soft errors into hard ones
@@ -2146,7 +2138,7 @@ if (0) {
     );
 
     curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/add-txn.php?' .
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/add-txn?' .
                      http_build_query($data),
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -2164,25 +2156,16 @@ if (0) {
       $f3->error(500, "cURL Error #:" . $err);
     }
 
-    // have to strip jsonp wrapping
-    $response= substr($response, 1, -2);
-    $data= json_decode($response);
-
-    // turn soft errors into hard ones
-    if ($data->error) {
-      return $f3->error(500, $data->error);
-    }
-
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
     $payment->method= 'gift';
-    $payment->amount= -$data->amount;
+    $payment->amount= -$amount;
     $payment->data= json_encode(array(
       'card' => $f3->get('REQUEST.card'),
     ));
     $payment->save();
 
-    if ($amount != $sale->total - $sale->paid) {
+    if ($sale->total - $sale->paid + $amount > 0) {
       echo json_encode(array('paid' => 0));
       return;
     }

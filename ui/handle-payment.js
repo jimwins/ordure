@@ -159,7 +159,7 @@ $("#giftcard-check").on("submit", function (ev) {
   var card= $('[name="giftcard"]', $form).val();
 
   $.ajax({ dataType: 'json', method: 'POST',
-           url: 'get-giftcard-balance',
+           url: $form.attr('action'),
            data: { card: card } })
    .done(function (data) {
      $form.addClass('hidden');
