@@ -105,7 +105,7 @@ class Sale {
 
     $sale= $this->create($f3);
 
-    $f3->reroute("./" . $sale->uuid);
+    $f3->reroute("/sale/" . $sale->uuid);
   }
 
   function showList($f3, $args) {
@@ -333,16 +333,16 @@ class Sale {
     switch ($sale->status) {
     case 'new':
     case 'cart':
-      return $f3->reroute($sale->uuid . '/edit');
+      return $f3->reroute('/sale/' . $sale->uuid . '/edit');
     case 'unpaid':
-      return $f3->reroute($sale->uuid . '/pay');
+      return $f3->reroute('/sale/' . $sale->uuid . '/pay');
     case 'paid':
     case 'review':
     case 'processing':
     case 'shipped':
     case 'cancelled':
     case 'onhold':
-      return $f3->reroute($sale->uuid . '/status');
+      return $f3->reroute('/sale/' . $sale->uuid . '/status');
     default:
       $f3->error(404);
     }
@@ -369,7 +369,7 @@ class Sale {
     $new_sale->shipping_address_id= $sale->shipping_address_id;
     $new_sale->save();
 
-    $f3->reroute("../{$new_sale->uuid}/edit");
+    $f3->reroute("/sale/{$new_sale->uuid}/edit");
   }
 
   // returns [ shipping_status, shipping_rate, special_conditions ]
@@ -819,10 +819,11 @@ class Sale {
   }
 
   function pay($f3, $args) {
-    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
 
     if ($sale->status != 'unpaid') {
-      $f3->reroute('./');
+      $f3->reroute('/sale/' . $uuid);
     }
 
     $f3->set('action', 'pay');
@@ -1086,6 +1087,7 @@ class Sale {
 
   function set_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
 
     $type= $f3->get('REQUEST.type');
 
@@ -1151,7 +1153,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('./checkout?uuid=' . $sale->uuid);
+    $f3->reroute($base. '/checkout?uuid=' . $sale->uuid);
   }
 
   function calculate_shipping($f3, $args) {
@@ -1296,6 +1298,7 @@ class Sale {
 
   function set_in_store_pickup($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
@@ -1324,11 +1327,12 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('./checkout?uuid=' . $sale->uuid);
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
   }
 
   function ship_to_billing_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
@@ -1357,11 +1361,12 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('./checkout?uuid=' . $sale->uuid);
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
   }
 
   function bill_to_shipping_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
 
     if (!$sale_uuid)
       $f3->error(404);
@@ -1381,7 +1386,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('./checkout');
+    $f3->reroute($base . '/checkout');
   }
 
   function set_shipping($f3, $args) {
@@ -1478,6 +1483,7 @@ class Sale {
 
   function set_person($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
@@ -1504,7 +1510,7 @@ class Sale {
       return $this->json($f3, $args);
     }
 
-    $f3->reroute('./checkout?uuid=' . $sale->uuid);
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
   }
 
   function add_exemption($f3, $args) {
