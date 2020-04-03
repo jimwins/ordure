@@ -9,6 +9,7 @@ class Rewards {
                'Rewards->getPendingRequests');
     $f3->route("GET|POST /mark-rewards-processed [json]",
                'Rewards->markRewardsProcessed');
+    $f3->route("GET /check-rewards-balance", 'Rewards->check_rewards_balance');
   }
 
   function process($f3, $args) {
@@ -158,5 +159,38 @@ class Rewards {
     $item[0]->save();
 
     echo json_encode($item[0]->cast(), JSON_PRETTY_PRINT);
+  }
+
+  function check_rewards_balance($f3) {
+    $curl = curl_init();
+
+    $data= array('loyalty' => $f3->get('REQUEST.loyalty'));
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~rewards/check-balance' .
+                     '?loyalty=' . rawurlencode($f3->get('REQUEST.loyalty')),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+    ));
+
+    $response= curl_exec($curl);
+    $err= curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+      $f3->error(500, "cURL Error #:" . $err);
+    }
+
+    $data= json_decode($response);
+
+    // turn soft errors into hard ones
+    if ($data->error) {
+      return $f3->error(500, $data->error);
+    }
+
+    echo $response;
   }
 }
