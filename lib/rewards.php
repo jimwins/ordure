@@ -1,4 +1,5 @@
 <?php
+use Respect\Validation\Validator as v;
 
 class Rewards {
 
@@ -31,6 +32,11 @@ class Rewards {
 
     // Verify email address with CleanTalk to cut down on spam
     $email= $f3->get('REQUEST.email');
+
+    if (!v::email()->validate($email)) {
+      $f3->error(500, "Sorry, you must provide a valid email address.");
+    }
+
     $key= $f3->get('CLEANTALK_ACCESS_KEY');
     if ($key && $email) {
       $req= new \lib\CleantalkRequest();
