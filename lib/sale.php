@@ -1087,7 +1087,7 @@ class Sale {
 
   function set_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
-    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     $type= $f3->get('REQUEST.type');
 
@@ -1298,7 +1298,7 @@ class Sale {
 
   function set_in_store_pickup($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
-    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
@@ -1332,7 +1332,7 @@ class Sale {
 
   function ship_to_billing_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
-    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
@@ -1366,7 +1366,7 @@ class Sale {
 
   function bill_to_shipping_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
-    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if (!$sale_uuid)
       $f3->error(404);
@@ -1483,7 +1483,7 @@ class Sale {
 
   function set_person($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
-    $base= $f3->get('PARAMS.sale') ? '/sale/' + $sale_uuid : '/cart';
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != 1)
