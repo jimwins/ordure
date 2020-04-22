@@ -38,7 +38,14 @@
           <tr>
             <th>Brand</th>
             <th>Product</th>
-            <th class="text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this product is stocked in our store or only available via special order.">Available in Store</th>
+            <check if="@DROPSHIP_ONLY">
+              <true>
+                <th class="text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this product currently available for order.">Available for Order</th>
+              </true>
+              <false>
+                <th class="text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this product is stocked in our store or only available via special order.">Available in Store</th>
+              </false>
+            </check>
           </tr>
         </thead>
         <tbody>

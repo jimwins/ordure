@@ -117,11 +117,19 @@ class Catalog {
     $product->brand_name= '(SELECT name
                               FROM brand
                              WHERE brand = brand.id)';
-    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
-                           FROM item
-                           JOIN scat_item ON item.code = scat_item.code
-                          WHERE item.product = product.id
-                            AND item.active)';
+    if ($f3->get('DROPSHIP_ONLY')) {
+      $product->stocked= '(SELECT SUM(is_dropshippable)
+                             FROM item
+                             JOIN scat_item ON item.code = scat_item.code
+                            WHERE item.product = product.id
+                              AND item.active)';
+    } else {
+      $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
+                             FROM item
+                             JOIN scat_item ON item.code = scat_item.code
+                            WHERE item.product = product.id
+                              AND item.active)';
+    }
 
     $products= $product->find(array('department = ? AND active',
                                     $dept->id),
@@ -221,16 +229,19 @@ class Catalog {
     }
     $active= " AND active";
 
+    $pq= $f3->get('DROPSHIP_ONLY') ?
+          'scat_item.is_dropshippable' :
+          'IFNULL(scat_item.purchase_quantity, item.purchase_quantity)';
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
-                IFNULL(scat_item.purchase_quantity, item.purchase_quantity) purchase_quantity,
+                $pq purchase_quantity,
                 length, width, height, weight,
                 sale_price(scat_item.retail_price,
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
                 scat_item.discount_type, scat_item.discount,
                 stock stocked,
-                minimum_quantity,
+                minimum_quantity, is_dropshippable,
                 item.prop65, item.oversized, item.hazmat,
                 thumbnail, active
            FROM item
@@ -602,6 +613,17 @@ class Catalog {
       /* XXX sphinx doesn't have full slug stored */
       foreach ($products as &$product) {
         $product['slug']= Catalog::getProductSlug($f3, $product['id']);
+        /* Sphinx may not have name, etc, either */
+        if (!$product['name']) {
+          $id= $product['id'];
+          $prod= new DB\SQL\Mapper($db, 'product');
+          $prod->brand_name= '(SELECT name
+                                    FROM brand
+                                   WHERE brand = brand.id)';
+          $prod->load(array('id=?', $id));
+          $product['name']= $prod->name;
+          $product['brand_name']= $prod->brand_name;
+        }
       }
 
       $f3->set('products', $products);

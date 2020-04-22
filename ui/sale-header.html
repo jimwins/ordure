@@ -2,7 +2,9 @@
   <p class="lead">
     <strong>Hello!</strong> We are currently only able to ship orders to the United States (including APO/FPO/DPO addresses).
   </p>
-  <p class="lead">
-    You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
-  </p>
+  <check if="!@DROPSHIP_ONLY">
+    <p class="lead">
+      You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
+    </p>
+  </check>
 </div>

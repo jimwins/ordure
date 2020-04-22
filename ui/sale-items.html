@@ -19,6 +19,11 @@
         <input type="text" style="width: 4em; text-align: right"
                class="form-control input-sm"
                name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
+        <check if="{{@data.purchase_quantity > 1 }}">
+          <small class="help-block">
+            Must be multiple of {{ @data.purchase_quantity }}
+          </span>
+        </check>
       </td>
   </true>
   <false>
@@ -59,7 +64,7 @@
             Shipping &amp; handling:
           </false>
         </check>
-        <check if="{{ @sale.status == 'cart' }}">
+        <check if="{{ @sale.status == 'cart' && !@DROPSHIP_ONLY }}">
           <br>or pick up in store for no charge.
         </check>
       </th>

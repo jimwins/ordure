@@ -22,21 +22,32 @@ gtag('event', 'checkout_progress', {
       </h3>
     </div>
     <div class="panel-body">
-      <p>
-        <strong>Where do you want to us to ship the order?</strong>
-        We can have your order prepared for pick-up at the store, or
-        we can ship it anywhere in the United States. (Sorry, we don't ship
-        internationally at this time.)
-      </p>
+      <check if="@DROPSHIP_ONLY">
+        <true>
+          <p>
+            <strong>Where do you want to us to ship the order?</strong>
+            We can ship it to any physical address in the United States.
+            (Sorry, no PO Boxes and we don't ship internationally.)
+          </p>
+        </true>
+        <false>
+          <p>
+            <strong>Where do you want to us to ship the order?</strong>
+            We can have your order prepared for pick-up at the store, or
+            we can ship it anywhere in the United States. (Sorry, we don't ship
+            internationally.)
+          </p>
 
-      <form method="POST"
-            action="{{ @BASE }}/cart/set-in-store-pickup">
-        <button type="submit" class="btn btn-primary btn-block">
-          <i class="fa fa-building"></i> Get it fast! (Pick up at the store)
-        </button>
-      </form>
+          <form method="POST"
+                action="{{ @BASE }}/cart/set-in-store-pickup">
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fa fa-building"></i> Get it fast! (Pick up at the store)
+            </button>
+          </form>
 
-      <hr>
+          <hr>
+        </false>
+      </check>
 
       <form method="POST" action="{{ @BASE }}/cart/set-address">
         <div class="row">
@@ -70,7 +81,7 @@ gtag('event', 'checkout_progress', {
             <input type="text" class="form-control" name="address1" required
                    autocomplete="address-line1"
                    value="{{ @shipping_address.address1 }}"
-                   placeholder="436 S Main St">
+                   placeholder="645 S Los Angeles St  ">
             <input type="text" class="form-control" name="address2" 
                    autocomplete="address-line2"
                    value="{{ @shipping_address.address2 }}"
@@ -96,7 +107,7 @@ gtag('event', 'checkout_progress', {
             <input type="text" class="form-control" name="zip5" required
                    autocomplete="postal-code"
                    value="{{ @shipping_address.zip5 }}"
-                   placeholder="90013">
+                   placeholder="90014">
           </div>
           <div class="form-group col-sm-4">
             <label for="country">Country</label>

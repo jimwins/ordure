@@ -218,28 +218,42 @@ gtag('event', 'view_item', {
                       {{ strlen(@item.short_name) ? @item.short_name : @item.name }}
                     </td>
                     <td>
-                      {{ Catalog::amount(@item.retail_price * @item.purchase_quantity) }}
+                      {{ Catalog::amount(@item.retail_price * max(@item.purchase_quantity,1)) }}
                       <check if="{{ @item.purchase_quantity > 1 }}">
                         <br><small>({{ @item.purchase_quantity }} pieces)</small>
                       </check>
                     </td>
                     <td class="text-primary">
                       <strong>
-                        {{ @item.sale_price ? Catalog::amount(@item.sale_price * @item.purchase_quantity) : '' }}
+                        {{ @item.sale_price ? Catalog::amount(@item.sale_price * max(@item.purchase_quantity,1)) : '' }}
                       </strong>
                     </td>
                     <td class="text-center">
-                      <check if="!(@item.minimum_quantity || @item.stocked > 0)">
+                      <check if="@DROPSHIP_ONLY">
                         <true>
-                          <small class="text-muted">Special order</small>
-                        </true>
-                        <false>
-                          <check if="@item.stocked > 0">
+                          <check if="@item.is_dropshippable">
                             <true>
-                             <small class="text-success">In stock</small>
+                              <small class="text-muted">Available</small>
                             </true>
                             <false>
-                             <small class="text-warning">Out of stock</small>
+                              <small class="text-muted">Not available</small>
+                            </false>
+                          </check>
+                        </true>
+                        <false>
+                          <check if="!(@item.minimum_quantity || @item.stocked > 0)">
+                            <true>
+                              <small class="text-muted">Special order</small>
+                            </true>
+                            <false>
+                              <check if="@item.stocked > 0">
+                                <true>
+                                 <small class="text-success">In stock</small>
+                                </true>
+                                <false>
+                                 <small class="text-warning">Out of stock</small>
+                                </false>
+                              </check>
                             </false>
                           </check>
                         </false>
@@ -254,17 +268,22 @@ gtag('event', 'view_item', {
                         <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
                       </check>
                     </td>
-                    <check if="{{ @FEATURE_cart }}">
-                      <td>
-                        <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
-                              action="/cart/add-item" method="POST">
-                          <input type="hidden"
-                                 name="item" value="{{ @item.code }}">
-                          <button type="submit" class="btn btn-primary btn-xs">
-                            <i class="fa fa-plus-square"></i> Add to Cart
-                          </button>
-                        </form>
-                      </td>
+                    <check if="{{ @FEATURE_cart && !(@DROPSHIP_ONLY && !@item.is_dropshippable) }}">
+                      <true>
+                        <td>
+                          <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+                                action="/cart/add-item" method="POST">
+                            <input type="hidden"
+                                   name="item" value="{{ @item.code }}">
+                            <button type="submit" class="btn btn-primary btn-xs">
+                              <i class="fa fa-plus-square"></i> Add to Cart
+                            </button>
+                          </form>
+                        </td>
+                      </true>
+                      <false>
+                        <td></td>
+                      </false>
                     </check>
                   </tr>
                 </check>

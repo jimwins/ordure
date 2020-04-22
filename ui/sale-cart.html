@@ -11,9 +11,11 @@
       <p class="lead">
         <strong>Hello!</strong> We are currently only able to ship orders to the United States (including APO/FPO/DPO addresses).
       </p>
-      <p class="lead">
-        You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
-      </p>
+      <check if="!@DROPSHIP_ONLY">
+        <p class="lead">
+          You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
+        </p>
+      </check>
     </div>
   </div>
 </div>
@@ -43,14 +45,20 @@
               your cart, but cannot place orders at this time.
             </p>
           </check>
-          <check if="{{ @shipping_status == 'immediate' }}">
+          <check if="{{ @shipping_status == 'below_minimum' }}">
+            <p class="lead alert alert-danger">
+              There is a ${{sprintf('%.2f', @SALE_MINIMUM)}}
+              minimum on online orders at this time.
+            </p>
+          </check>
+          <check if="{{ @shipping_status == 'immediate' && !@DROPSHIP_ONLY }}">
             <p class="lead alert alert-success">
               These are in stock at the store and eligible for immediate
               shipment or pick-up. We will contact you if any problems
               arise in having your order ready!
             </p>
           </check>
-          <check if="{{ @shipping_status == 'stock_limited' }}">
+          <check if="{{ @shipping_status == 'stock_limited' && !@DROPSHIP_ONLY }}">
             <p class="lead alert alert-warning">
               Not all of the items in your cart are currently in stock,
               so your order will take additional time to prepare. We will
@@ -59,7 +67,7 @@
               are ready in about one week.)
             </p>
           </check>
-          <check if="{{ @shipping_status == 'special_order' }}">
+          <check if="{{ @shipping_status == 'special_order' && !@DROPSHIP_ONLY }}">
             <p class="lead alert alert-info">
               Your order contains special order items that will take extra
               time to prepare. We will email you with an esimated
@@ -84,9 +92,10 @@
           <check if="{{ @shipping_rate == 'unknown' }}">
             <p class="lead alert alert-danger">
               Sorry, our system is unable to calculate the shipping costs
-              for your order due to incomplete information. You can submit
-              your order for manual review, and we'll contact you with the
-              shipping cost and instructions on how to complete the order.
+              for your order due to incomplete information in our system. You
+              can submit your order for manual review, and we'll contact you
+              with the shipping cost and instructions on how to complete the
+              order.
             </p>
           </check>
 
@@ -101,18 +110,20 @@
                   </a>
                 </check>
               </div>
-              <check if="{{ @shipping_status != 'closed' }}">
-                <div class="col-sm-4">
-                  <button type="submit" class="btn btn-primary btn-lg btn-block">
-                    <i class="fa fa-sign-in"></i>
-                    Check out
-                  </button>
-                </div>
-              </check>
-              <check if="{{ @shipping_status != 'closed' && !in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
-                <div class="col-sm-4">
-                  <div id="AmazonPayButton"></div>
-                </div>
+              <check if="@shipping_status != 'below_minimum'">
+                <check if="{{ @shipping_status != 'closed' }}">
+                  <div class="col-sm-4">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                      <i class="fa fa-sign-in"></i>
+                      Check out
+                    </button>
+                  </div>
+                </check>
+                <check if="{{ @shipping_status != 'closed' && !in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
+                  <div class="col-sm-4">
+                    <div id="AmazonPayButton"></div>
+                  </div>
+                </check>
               </check>
             </div>
           </div>
