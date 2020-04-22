@@ -67,6 +67,9 @@
         <check if="{{ @sale.status == 'cart' && !@DROPSHIP_ONLY }}">
           <br>or pick up in store for no charge.
         </check>
+        <check if="@DEBUG">
+          <br><small>Rate: {{ @shipping_rate }}</small>
+        </check>
       </th>
 <check if="{{ @FEATURE_cart && (@sale.status == 'cart' || @sale.status == 'review')
             && in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
