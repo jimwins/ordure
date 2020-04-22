@@ -10,9 +10,12 @@
       </check>
     </true>
     <false>
-      We are temporarily closed due to California's "Stay at Home" order. We
-      have also suspended all online ordering while we do some work our online
-      store. 
+      <check if="{{ @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
+        <strong>Our downtown store is temporarily closed due to the "Safer at
+        Home" emergency order in Los Angeles.</strong>
+        We have also suspended all online ordering while we do some work our
+        online store.
+      </check>
     </false>
   </check>
 </div>
