@@ -1531,6 +1531,11 @@ class Sale {
       return $this->json($f3, $args);
     }
 
+    // don't push into checkout flow if just saving address
+    if ($f3->get('REQUEST.just_saving')) {
+      $f3->reroute($base . '?uuid=' . $sale->uuid);
+    }
+
     $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
   }
 
