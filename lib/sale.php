@@ -893,7 +893,7 @@ class Sale {
     $item->nretail_price= "IFNULL((SELECT retail_price FROM scat_item WHERE scat_item.code = item.code), retail_price)";
     $item->discount_type= "(SELECT discount_type FROM scat_item WHERE scat_item.code = item.code)";
     $item->discount= "(SELECT discount FROM scat_item WHERE scat_item.code = item.code)";
-    if ($f3->config('DROPSHIP_ONLY')) {
+    if ($f3->get('DROPSHIP_ONLY')) {
       $item->npurchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
     } else {
       $item->npurchase_quantity= "IFNULL((SELECT scat_item.purchase_quantity FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
