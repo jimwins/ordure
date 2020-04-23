@@ -80,7 +80,9 @@ class Sale {
       $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("POST /cart/amz-get-details", 'Sale->amz_get_details');
       $f3->route("POST /cart/amz-process-order", 'Sale->amz_process_order');
-      $f3->route("GET /cart/forget", 'Sale->forget_cart');
+      $f3->route("GET|POST /cart/retrieve", 'Sale->retrieve_cart');
+      $f3->route("GET /cart/combine-carts", 'Sale->combine_carts');
+      $f3->route("GET /cart/forget", 'Sale->forget_cart_and_redir');
     }
   }
 
@@ -457,16 +459,17 @@ class Sale {
   }
 
   function cart($f3, $args) {
-    $uuid= $f3->get('COOKIE.cartID');
-
-    /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
+    $uuid= $f3->get('REQUEST.uuid');
+    if (empty($uuid)) {
+      $uuid= $f3->get('COOKIE.cartID');
+    }
 
     if ($uuid) {
       $sale= $this->load($f3, $uuid, 'uuid');
 
       if ($sale->status != 'cart') {
         $this->forget_cart($f3, $args);
-        $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
+        $f3->reroute($f3->get('BASE') . '/cart');
       }
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
@@ -477,10 +480,8 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
-      echo Template::instance()->render('sale-cart.html');
-    } else {
-      $f3->reroute($f3->get('BASE') . $f3->get('CATALOG'));
     }
+    echo Template::instance()->render('sale-cart.html');
   }
 
   function cart_checkout($f3, $args) {
@@ -826,6 +827,11 @@ class Sale {
               '/', $domain, true, true);
     SetCookie('cartDetails', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, false);
+  }
+
+  function forget_cart_and_redir($f3, $args) {
+    $this->forget_cart($f3, $args);
+    $f3->reroute('/cart');
   }
 
   function pay($f3, $args) {
@@ -2838,6 +2844,159 @@ Your order is now being processed, and you will receive another email when your 
             'name' => $f3->get('sale.name'),
             'header_to' => $f3->get('sale.email'),
             'email' => $f3->get('CONTACT_SALES'),
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+        'transactional' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
+    }
+  }
+
+  function retrieve_cart($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $email= $f3->get('REQUEST.email');
+
+    if (!v::email()->validate($email)) {
+      $f3->reroute('/cart?error=invalid_email');
+    }
+
+    // validate key
+    $key= $f3->get('REQUEST.key');
+    if ($key) {
+      list($ts, $hash)= explode(':', $key);
+      if ((int)$ts < time() - 24*3600) {
+        $f3->reroute('/cart?error=expired_key');
+      }
+      if ((int)$ts > time() ||
+          $hash != base64_encode(hash('sha256', $ts . $f3->get('UPLOAD_KEY'), true))) {
+        $f3->reroute('/cart?error="invalid_key');
+      }
+    }
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sale->items= '(SELECT SUM(quantity)
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $sale->total= 'CAST(shipping + ROUND(shipping_tax, 2) +
+                        (SELECT SUM(quantity * sale_price(retail_price,
+                                                          discount_type,
+                                                          discount)
+                                    + ROUND(tax, 2))
+                           FROM sale_item WHERE sale_id = sale.id)
+                     AS DECIMAL(9,2))';
+    $sales= $sale->find([ 'email = ? AND status = ?', $email, 'cart' ],
+                        [ 'order' => 'id' ]);
+
+    if ($sales && !$key) {
+      self::send_cart_login($f3, $email);
+      $f3->reroute('/cart?success=sent');
+    } elseif (!$key) {
+      $f3->reroute('/cart?error=no_carts');
+    } else {
+      if (count($sales) == 1) {
+        $f3->reroute('/cart?uuid=' . $sales[0]->uuid);
+      }
+      $sales_out= array();
+      foreach ($sales as $i) {
+        $sales_out[]= $i->cast();
+      }
+      $f3->set('sales', $sales_out);
+      echo Template::instance()->render('sale-cart-retrieve.html');
+    }
+  }
+
+  function combine_carts($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $email= $f3->get('REQUEST.email');
+
+    if (!v::email()->validate($email)) {
+      $f3->error(500, "That email is invalid.");
+    }
+
+    // validate key
+    $key= $f3->get('REQUEST.key');
+    if ($key) {
+      list($ts, $hash)= explode(':', $key);
+      if ((int)$ts < time() - 24*3600) {
+        $f3->error(500, "That key is expired.");
+      }
+      if ((int)$ts > time() ||
+          $hash != base64_encode(hash('sha256', $ts . $f3->get('UPLOAD_KEY'), true))) {
+        $f3->error(500, "That key is invalid.");
+      }
+    }
+
+    $sale= new DB\SQL\Mapper($db, 'sale');
+    $sales= $sale->find([ 'email = ? AND status = ?', $email, 'cart' ],
+                        [ 'order' => 'id' ]);
+
+    if (!$sales)
+      $f3->error(500, "No carts found.");
+
+    $cart= array_pop($sales);
+
+    $q= "UPDATE sale_item SET sale_id = ? WHERE sale_id = ?";
+    foreach ($sales as $sale) {
+      $db->exec($q, [ $cart->id, $sale->id ]);
+      $sale->erase();
+    }
+
+    $f3->reroute('/cart?uuid=' . $cart->uuid);
+  }
+
+  function send_cart_login($f3, $email) {
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+    $title= "Retrieve your Shopping Cart";
+    $f3->set('title', $title);
+
+    $ts= time();
+    $hash= base64_encode(hash('sha256', $ts . $f3->get('UPLOAD_KEY'), true));
+    $key= "$ts:$hash";
+
+    $f3->set('content_top', Markdown::instance()->convert("Here is a link to reclaim your shopping cart:"));
+    $f3->set('call_to_action', 'Retrieve Cart');
+    $f3->set('call_to_action_url',
+             'https://' . $_SERVER['HTTP_HOST'] . '/cart/retrieve? ' .
+             http_build_query([ 'email' => $email, 'key' => $key ]));
+    $f3->set('content_bottom', Markdown::instance()->convert("Let us know if there is anything else that we can do to help."));
+
+    $html= Template::instance()->render('email-template.html');
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'html' => $html,
+        'subject' => $title,
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
+      ],
+      'recipients' => [
+        [
+          'address' => [
+            'name' => '',
+            'email' => $email,
           ],
         ],
       ],

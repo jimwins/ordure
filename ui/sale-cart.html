@@ -20,6 +20,66 @@
   </div>
 </div>
 
+<check if="@items && count(@items)">
+  <false>
+    <p class="lead">
+      You don't have anything in your cart.
+    </p>
+    <div class="well">
+      <p>
+        Want to retrieve a cart that you saved? Enter your email address
+        and we'll email you a link to access it.
+      </p>
+      <check if="@REQUEST.error == 'invalid_email'">
+        <div class="alert alert-danger">
+          That email address is invalid.
+        </div>
+      </check>
+      <check if="@REQUEST.error == 'no_carts'">
+        <div class="alert alert-danger">
+          There are no saved shopping carts for that email address.
+        </div>
+      </check>
+      <check if="@REQUEST.error == 'expired_key'">
+        <div class="alert alert-danger">
+          Sorry, that link has expired, you'll need to request a new one.
+        </div>
+      </check>
+      <check if="@REQUEST.error == 'invalid_key'">
+        <div class="alert alert-danger">
+          Sorry, that link was not valid, you'll need to request a new one.
+        </div>
+      </check>
+      <check if="@REQUEST.success == 'sent'">
+        <div class="alert alert-success">
+          You should receive an email with a link to retrieve your cart
+          shortly. The link will be valid for 24 hours.
+        </div>
+      </check>
+      <form class="form form-inline"
+            method="POST" action="{{ @BASE }}/cart/retrieve">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" name="email" required
+                 size="50"
+                 placeholder="vincent.van.gogh@example.com"
+                 value="{{ @REQUEST.email }}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Go
+        </button>
+      </form>
+    </div>
+
+    <p class="lead">
+      Search our <a href="/art-supplies">online catalog</a> for products:
+    </p>
+    </p>
+    <include href="searchform.html" />
+  </false>
+  <true>
+
 <div class="row">
   <div class="col-md-12">
     <div class="panel panel-default">
@@ -174,6 +234,9 @@
   </div>
 
 </div>
+  </true>
+</check>
+
 <script type="text/javascript">
   function showButton() {
     var authRequest;
