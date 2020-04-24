@@ -172,6 +172,15 @@ gtag('event', 'view_item', {
 });
     </script>
 
+    <check if="@DROPSHIP_ONLY">
+      <div class="alert alert-warning">
+        <strong>Availability alert!</strong>  Items that say "Available" may
+        not be in stock, this only indicates that the item is usually stocked
+        in the warehouse. Your payment will be refunded for any items we are
+        unable to have shipped.
+      </div>
+    </check>
+
     <check if="{{ count(@variations) > 1 &&
                @product.variation_style == 'tabs' }}">
       <ul class="nav nav-tabs">
