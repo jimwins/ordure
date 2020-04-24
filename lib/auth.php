@@ -13,6 +13,7 @@ class Auth {
     $f3->route("GET|HEAD /register", 'Auth->viewRegisterForm');
     $f3->route("POST /register", 'Auth->register');
     $f3->route("GET|HEAD /account", 'Auth->account');
+    $f3->route("POST /account/update", 'Auth->updateAccount');
     $f3->route("GET|HEAD /logout", 'Auth->logout');
   }
 
@@ -294,11 +295,56 @@ class Auth {
       $f3->reroute('/login');
     }
 
-    $db= $f3->get('DBH');
-
     $f3->set('person', self::authenticated_user_details($f3));
 
     echo Template::instance()->render('account.html');
+  }
+
+  function updateAccount($f3, $args) {
+    $person_id= self::authenticated_user($f3);
+
+    if (!$person_id) {
+      $f3->reroute('/login');
+    }
+
+    $conflict= $f3->get('REQUEST.conflict');
+    if ($conflict) {
+      self::email_conflict_report($f3, $person_id);
+      $f3->reroute("/account?success=conflict");
+    }
+
+    $client= new GuzzleHttp\Client();
+
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . '/ordure/~update-person';
+
+    $data= [
+      'name' => $f3->get('REQUEST.name'),
+      'email' => $f3->get('REQUEST.email'),
+      'phone' => $f3->get('REQUEST.phone'),
+    ];
+
+    try {
+      $response= $client->post($uri, [
+        'json' => array_merge($data, [ 'id' => $person_id ])
+      ]);
+    } catch (\Exception $e) {
+      $f3->reroute('/account?errors[]=unable&' . http_build_query($data));
+    }
+
+    $person= json_decode($response->getBody(), true);
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->reroute('/account?errors[]=unable&' . http_build_query($data));
+    }
+
+    if ($person['errors']) {
+      $f3->reroute('/account?' . http_build_query(array_merge($person, $data)));
+    }
+
+    $person= self::authenticated_user_details($f3);
+
+    $f3->reroute('/account?success=update');
   }
 
   function logout($f3, $args) {
@@ -306,6 +352,7 @@ class Auth {
               $_SERVER['HTTP_HOST'] : false);
 
     SetCookie('loginToken', "", (new \Datetime("-24 hours"))->format("U"),
+
               '/', $domain, true, true);
     SetCookie('loggedIn', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, false);
@@ -415,6 +462,67 @@ class Auth {
           'address' => [
             'name' => '',
             'email' => $person['email'],
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+        'transactional' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
+    }
+  }
+
+  function email_conflict_report($f3, $person_id) {
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+    $title= "User conflict reported";
+    $f3->set('title', $title);
+
+    $content=
+      "Someone reported a conflict in the user data.\n\n" .
+      "Name: " . $f3->get('REQUEST.name') . "  \n" .
+      "Email: " . $f3->get('REQUEST.email') . "  \n" .
+      "Phone: " . $f3->get('REQUEST.phone') . "  \n";
+
+    $f3->set('content_top', Markdown::instance()->convert($content));
+    $f3->set('call_to_action', 'Resolve');
+    $f3->set('call_to_action_url',
+             $f3->get('GIFT_BACKEND') . '/person/' . $person_id);
+    $f3->set('content_bottom', Markdown::instance()->convert("Contact them when this is resolved."));
+
+    $html= Template::instance()->render('email-template.html');
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'html' => $html,
+        'subject' => $title,
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
+      ],
+      'recipients' => [
+        [
+          'address' => [
+            'name' => '',
+            'email' => $f3->get('CONTACT_SALES'),
           ],
         ],
       ],

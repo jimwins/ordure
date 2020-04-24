@@ -3,21 +3,109 @@
 
 <div class="row">
 
-<div class="pull-right">
+  <div class="pull-right">
   <a href="{{ @BASE }}/logout" class="btn btn-danger">Log Out</a>
-</div>
+  </div>
 
-<p class="lead">Welcome back, {{ @person.name }}!</p>
+  <h1 class="page-header">Welcome back, {{ @person.name }}!</h1>
 
-<check if="{{ @person.id == @ADMIN_USER }}">
-  <a class="btn btn-primary" href="/sale/list">
-    Go to list of sales.
-  </a>
-</check>
+  <p>We are glad to see you again!</p>
 
-<br><br>
+  <h2>Where to next?</h2>
+  <div class="list-group">
+    <a href="/art-supplies" class="list-group-item active">
+      Start Shopping
+    </a>
+    <a href="/account/orders" class="list-group-item disabled">
+      See Previous Orders (currently unavailable)
+    </a>
+    <a href="/contact" class="list-group-item">
+      Contact us
+    </a>
+  </div>
 
-<a href="/art-supplies" class="btn btn-primary">Start Shopping</a>
+  <h2>Update your Account</h2>
+  <form class="well" action="/account/update" method="POST">
+    <check if="{{ @REQUEST.success == 'update' }}">
+      <div class="alert alert-success">
+        <strong>Success!</strong> Your account information has been
+        successfully updated. Thank you!
+      </div>
+    </check>
+    <check if="{{ @REQUEST.success == 'conflict' }}">
+      <div class="alert alert-success">
+        <strong>Success!</strong> The conflict has been sent to our team,
+        so they'll take a look and contact you when the problem has been
+        resolved.
+      </div>
+    </check>
+    <repeat group="{{ @REQUEST.errors }}" value="{{ @error}}">
+      <div class="alert alert-danger">
+        <check if="@error == 'unable'">
+          <strong>Update failed.</strong> Sorry, we were unable to
+          update your information at this time. Please try again later.
+        </check>
+        <check if="@error == 'name'">
+          <strong>Invalid name.</strong> Sorry, the name you provided
+          was invalid.
+        </check>
+        <check if="@error == 'email'">
+          <strong>Invalid email.</strong> Sorry, the email you provided
+          appears to be invalid.
+        </check>
+        <check if="@error == 'phone'">
+          <strong>Invalid phone.</strong> Sorry, the phone number you provided
+          appears to be invalid.
+        </check>
+        <check if="@error == 'conflict'">
+          <div class="pull-right">
+            <button type="submit" class="btn btn-danger"
+              name="conflict" value="1">
+              Report the Conflict
+            </button>
+          </div>
+          <strong>Conflict.</strong> Sorry, some of the information that you
+          provided appears to conflict with another account. If you report
+          this conflict, we will try and merge the accounts.
+          <div class="clearfix"></div>
+        </check>
+      </div>
+    </repeat>
+
+    <div class="form-group {{ (@REQUEST.name && @REQUEST.name != @person.name) ? 'has-error' : '' }}">
+      <label for="name">Name</label>
+      <input type="text" class="form-control"
+             id="name" name="name"
+             value="{{ @REQUEST.name ?: @person.name }}"
+             placeholder="Vincent van Gogh">
+    </div>
+
+    <div class="form-group {{ (@REQUEST.email && @REQUEST.email != @person.email) ? 'has-error' : '' }}">
+      <label for="email">Email address</label>
+      <input type="email" class="form-control"
+             id="email" name="email"
+             value="{{ @REQUEST.email ?: @person.email }}"
+             placeholder="vincent.van.gogh@example.com">
+    </div>
+
+    <div class="form-group {{ (@REQUEST.phone && @REQUEST.phone != @person.phone) ? 'has-error' : '' }}">
+      <label for="phone">Phone number</label>
+      <input type="phone" class="form-control"
+             id="phone" name="phone"
+             value="{{ @REQUEST.phone ?: @person.phone }}"
+             placeholder="213 627 7223">
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+      Update
+    </button>
+  </form>
+
+  <check if="{{ @person.id == @ADMIN_USER }}">
+    <a class="btn btn-primary" href="/sale/list">
+      Sales List
+    </a>
+  </check>
 
 </div>
 
