@@ -122,10 +122,24 @@ loadScript('{{ @STATIC }}/code/combined-2020-03-13.js', function() {
   $('[data-toggle="tooltip"]').tooltip();
 
   // Fill in cartDetails
-  var details= Cookies.getJSON('cartDetails');
-  if (details && details.items > 0) {
-    $('#cart-button .badge').text('' + details.items + ': $' + details.total)
-                            .show();
+  var details= Cookies.get('cartDetails');
+  if (details) {
+    try {
+      debugger
+      details= JSON.parse(details)
+      if (details.items > 0) {
+        var badge= document.querySelector('#cart-button .badge')
+        badge.innerText= '' + details.items + ': $' + details.total
+        badge.style.display= 'inline-block'
+      }
+    } catch (err) {
+      // don't care
+    }
+  }
+
+  var account= Cookies.get('loggedIn')
+  if (account) {
+    document.getElementById('account-button').style.display= 'inline-block'
   }
 });
 </script>

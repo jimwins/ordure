@@ -100,6 +100,8 @@ class Auth {
 
     SetCookie('loginToken', "$token", $expires->format('U'),
               '/', $domain, true, true);
+    SetCookie('loggedIn', "1", $expires->format('U'),
+              '/', $domain, true, false);
   }
 
   function viewLoginForm($f3) {
@@ -305,6 +307,8 @@ class Auth {
 
     SetCookie('loginToken', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, true);
+    SetCookie('loggedIn', "", (new \Datetime("-24 hours"))->format("U"),
+              '/', $domain, true, false);
     $f3->reroute('/login');
   }
 
