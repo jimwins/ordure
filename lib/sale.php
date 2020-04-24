@@ -102,7 +102,7 @@ class Sale {
   }
 
   function new_sale($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $sale= $this->create($f3);
@@ -111,7 +111,7 @@ class Sale {
   }
 
   function showList($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
         $f3->error(403);
       }
@@ -176,7 +176,7 @@ class Sale {
   }
 
   function showItemsList($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
         $f3->error(403);
       }
@@ -356,14 +356,14 @@ class Sale {
   }
 
   function edit($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     echo Template::instance()->render('sale-edit.html');
   }
 
   function make_clone($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
@@ -859,7 +859,7 @@ class Sale {
     $sale_uuid= $f3->get('PARAMS.sale');
 
     if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
@@ -927,7 +927,7 @@ class Sale {
   }
 
   function remove_item($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -949,7 +949,7 @@ class Sale {
   }
 
   function update_item($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1008,7 +1008,7 @@ class Sale {
     $sale_uuid= $f3->get('PARAMS.sale');
 
     if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
@@ -1127,7 +1127,7 @@ class Sale {
 
     if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
         $type != 'billing' &&
-        \Auth::authenticated_user($f3) != 1) {
+        \Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       $f3->error(403);
     }
 
@@ -1195,7 +1195,7 @@ class Sale {
 
     if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
         $type != 'billing' &&
-        \Auth::authenticated_user($f3) != 1) {
+        \Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       $f3->error(403);
     }
 
@@ -1269,7 +1269,7 @@ class Sale {
 
     if ($f3->get('PARAMS.sale') && $sale->status != 'unpaid' &&
         $type != 'billing' &&
-        \Auth::authenticated_user($f3) != 1) {
+        \Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       $f3->error(403);
     }
 
@@ -1299,7 +1299,7 @@ class Sale {
   }
 
   function remove_address($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1328,7 +1328,7 @@ class Sale {
     $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
@@ -1362,7 +1362,7 @@ class Sale {
     $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
@@ -1417,7 +1417,7 @@ class Sale {
   }
 
   function set_shipping($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1445,7 +1445,7 @@ class Sale {
   }
 
   function verify_address($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1513,7 +1513,7 @@ class Sale {
     $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
 
     if ($sale_uuid) {
-      if (\Auth::authenticated_user($f3) != 1)
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
@@ -1546,7 +1546,7 @@ class Sale {
   }
 
   function add_exemption($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1619,7 +1619,7 @@ class Sale {
   }
 
   function set_status($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
         $f3->error(403);
       }
@@ -1779,7 +1779,7 @@ class Sale {
   }
 
   function calculate_sales_tax($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -1857,7 +1857,7 @@ class Sale {
   }
 
   function fetch_json($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
       if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
         $f3->error(403);
       }
@@ -2224,7 +2224,7 @@ if (0) {
   }
 
   function process_other_payment($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1)
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
       $f3->error(403);
 
     $db= $f3->get('DBH');
@@ -2690,7 +2690,7 @@ Your order is now being processed, and you will receive another email when your 
   }
 
   function confirm_order($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
         $f3->error(403);
     }
 
@@ -2779,7 +2779,7 @@ Your order is now being processed, and you will receive another email when your 
   }
 
   function send_note($f3, $args) {
-    if (\Auth::authenticated_user($f3) != 1) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
         $f3->error(403);
     }
 

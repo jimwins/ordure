@@ -1,10 +1,15 @@
 <?php
 
+use Respect\Validation\Validator as v;
+
 class Auth {
 
   static function addRoutes($f3) {
     $f3->route("GET|HEAD /login", 'Auth->viewLoginForm');
     $f3->route("POST /login", 'Auth->login');
+    $f3->route("POST /login/get-link", 'Auth->getLoyaltyLink');
+    $f3->route("GET /login/key/*", 'Auth->loginWithKey');
+    $f3->route("GET|HEAD /forgotPassword", 'Auth->viewForgotPasswordForm');
     $f3->route("GET|HEAD /register", 'Auth->viewRegisterForm');
     $f3->route("POST /register", 'Auth->register');
     $f3->route("GET|HEAD /account", 'Auth->account');
@@ -15,35 +20,49 @@ class Auth {
     return base64_encode(hash('sha256', $password, true));
   }
 
+  static function validate_auth_token($f3, $token) {
+    list($selector, $validator)= explode(':', $token);
+    if (!$selector || !$validator) {
+      return false;
+    }
+
+    $db= $f3->get('DBH');
+    $auth_token= new DB\SQL\Mapper($db, 'auth_token');
+    $auth_token->load(array('selector = ?', $selector));
+    if ($auth_token->dry()) {
+      return false;
+    }
+
+    if ($auth_token->expires &&
+        new \Datetime() > new \Datetime($auth_token->expires)) {
+      $auth_token->erase();
+      return false; // expired
+    }
+
+    if (hash_equals($auth_token->token, hash('sha256', $validator))) {
+      return $auth_token;
+    }
+
+    return false;
+  }
+
   static function authenticated_user($f3) {
+    if (($user_id= $f3->get('AUTHENTICATED_USER_ID'))) {
+      return $user_id;
+    }
+
     if (($login_token= $f3->get('COOKIE.loginToken'))) {
-      list($selector, $validator)= explode(':', $login_token);
-      if (!$selector || !$validator) {
-        return false;
-      }
-
-      $db= $f3->get('DBH');
-      $auth_token= new DB\SQL\Mapper($db, 'auth_token');
-      $auth_token->load(array('selector = ?', $selector));
-      if ($auth_token->dry()) {
-        return false;
-      }
-
-      if ($auth_token->expires &&
-          new \Datetime() > new \Datetime($auth_token->expires)) {
-        $auth_token->erase();
-        return false; // expired
-      }
-
-      if (hash_equals($auth_token->token, hash('sha256', $validator))) {
+      if (($auth_token= self::validate_auth_token($f3, $login_token))) {
         /* Push out expiry of token if more than a day since we've seen it */
         if (new \Datetime('-1 day') > new \Datetime($auth_token->modified)) {
           $expires= new \Datetime('+14 days');
           $auth_token->expires= $expires->format('Y-m-d H:i:s');
           $auth_token->save();
 
-          self::generateAuthCookie($selector, $validator, $expires);
+          self::generateAuthCookie($login_token, $expires);
         }
+
+        $f3->set('AUTHENTICATED_USER_ID', $auth_token->person_id);
 
         return $auth_token->person_id;
       }
@@ -51,12 +70,10 @@ class Auth {
     return false;
   }
 
-  function issue_auth_token($f3, $person_id) {
+  function generate_auth_token($f3, $person_id, $expires) {
     $selector= bin2hex(random_bytes(6));
     $validator= base64_encode(random_bytes(24));
     $token= hash('sha256', $validator);
-
-    $expires= new \Datetime('+14 days');
 
     $db= $f3->get('DBH');
     $auth_token= new DB\SQL\Mapper($db, 'auth_token');
@@ -67,14 +84,21 @@ class Auth {
 
     $auth_token->save();
 
-    self::generateAuthCookie($selector, $validator, $expires);
+    return "$selector:$validator";
   }
 
-  static function generateAuthCookie($selector, $validator, $expires) {
+  function issue_auth_token($f3, $person_id) {
+    $expires= new \Datetime('+14 days');
+    $token= self::generate_auth_token($f3, $person_id, $expires);
+
+    self::generateAuthCookie($token, $expires);
+  }
+
+  static function generateAuthCookie($token, $expires) {
     $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
               $_SERVER['HTTP_HOST'] : false);
 
-    SetCookie('loginToken', "$selector:$validator", $expires->format('U'),
+    SetCookie('loginToken', "$token", $expires->format('U'),
               '/', $domain, true, true);
   }
 
@@ -152,6 +176,23 @@ class Auth {
     echo Template::instance()->render('login.html');
   }
 
+  function loginWithKey($f3, $args) {
+    $key= $args['*'];
+
+    if (($auth= self::validate_auth_token($f3, $key))) {
+      self::issue_auth_token($f3, $auth->person_id);
+      $f3->reroute('/account');
+    }
+
+    $f3->set('KEY_FAILED', true);
+
+    echo Template::instance()->render('login.html');
+  }
+
+  function viewForgotPasswordForm($f3) {
+    $f3->error(500, "Sorry, I can't do that yet.");
+  }
+
   function viewRegisterForm($f3) {
     $db= $f3->get('DBH');
 
@@ -217,6 +258,33 @@ class Auth {
     echo Template::instance()->render('register.html');
   }
 
+  static function authenticated_user_details($f3) {
+    $person_id= self::authenticated_user($f3);
+    if (!$person_id) {
+      return false;
+    }
+
+    $client= new GuzzleHttp\Client();
+
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . '/ordure/~load-person';
+
+    try {
+      $response= $client->post($uri, [ 'json' => [ 'id' => $person_id ] ]);
+    } catch (\Exception $e) {
+      throw new \Exception(sprintf("Request failed: %s (%s)",
+                                   $e->getMessage(), $e->getCode()));
+    }
+
+    $data= json_decode($response->getBody(), true);
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
+    }
+
+    return $data;
+  }
+
   function account($f3, $args) {
     $person_id= self::authenticated_user($f3);
 
@@ -226,9 +294,7 @@ class Auth {
 
     $db= $f3->get('DBH');
 
-    $person= new DB\SQL\Mapper($db, 'person');
-    $person->load(array('id = ?', $person_id));
-    $person->copyTo('person');
+    $f3->set('person', self::authenticated_user_details($f3));
 
     echo Template::instance()->render('account.html');
   }
@@ -240,5 +306,128 @@ class Auth {
     SetCookie('loginToken', "", (new \Datetime("-24 hours"))->format("U"),
               '/', $domain, true, true);
     $f3->reroute('/login');
+  }
+
+  function getLoyaltyLink($f3, $args) {
+    $loyalty= $f3->get('REQUEST.loyalty');
+
+    $client= new GuzzleHttp\Client();
+
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . '/ordure/~load-person';
+
+    try {
+      $response= $client->post($uri, [ 'json' => [ 'loyalty' => $loyalty ] ]);
+    } catch (\Exception $e) {
+      $f3->error(500, (sprintf("Request failed: %s (%s)",
+                               $e->getMessage(), $e->getCode())));
+    }
+
+    $person= json_decode($response->getBody(), true);
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
+    }
+
+    if (!$person) {
+      $f3->reroute('/login?error=invalid_loyalty');
+    }
+
+    if ($loyalty == $person->email) {
+      self::email_login_link($f3, $person);
+      $f3->reroute('/login?success=email_sent');
+    }
+
+    self::sms_login_link($f3, $person);
+    $f3->reroute('/login?success=sms_sent');
+  }
+
+  function generate_login_link($f3, $person) {
+    $expires= new \Datetime('+24 hours');
+    $key= self::generate_auth_token($f3, $person['id'], $expires);
+    return 'https://' . $_SERVER['HTTP_HOST'] .
+           '/login/key/' . rawurlencode($key);
+  }
+
+  function sms_login_link($f3, $person) {
+    $client= new GuzzleHttp\Client();
+
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . '/~sms/send';
+
+    $text= "You can use this link to log in within the next 24 hours: " .
+           self::generate_login_link($f3, $person);
+
+    try {
+      $response= $client->post($uri, [ 'json' => [
+        'to' => $person['loyalty_number'],
+        'text' => $text
+      ] ]);
+    } catch (\Exception $e) {
+      $f3->error(500, (sprintf("Request failed: %s (%s)",
+                               $e->getMessage(), $e->getCode())));
+    }
+
+    $data= json_decode($response->getBody());
+
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
+    }
+
+    error_log(json_encode($data, JSON_PRETTY_PRINT));
+  }
+
+  function email_login_link($f3, $person) {
+    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
+    $sparky= new \SparkPost\SparkPost($httpClient,
+                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+
+    $title= "Log in to your account";
+    $f3->set('title', $title);
+
+    $f3->set('content_top', Markdown::instance()->convert("Here is a link to log in to your account on our website:"));
+    $f3->set('call_to_action', 'Log in');
+    $f3->set('call_to_action_url', self::generate_login_link($f3, $person));
+    $f3->set('content_bottom', Markdown::instance()->convert("Let us know if there is anything else that we can do to help."));
+
+    $html= Template::instance()->render('email-template.html');
+
+    $promise= $sparky->transmissions->post([
+      'content' => [
+        'html' => $html,
+        'subject' => $title,
+        'from' => array('name' => 'Raw Materials Art Supplies',
+                        'email' => $f3->get('CONTACT_SALES')),
+        'inline_images' => [
+          [
+            'name' => 'logo.png',
+            'type' => 'image/png',
+            'data' => base64_encode(file_get_contents('../ui/logo.png')),
+          ],
+        ],
+      ],
+      'recipients' => [
+        [
+          'address' => [
+            'name' => '',
+            'email' => $person['email'],
+          ],
+        ],
+      ],
+      'options' => [
+        'inlineCss' => true,
+        'transactional' => true,
+      ],
+    ]);
+
+    try {
+      $response= $promise->wait();
+      // XXX handle response
+    } catch (\Exception $e) {
+      $f3->get('log')->error(
+        sprintf("SparkPost failure: %s (%s)",
+                $e->getMessage(), $e->getCode())
+      );
+    }
   }
 }

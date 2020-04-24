@@ -3,86 +3,143 @@
 
 <div class="row">
 
-<form method="POST" action="">
+<check if="@BUILTIN_LOGIN">
+  <div class="col-md-6">
+    <form method="POST" action="">
 
-<div class="col-md-6 col-md-push-3">
-
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">
-        Sign In
-      </h3>
-    </div>
-    <div class="panel-body">
-
-      <check if="{{ @LOGIN_FAILED }}">
-        <div class="alert alert-danger" role="alert">
-          <strong>There was a problem with your request.</strong>
-          <!-- XXX should pass in rest of this message from code. -->
-          There was an error with your email / password combination.
-          Please try again.
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Sign In
+          </h3>
         </div>
-      </check>
+        <div class="panel-body">
 
-      <div class="form-group">
-        <label for="email">
-          What is your email address?
-        </label>
-        <input type="email" class="form-control"
-               id="email" name="email"
-               data-bind="value: email"
-               placeholder="Email address">
-      </div> 
+          <check if="{{ @LOGIN_FAILED }}">
+            <div class="alert alert-danger" role="alert">
+              <strong>There was a problem with your request.</strong>
+              <!-- XXX should pass in rest of this message from code. -->
+              There was an error with your email / password combination.
+              Please try again.
+            </div>
+          </check>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="radio">
-          <label>
-            <input type="radio" name="createNew" value="1"
-                   data-bind="checked: createNew">
-            No, I am a new customer.
-          </label>
+          <div class="form-group">
+            <label for="email">
+              What is your email address?
+            </label>
+            <input type="email" class="form-control"
+                   id="email" name="email"
+                   data-bind="value: email"
+                   placeholder="Email address">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="radio">
+              <label>
+                <input type="radio" name="createNew" value="1"
+                       data-bind="checked: createNew">
+                No, I am a new customer.
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="createNew" value="0"
+                       data-bind="checked: createNew">
+                Yes, I have a password:
+                <input type="password" class="form-control"
+                       id="password" name="password"
+                       data-bind="value: password, disable: createNew() == '1'"
+                       placeholder="Enter your password">
+                <small class="text-warning" data-bind="visible: password().length && password().length < 5">
+                  Password must be at least four characters long.
+                </small>
+              </label>
+            </div>
+
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="rememberMe" value="1">
+                Keep me signed in.
+              </label>
+
+                <a tabindex="0" class="help" role="button" data-toggle="popover" data-trigger="focus" title='"Keep Me Signed In" Checkbox' data-html="true" data-content='When you sign in to our website, you can stay signed in by checking the "Keep me signed in" or "Keep me signed in for future purchases" box on the sign in page. This will keep you signed in to your account for two weeks, or until you attempt to perform a sensitive action such as modifying account information.<br><br>To prevent others from accessing your account, we strongly recommend you do not use this feature on devices and computers that are shared with other people.'>Details.</a>
+            </div>
+          </div>
+
         </div>
-        <div class="radio">
-          <label>
-            <input type="radio" name="createNew" value="0"
-                   data-bind="checked: createNew">
-            Yes, I have a password:
-            <input type="password" class="form-control"
-                   id="password" name="password"
-                   data-bind="value: password, disable: createNew() == '1'"
-                   placeholder="Enter your password">
-            <small class="text-warning" data-bind="visible: password().length && password().length < 5">
-              Password must be at least four characters long.
-            </small>
-          </label>
+        <div class="panel-footer">
+          <button class="btn btn-primary">Sign in using our secure server</button>
         </div>
+      </div>
 
-        <div class="checkbox">
-          <label>
-            <input type="checkbox" name="rememberMe" value="1">
-            Keep me signed in.
-          </label>
-            
-            <a tabindex="0" class="help" role="button" data-toggle="popover" data-trigger="focus" title='"Keep Me Signed In" Checkbox' data-html="true" data-content='When you sign in to our website, you can stay signed in by checking the "Keep me signed in" or "Keep me signed in for future purchases" box on the sign in page. This will keep you signed in to your account for two weeks, or until you attempt to perform a sensitive action such as modifying account information.<br><br>To prevent others from accessing your account, we strongly recommend you do not use this feature on devices and computers that are shared with other people.'>Details.</a>
+      <h4>Sign In Help</h4>
+
+      <p>Forgot your password? <a href="forgotPassword">Get password help.</a>
+
+    </form>
+
+  </div><!-- .col-sm-6 -->
+</check>
+
+  <div class="col-md-6">
+    <form method="POST" action="/login/get-link">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div class="panel-title">
+            Rewards Program Sign In
+          </div>
         </div>
-      </div> 
-
-    </div>
-    <div class="panel-footer">
-      <button class="btn btn-primary">Sign in using our secure server</button>
-    </div>
+        <div class="panel-body">
+          <p>
+            Are you a member of our <a href="/rewards">rewards program</a>?
+            We can text or email you a link to log you into the store and the
+            benefits of your rewards membership. (Standard messaging and data
+            rates may apply.)
+          </p>
+          <check if="@KEY_FAILED">
+            <div class="alert alert-danger">
+              The key you provided was not valid. It may have expired.
+            </div>
+          </check>
+          <check if="@REQUEST.error == 'invalid_loyalty'">
+            <div class="alert alert-danger">
+              That number or email did not match up with any accounts in
+              our system.
+            </div>
+          </check>
+          <check if="@REQUEST.success == 'email_sent'">
+            <div class="alert alert-success">
+              An email has been sent with a link to log in. The link will
+              only work for the next 24 hours.
+            </div>
+          </check>
+          <check if="@REQUEST.success == 'sms_sent'">
+            <div class="alert alert-success">
+              A text message has been sent with a link to log in. The link
+              will only work for the next 24 hours.
+            </div>
+          </check>
+          <div class="form-group">
+            <label for="loyalty">
+              What is the phone number or email address for your loyalty
+              account?
+            </label>
+            <input type="text" class="form-control"
+                   id="loyalty" name="loyalty"
+                   placeholder="213-627-7223">
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button type="submit" class="btn btn-primary">
+            Get Login Link
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
-
-  <h4>Sign In Help</h4>
-
-  <p>Forgot your password? <a href="forgotPassword">Get password help.</a>
-
-</div>
-
-</form>
-
-</div>
+</div><!-- .row -->
 
 <include href="foot.html" />
 <script>

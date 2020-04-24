@@ -5,6 +5,12 @@
 
 <p>Welcome back, {{ @person.name }}!</p>
 
+<check if="{{ @person.id == @ADMIN_USER }}">
+  <div>
+    <a href="/sale/list">Go to list of sales.</a>
+  </div>
+</check>
+
 <a href="{{ @BASE }}/logout" class="btn btn-primary">Log Out</a>
 
 </div>

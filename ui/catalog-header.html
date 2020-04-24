@@ -1,20 +1,22 @@
 <div class="alert alert-danger">
-  <check if="@DROPSHIP_ONLY">
+  <strong>Our downtown store is temporarily closed due to the "Safer at
+  Home" emergency order in Los Angeles.</strong>
+
+  <check if="{{ @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
     <true>
-      <strong>Our downtown store is temporarily closed due to the "Safer at
-      Home" emergency order in Los Angeles.</strong>
-      We are able to ship a limited selection of products from warehouses in
-      other states. Some of these products must be ordered in case quantities.
-      <check if="@SALE_MINIMUM">
-        There is also a ${{ @SALE_MINIMUM }} order minimum at this time.
-      </check>
+      We have also suspended all online ordering while we do some work our
+      online store. We hope to be back soon!
     </true>
     <false>
-      <check if="{{ @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
-        <strong>Our downtown store is temporarily closed due to the "Safer at
-        Home" emergency order in Los Angeles.</strong>
-        We have also suspended all online ordering while we do some work our
-        online store.
+      <check if="@DROPSHIP_ONLY">
+        <true>
+          We are able to ship a limited selection of products from warehouses in
+          other states. Some of these products must be ordered in case
+          quantities.
+        </true>
+      </check>
+      <check if="@SALE_MINIMUM">
+        There is a ${{ @SALE_MINIMUM }} order minimum at this time.
       </check>
     </false>
   </check>

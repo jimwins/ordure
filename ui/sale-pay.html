@@ -131,7 +131,7 @@
         </div>
       </div>
 
-      <check if="{{ \Auth::authenticated_user(\Base::instance()) == 1 }}">
+      <check if="{{ \Auth::authenticated_user(\Base::instance()) == @ADMIN_USER }}">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="pay-other-heading">
           <h4 class="panel-title">
