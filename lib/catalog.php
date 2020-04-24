@@ -497,9 +497,9 @@ class Catalog {
       $term= $f3->get('REQUEST.q');
     }
 
-    if ($term && preg_match('!^[-A-Z0-9/.]+$!i', $term)) {
+    if ($term && preg_match('!^[-A-Z0-9/.]+$!i', trim($term))) {
       $item= new DB\SQL\Mapper($db, 'item');
-      $item->load(array('code=?', $term));
+      $item->load(array('code=?', trim($term)));
 
       if (!$item->dry()) {
         $product= new DB\SQL\Mapper($db, 'product');
