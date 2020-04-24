@@ -386,7 +386,12 @@ class Sale {
     $weight= 0.0;
 
     if (($override= $f3->get("SHIPPING_STATUS_OVERRIDE"))) {
-      return [ $override, '', [ '' ] ];
+      $person_id= \Auth::authenticated_user($f3);
+
+      // let through logged in users
+      if (!$person_id) {
+        return [ $override, '', [ '' ] ];
+      }
     }
 
     if (($minimum= $f3->get("SALE_MINIMUM")) && $minimum > $sale->total) {
@@ -863,11 +868,20 @@ class Sale {
         $f3->error(403);
     } else {
       $sale_uuid= $f3->get('COOKIE.cartID');
+      $person_id= \Auth::authenticated_user($f3);
 
       /* No cart yet? Create one. */
       if (!$sale_uuid) {
         $sale= $this->create($f3, 'cart');
         $sale_uuid= $sale->uuid;
+
+        if ($person_id) {
+          $sale->person_id= $person_id;
+          $person= \Auth::authenticated_user_details($f3);
+          $sale->name= $person['name'];
+          $sale->email= $person['email'];
+          $sale->save();
+        }
 
         $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                   $_SERVER['HTTP_HOST'] : false);

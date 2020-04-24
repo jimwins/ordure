@@ -2,7 +2,7 @@
   <strong>Our downtown store is temporarily closed due to the "Safer at
   Home" emergency order in Los Angeles.</strong>
 
-  <check if="{{ @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
+  <check if="{{ !\Auth::authenticated_user(\Base::instance()) && @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
     <true>
       We have also suspended all online ordering while we do some work our
       online store. We hope to be back soon!

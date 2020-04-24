@@ -23,19 +23,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <li class="{{ !strncmp(@URI, @BASE . '/contact', strlen(@BASE . '/contact')) ? 'active' : '' }}"><a href="{{ @BASE }}/contact">Contact</a></li>
         </ul>
 <check if="{{ @FEATURE_cart }}">
-        <form class="navbar-form navbar-left">
-          <button id="cart-button" type="button" class="btn btn-default"
-                  href="{{ @BASE }}/cart">
+        <div class="navbar-form navbar-left">
+          <a id="cart-button" type="button" class="btn btn-default"
+             href="{{ @BASE }}/cart">
             <i class="fa fa-shopping-cart"></i> Cart
             <span style="display: none" class="badge">0: $0.00</span>
-          </button>
-          <button id="account-button" type="button" class="btn btn-default"
-                  href="{{ @BASE }}/account" style="display: none">
+          </a>
+          <a id="account-button" type="button" class="btn btn-default"
+             href="{{ @BASE }}/account" style="display: none">
             <i class="fa fa-user"></i> Account
-          </button>
-        </form>
+          </a>
+        </div>
 </check>
-        </form>
         <ul class="nav navbar-nav navbar-right">
           <li><a href="http://twitter.com/RawMaterials" title="Follow us on Twitter"><i class="fa fa-lg fa-twitter-square"></i></a></li>
           <li><a href="http://facebook.com/RawMaterialsLA" title="Like us on Facebook"><i class="fa fa-lg fa-facebook-square"></i></a></li>
