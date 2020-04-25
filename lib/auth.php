@@ -404,7 +404,7 @@ class Auth {
     $client= new GuzzleHttp\Client();
 
     $backend= $f3->get('GIFT_BACKEND');
-    $uri= $backend . '/~sms/send';
+    $uri= $backend . '/sms/~send';
 
     $text= "You can use this link to log in within the next 24 hours: " .
            self::generate_login_link($f3, $person);
