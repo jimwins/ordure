@@ -330,6 +330,10 @@ class Auth {
       $response= $client->patch($uri, [
         'json' => $data,
       ]);
+    } catch (\GuzzleHttp\Exception\ClientException $e) {
+      if ($e->hasResponse() && $e->getResponse()->getStatusCode() == 409) {
+        $f3->reroute('/account?errors[]=conflict&' . http_build_query($data));
+      }
     } catch (\Exception $e) {
       $f3->reroute('/account?errors[]=unable&' . http_build_query($data));
     }
@@ -426,8 +430,6 @@ class Auth {
     if (json_last_error() != JSON_ERROR_NONE) {
       $f3->error(500, json_last_error_msg());
     }
-
-    error_log(json_encode($data, JSON_PRETTY_PRINT));
   }
 
   function email_login_link($f3, $person) {
