@@ -270,10 +270,12 @@ class Auth {
     $client= new GuzzleHttp\Client();
 
     $backend= $f3->get('GIFT_BACKEND');
-    $uri= $backend . '/ordure/~load-person';
+    $uri= $backend . "/person/{$person_id}";
 
     try {
-      $response= $client->post($uri, [ 'json' => [ 'id' => $person_id ] ]);
+      $response= $client->get($uri, [
+        'headers' => [ 'Accept' => 'application/json' ]
+      ]);
     } catch (\Exception $e) {
       throw new \Exception(sprintf("Request failed: %s (%s)",
                                    $e->getMessage(), $e->getCode()));
@@ -316,7 +318,7 @@ class Auth {
     $client= new GuzzleHttp\Client();
 
     $backend= $f3->get('GIFT_BACKEND');
-    $uri= $backend . '/ordure/~update-person';
+    $uri= $backend . '/person/' . $person_id;
 
     $data= [
       'name' => $f3->get('REQUEST.name'),
@@ -325,8 +327,8 @@ class Auth {
     ];
 
     try {
-      $response= $client->post($uri, [
-        'json' => array_merge($data, [ 'id' => $person_id ])
+      $response= $client->patch($uri, [
+        'json' => $data,
       ]);
     } catch (\Exception $e) {
       $f3->reroute('/account?errors[]=unable&' . http_build_query($data));
