@@ -344,7 +344,7 @@ class Auth {
       $f3->reroute('/account?errors[]=unable&' . http_build_query($data));
     }
 
-    if ($person['errors']) {
+    if ($person->errors) {
       $f3->reroute('/account?' . http_build_query(array_merge($person, $data)));
     }
 
@@ -366,42 +366,44 @@ class Auth {
   }
 
   function getLoyaltyLink($f3, $args) {
-    $loyalty= $f3->get('REQUEST.loyalty');
+    $loyalty= trim($f3->get('REQUEST.loyalty'));
 
     $client= new GuzzleHttp\Client();
 
     $backend= $f3->get('GIFT_BACKEND');
-    $uri= $backend . '/ordure/~load-person';
+    $uri= $backend . '/person/search/?loyalty=' . $loyalty;
 
     try {
-      $response= $client->post($uri, [ 'json' => [ 'loyalty' => $loyalty ] ]);
+      $response= $client->get($uri, [
+        'headers' => [ 'Accept' => 'application/json' ]
+      ]);
     } catch (\Exception $e) {
       $f3->error(500, (sprintf("Request failed: %s (%s)",
                                $e->getMessage(), $e->getCode())));
     }
 
-    $person= json_decode($response->getBody(), true);
+    $people= json_decode($response->getBody());
 
     if (json_last_error() != JSON_ERROR_NONE) {
       $f3->error(500, json_last_error_msg());
     }
 
-    if (!$person) {
+    if (!$people) {
       $f3->reroute('/login?error=invalid_loyalty');
     }
 
-    if ($loyalty == $person->email) {
-      self::email_login_link($f3, $person);
+    if (strcasecmp($loyalty, $people[0]->email) == 0) {
+      self::email_login_link($f3, $people[0]);
       $f3->reroute('/login?success=email_sent');
     }
 
-    self::sms_login_link($f3, $person);
+    self::sms_login_link($f3, $people[0]);
     $f3->reroute('/login?success=sms_sent');
   }
 
   function generate_login_link($f3, $person) {
     $expires= new \Datetime('+24 hours');
-    $key= self::generate_auth_token($f3, $person['id'], $expires);
+    $key= self::generate_auth_token($f3, $person->id, $expires);
     return 'https://' . $_SERVER['HTTP_HOST'] .
            '/login/key/' . rawurlencode($key);
   }
@@ -417,7 +419,7 @@ class Auth {
 
     try {
       $response= $client->post($uri, [ 'json' => [
-        'to' => $person['loyalty_number'],
+        'to' => $person->loyalty_number,
         'text' => $text
       ] ]);
     } catch (\Exception $e) {
@@ -465,7 +467,7 @@ class Auth {
         [
           'address' => [
             'name' => '',
-            'email' => $person['email'],
+            'email' => $person->email,
           ],
         ],
       ],
