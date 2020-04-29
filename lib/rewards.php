@@ -168,35 +168,31 @@ class Rewards {
   }
 
   function check_rewards_balance($f3) {
-    $curl = curl_init();
+    $client= new GuzzleHttp\Client();
 
-    $data= array('loyalty' => $f3->get('REQUEST.loyalty'));
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . "/person/search?loyalty=" . $f3->get('REQUEST.loyalty');
 
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~rewards/check-balance' .
-                     '?loyalty=' . rawurlencode($f3->get('REQUEST.loyalty')),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 30,
-    ));
-
-    $response= curl_exec($curl);
-    $err= curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      $f3->error(500, "cURL Error #:" . $err);
+    try {
+      $response= $client->get($uri, [
+        'headers' => [ 'Accept' => 'application/json' ]
+      ]);
+    } catch (\Exception $e) {
+      throw new \Exception(sprintf("Request failed: %s (%s)",
+                                   $e->getMessage(), $e->getCode()));
     }
 
-    $data= json_decode($response);
+    $data= json_decode($response->getBody(), true);
 
-    // turn soft errors into hard ones
-    if ($data->error) {
-      return $f3->error(500, $data->error);
+    if (json_last_error() != JSON_ERROR_NONE) {
+      $f3->error(500, json_last_error_msg());
     }
 
-    echo $response;
+    if (!$data) {
+      return $f3->error(404, "No data found.");
+    }
+
+    header('Content-type: application/json');
+    echo json_encode($data[0], JSON_PRETTY_PRINT);
   }
 }
