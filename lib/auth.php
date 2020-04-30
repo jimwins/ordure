@@ -324,6 +324,7 @@ class Auth {
       'name' => $f3->get('REQUEST.name'),
       'email' => $f3->get('REQUEST.email'),
       'phone' => $f3->get('REQUEST.phone'),
+      'rewardsplus' => $f3->get('REQUEST.rewardsplus'),
     ];
 
     try {

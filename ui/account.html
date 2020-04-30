@@ -96,6 +96,25 @@
              placeholder="213 627 7223">
     </div>
 
+    <div class="form-group">
+      <check if="@person.rewardsplus">
+        <true>
+          <label>
+            <input type="checkbox" name="rewardsplus" value="0">
+            Stop sending me Rewards+ messages.
+          </label>
+        </true>
+        <false>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="rewardsplus" value="1">
+              Sign me up for Rewards+. (You may receive up to 6 messages per month. Message and data rates may apply. Reply STOP to end or HELP for help.)
+            </label>
+          </div>
+        </false>
+      </check>
+  </div>
+
     <button type="submit" class="btn btn-primary">
       Update
     </button>
