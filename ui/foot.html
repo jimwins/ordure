@@ -125,7 +125,6 @@ loadScript('{{ @STATIC }}/code/combined-2020-03-13.js', function() {
   var details= Cookies.get('cartDetails');
   if (details) {
     try {
-      debugger
       details= JSON.parse(details)
       if (details.items > 0) {
         var badge= document.querySelector('#cart-button .badge')
