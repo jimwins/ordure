@@ -27,9 +27,11 @@
         {{ @item.name }}
       </a>
     </repeat>
-    <a class="list-group-item"
-       href="{{ '/' . @CATALOG . '/brand' }}">
-      Brands
-    </a>
+    <check if="{{ !isset(@dept) }}">
+      <a class="list-group-item list-group-item-info"
+         href="{{ '/' . @CATALOG . '/brand' }}">
+        Brands
+      </a>
+    </check>
   </div>
 </div>
