@@ -2110,41 +2110,27 @@ if (0) {
   }
 
   function get_giftcard_balance($f3, $args) {
-    $curl = curl_init();
+    $client= new GuzzleHttp\Client();
 
-    $data= array('card' => $f3->get('REQUEST.card'));
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . "/gift-card/" . rawurlencode($f3->get('REQUEST.card'));
 
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/check-balance' .
-                     '?card=' . rawurlencode($f3->get('REQUEST.card')),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 30,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    ));
-
-    $response= curl_exec($curl);
-    $err= curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      $f3->error(500, "cURL Error #:" . $err);
+    try {
+      $response= $client->get($uri, [
+        'headers' => [ 'Accept' => 'application/json' ]
+      ]);
+    } catch (\Exception $e) {
+      throw new \Exception(sprintf("Request failed: %s (%s)",
+                                   $e->getMessage(), $e->getCode()));
     }
 
-    $data= json_decode($response);
-
-    // turn soft errors into hard ones
-    if ($data->error) {
-      return $f3->error(500, $data->error);
-    }
+    $data= json_decode($response->getBody());
 
     if ($data->balance == 0.00) {
       return $f3->error(500, "There is no remaining balance on this card.");
     }
 
-    echo $response;
+    echo $response->getBody();
   }
 
   function process_giftcard_payment($f3, $args) {
@@ -2152,61 +2138,39 @@ if (0) {
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
-    $curl= curl_init();
+    $client= new GuzzleHttp\Client();
 
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/check-balance' .
-                     '?card=' . rawurlencode($f3->get('REQUEST.card')),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 30,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    ));
+    $backend= $f3->get('GIFT_BACKEND');
+    $uri= $backend . "/gift-card/" . rawurlencode($f3->get('REQUEST.card'));
 
-    $response= curl_exec($curl);
-    $err= curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      $f3->error(500, "cURL Error #:" . $err);
+    try {
+      $response= $client->get($uri, [
+        'headers' => [ 'Accept' => 'application/json' ]
+      ]);
+    } catch (\Exception $e) {
+      throw new \Exception(sprintf("Request failed: %s (%s)",
+                                   $e->getMessage(), $e->getCode()));
     }
 
-    $data= json_decode($response);
+    $data= json_decode($response->getBody());
 
-    // turn soft errors into hard ones
-    if ($data->error) {
-      return $f3->error(500, $data->error);
+    if ($data->balance == 0.00) {
+      return $f3->error(500, "There is no remaining balance on this card.");
     }
 
     $amount= -min($data->balance, $sale->total - $sale->paid);
 
-    $curl= curl_init();
-
-    $data= array(
-      'card' => $f3->get('REQUEST.card'),
-      'amount' => $amount
-    );
-
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $f3->get('GIFT_BACKEND') . '/~gift-card/add-txn?' .
-                     http_build_query($data),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 30,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    ));
-
-    $response= curl_exec($curl);
-    $err= curl_error($curl);
-
-    curl_close($curl);
-
-    if ($err) {
-      $f3->error(500, "cURL Error #:" . $err);
+    try {
+      $response= $client->post($uri, [
+        'headers' => [ 'Accept' => 'application/json' ],
+        'json' => [ 'amount' => $amount ],
+      ]);
+    } catch (\Exception $e) {
+      throw new \Exception(sprintf("Request failed: %s (%s)",
+                                   $e->getMessage(), $e->getCode()));
     }
+
+    $data= json_decode($response->getBody());
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
@@ -2217,7 +2181,10 @@ if (0) {
     ));
     $payment->save();
 
-    if ($sale->total - $sale->paid + $amount > 0) {
+    if ($sale->total - ($sale->paid + $amount) > 0) {
+      $sale->status= 'unpaid';
+      $sale->save();
+
       echo json_encode(array('paid' => 0));
       return;
     }
