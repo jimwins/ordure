@@ -8,6 +8,7 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/brand", 'Catalog->brands');
     $f3->route("GET|HEAD /$CATALOG/brand/@brand", 'Catalog->brand');
 
     /* Use Sphinx if it is configured */
@@ -268,6 +269,21 @@ class Catalog {
              array('title' => "$product[name] by $product[brand_name] - Raw Materials Art Supplies"));
 
     echo Template::instance()->render('catalog-product.html');
+  }
+
+  function brands($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $brand= new DB\SQL\Mapper($db, 'brand');
+    $brands= $brand->find(array('active = 1'), array('order' => 'name'));
+    $f3->set('brands', $brands);
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $departments= $dept->find(array('parent=?', 0),
+                              array('order' => 'name'));
+    $f3->set('departments', $departments);
+
+    echo Template::instance()->render('catalog-brands.html');
   }
 
   function brand($f3, $args) {
