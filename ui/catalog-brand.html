@@ -49,25 +49,11 @@
       <h1>{{ @brand.name }}</h1>
     </div>
 
-    <p>
-      <check if="{{ @brand.description }}">
-        {{ @markdown(@brand.description) | raw }}
-      </check>
-    </p>
-
-    <check if="{{ isset(@dept) }}">
-      <div class="page-header" data-department="{{ isset(@subdept) ? @subdept.id : @dept.id }}">
-        <h1>
-          {{ isset(@subdept) ? @subdept.name : @dept.name }}
-        </h1>
-      </div>
+    <check if="{{ @brand.description }}">
+      {{ @markdown(@brand.description) | raw }}
+      <hr>
     </check>
 
-    <div data-slug="{{ @PAGE.slug }}">
-      <div class="rendered">
-        {{ @PAGE.content ? @markdown(@PAGE.content) : '' | raw }}
-      </div>
-    </div>
     <check if="isset(@products)">
       <repeat group="{{ @products }}" value="{{ @product }}">
 	<div class="row">
