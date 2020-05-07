@@ -116,7 +116,7 @@ class GiftCard {
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
     $line->sale_id= $sale->id;
-    $line->item_id= 11212; // TODO don't hard-code
+    $line->item_id= $kit ? 89883 : 11212; // TODO don't hard-code
     if ($kit) {
       $line->override_name= "AzLotusArt Kit";
     }
