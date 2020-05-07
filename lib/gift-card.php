@@ -10,6 +10,8 @@ class GiftCard {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
 
+    $kit= $f3->get('REQUEST.kit');
+
     $token= json_decode($_REQUEST['token']);
     $amount= (int)$_REQUEST['amount'];
 
@@ -46,7 +48,7 @@ class GiftCard {
     $promise= $sparky->transmissions->post([
       'content' => [
         'text' => $text,
-        'subject' => "Sale: Gift Card",
+        'subject' => $kit ? 'Sale: AzLotusArt Kit' : "Sale: Gift Card",
         'from' => array('name' => 'Raw Materials Art Supplies',
                         'email' => $f3->get('CONTACT_SALES')),
       ],
@@ -72,6 +74,6 @@ class GiftCard {
                         $e->getMessage(), $e->getCode()));
     }
 
-    $f3->reroute('/gift-card/thanks');
+    $f3->reroute($kit ? '/azlotusart-kit-thanks' : '/gift-card/thanks');
   }
 }
