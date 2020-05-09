@@ -1774,6 +1774,11 @@ class Sale {
 
     $data= json_decode($response);
 
+    if (!$data->CartItemsResponse) {
+      error_log($response);
+      $f3->error(500, "Unable to calculate sales tax.");
+    }
+
     foreach ($data->CartItemsResponse as $response) {
       if ($response->CartItemIndex == 0) {
         $sale->shipping_tax= $response->TaxAmount;
