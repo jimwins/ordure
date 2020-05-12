@@ -895,7 +895,7 @@ class Sale {
 
     $db= $f3->get('DBH');
 
-    $item_code= $f3->get('REQUEST.item');
+    $item_code= trim($f3->get('REQUEST.item'));
 
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
