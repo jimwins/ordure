@@ -989,8 +989,6 @@ class Sale {
     if ($f3->exists('REQUEST.price')) {
       $price= $f3->get('REQUEST.price');
 
-      // XXX handle resetting price
-
       if (preg_match('/^\d*(\/|%)$/', $price)) {
         $line->discount_type= "percentage";
         $line->discount= (float)$price;
@@ -1007,8 +1005,13 @@ class Sale {
           $line->discount_manual= NULL;
         }
       } elseif ($price == '...') {
+        $item= new DB\SQL\Mapper($db, 'item');
+        $item->load(array('id = ?', $line->item_id));
+        if (!$item) {
+          $f3->error(500, "Can't find price");
+        }
         $scat_item= new DB\SQL\Mapper($db, 'scat_item');
-        $scat_item->load(array('code = ?', $sale_item['code']));
+        $scat_item->load(array('code = ?', $item->code));
         if (!$scat_item) {
           $f3->error(500, "Can't find price");
         }
