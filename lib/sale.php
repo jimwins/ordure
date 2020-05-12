@@ -1006,6 +1006,16 @@ class Sale {
           $line->discount_type= NULL;
           $line->discount_manual= NULL;
         }
+      } elseif ($price == '...') {
+        $scat_item= new DB\SQL\Mapper($db, 'scat_item');
+        $scat_item->load(array('code = ?', $sale_item['code']));
+        if (!$scat_item) {
+          $f3->error(500, "Can't find price");
+        }
+        $line->retail_price= $scat_item->retail_price;
+        $line->discount= $scat_item->discount;
+        $line->discount_type= $scat_item->discount_type;
+        $line->discount_manual= NULL;
       } else {
         $f3->error(500, "Didn't understand price.");
       }
