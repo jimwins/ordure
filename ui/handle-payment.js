@@ -44,6 +44,11 @@ loadScript('https://js.stripe.com/v3/',
   function stripeTokenHandler(token) {
     // Insert the token ID into the form so it gets submitted to the server
     var form= document.getElementById('payment-form');
+
+    // prevent double-submit
+    if (form.disabled) return;
+    form.disabled= true;
+
     var hiddenInput= document.createElement('input');
     hiddenInput.setAttribute('type', 'hidden');
     hiddenInput.setAttribute('name', 'stripeToken');
@@ -87,6 +92,7 @@ loadScript('https://js.stripe.com/v3/',
                                    jqXHR.responseJSON.text :
                                    textStatus;
          displayError.classList.remove('hidden');
+         form.disabled= false;
        });
     } else {
       form.submit();
