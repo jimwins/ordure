@@ -11,6 +11,22 @@
 
   <p>We are glad to see you again!</p>
 
+  <check if="{{ @person.points_available || @person.points_pending }}">
+    <true>
+      <check if="{{ @person.points_available }}">
+        You have {{ @person.points_available }} points available to use now.
+      </check>
+      <check if="{{ @person.points_pending }}">
+        You have {{ @person.points_pending }} points that will be available
+        tomorrow.
+      </check>
+    </true>
+    <false>
+      You don't have any rewards points yet.
+    </false>
+  </check>
+  <h2>
+
   <h2>Where to next?</h2>
   <div class="list-group">
     <a href="/art-supplies" class="list-group-item active">
