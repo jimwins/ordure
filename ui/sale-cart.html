@@ -100,31 +100,21 @@
         <div class="panel-body">
           <div class="well">
             <p>
-              Save your cart so you can access it later by providing your
-              name and email address.
+              Log in to your rewards account so you can access your cart
+              later! Don't have an account? <a href="/rewards">Register
+              now.</a>
             </p>
             <form class="form form-inline"
-                  method="POST" action="{{ @BASE }}/cart/update-person">
-              <input type="hidden" name="just_saving" value="1">
-              <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" class="form-control" name="email" required
-                       size="50"
-                       placeholder="vincent.van.gogh@example.com"
-                       value="{{ @sale.email }}">
-              </div>
-
-              <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" name="name" required
-                       autocomplete="name"
-                       size="50"
-                       placeholder="Vincent Van Gogh"
-                       value="{{ @sale.name }}">
-              </div>
-
+                  method="POST" action="{{ @BASE }}/login/get-link">
+              <input type="hidden" name="cart" value="{{ @sale.uuid }}">
+              <label for="loyalty">
+                Phone number or email address
+              </label>
+              <input type="text" class="form-control"
+                     id="loyalty" name="loyalty"
+                     placeholder="213-627-7223">
               <button type="submit" class="btn btn-primary">
-                Save
+                Get Link
               </button>
             </form>
           </div>

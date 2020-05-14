@@ -76,12 +76,15 @@ class Auth {
     $validator= base64_encode(random_bytes(24));
     $token= hash('sha256', $validator);
 
+    $cart= trim($f3->get('REQUEST.cart'));
+
     $db= $f3->get('DBH');
     $auth_token= new DB\SQL\Mapper($db, 'auth_token');
     $auth_token->selector= $selector;
     $auth_token->token= $token;
     $auth_token->person_id= $person_id;
     $auth_token->expires= $expires->format('Y-m-d H:i:s');
+    $auth_token->cart= $cart;
 
     $auth_token->save();
 
@@ -91,6 +94,8 @@ class Auth {
   function issue_auth_token($f3, $person_id) {
     $expires= new \Datetime('+14 days');
     $token= self::generate_auth_token($f3, $person_id, $expires);
+
+    $f3->set('AUTHENTICATED_USER_ID', $person_id);
 
     self::generateAuthCookie($token, $expires);
   }
@@ -184,7 +189,28 @@ class Auth {
 
     if (($auth= self::validate_auth_token($f3, $key))) {
       self::issue_auth_token($f3, $auth->person_id);
-      $f3->reroute('/account');
+
+      if ($auth->cart) {
+        $db= $f3->get('DBH');
+        $cart= new DB\SQL\Mapper($db, 'sale');
+        $cart->load(array('uuid = ?', $auth->cart));
+        if (!$cart->dry()) {
+          $person= self::authenticated_user_details($f3);
+          error_log("Associating cart {$cart->id} to person {$person['id']}\n");
+          $cart->person_id= $person['id'];
+          $cart->email= $person['email'];
+          $cart->name= $person['name'];
+          $cart->save();
+
+          $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+                    $_SERVER['HTTP_HOST'] : false);
+
+          SetCookie('cartID', $cart->uuid, null /* don't expire */,
+                    '/', $domain, true, true);
+        }
+      }
+
+      $f3->reroute($auth->cart ? '/cart' : '/account');
     }
 
     $f3->set('KEY_FAILED', true);
