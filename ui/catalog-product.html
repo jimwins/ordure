@@ -172,9 +172,9 @@ gtag('event', 'view_item', {
 });
     </script>
 
-    <check if="@DROPSHIP_ONLY">
+    <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP">
       <div class="alert alert-warning">
-        <strong>Availability alert!</strong>  Items that say "Available" may
+        <strong>Availability alert!</strong>  Items that say "Maybe" may
         not be in stock, this only indicates that the item is usually stocked
         in the warehouse. Your payment will be refunded for any items we are
         unable to have shipped.
