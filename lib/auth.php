@@ -185,23 +185,34 @@ class Auth {
   }
 
   function loginWithKey($f3, $args) {
+    $db= $f3->get('DBH');
     $key= $args['*'];
 
     if (($auth= self::validate_auth_token($f3, $key))) {
       self::issue_auth_token($f3, $auth->person_id);
+      $person= self::authenticated_user_details($f3);
 
       if ($auth->cart) {
-        $db= $f3->get('DBH');
         $cart= new DB\SQL\Mapper($db, 'sale');
         $cart->load(array('uuid = ?', $auth->cart));
         if (!$cart->dry()) {
-          $person= self::authenticated_user_details($f3);
           error_log("Associating cart {$cart->id} to person {$person['id']}\n");
           $cart->person_id= $person['id'];
           $cart->email= $person['email'];
           $cart->name= $person['name'];
           $cart->save();
 
+          $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+                    $_SERVER['HTTP_HOST'] : false);
+
+          SetCookie('cartID', $cart->uuid, null /* don't expire */,
+                    '/', $domain, true, true);
+        }
+      } else {
+        $cart= new DB\SQL\Mapper($db, 'sale');
+        $cart->load(array("person_id = ? AND status = 'cart'", $person['id']));
+        if (!$cart->dry()) {
+          error_log("Loading latest open cart {$cart->uuid}\n");
           $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                     $_SERVER['HTTP_HOST'] : false);
 
