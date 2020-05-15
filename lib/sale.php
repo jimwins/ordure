@@ -477,6 +477,8 @@ class Sale {
         $f3->reroute($f3->get('BASE') . '/cart');
       }
 
+      $this->remember_cart($f3, $uuid);
+
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
       SetCookie('cartDetails',
@@ -825,6 +827,14 @@ class Sale {
     }
   }
 
+  function remember_cart($f3, $uuid) {
+    $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+              $_SERVER['HTTP_HOST'] : false);
+
+    SetCookie('cartID', $uuid, null /* don't expire */,
+              '/', $domain, true, true);
+  }
+
   function forget_cart($f3, $args) {
     $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
               $_SERVER['HTTP_HOST'] : false);
@@ -883,11 +893,7 @@ class Sale {
           $sale->save();
         }
 
-        $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
-                  $_SERVER['HTTP_HOST'] : false);
-
-        SetCookie('cartID', $sale_uuid, null /* don't expire */,
-                  '/', $domain, true, true);
+        $this->remember_cart($f3, $sale_uuid);
       } else {
         $f3->get('log')->info("Loading cart from UUID '$sale_uuid'.");
       }
@@ -2921,26 +2927,33 @@ Your order is now being processed, and you will receive another email when your 
 
     $email= $f3->get('REQUEST.email');
 
-    if (!v::email()->validate($email)) {
-      $f3->error(500, "That email is invalid.");
-    }
-
-    // validate key
-    $key= $f3->get('REQUEST.key');
-    if ($key) {
-      list($ts, $hash)= explode(':', $key);
-      if ((int)$ts < time() - 24*3600) {
-        $f3->error(500, "That key is expired.");
+    $person_id= \Auth::authenticated_user($f3);
+    if (!$email && $person_id) {
+      $sale= new DB\SQL\Mapper($db, 'sale');
+      $sales= $sale->find([ 'person_id = ? AND status = ?', $person_id, 'cart'],
+                          [ 'order' => 'id' ]);
+    } else {
+      if (!v::email()->validate($email)) {
+        $f3->error(500, "That email is invalid.");
       }
-      if ((int)$ts > time() ||
-          $hash != base64_encode(hash('sha256', $ts . $f3->get('UPLOAD_KEY'), true))) {
-        $f3->error(500, "That key is invalid.");
-      }
-    }
 
-    $sale= new DB\SQL\Mapper($db, 'sale');
-    $sales= $sale->find([ 'email = ? AND status = ?', $email, 'cart' ],
-                        [ 'order' => 'id' ]);
+      // validate key
+      $key= $f3->get('REQUEST.key');
+      if ($key) {
+        list($ts, $hash)= explode(':', $key);
+        if ((int)$ts < time() - 24*3600) {
+          $f3->error(500, "That key is expired.");
+        }
+        if ((int)$ts > time() ||
+            $hash != base64_encode(hash('sha256', $ts . $f3->get('UPLOAD_KEY'), true))) {
+          $f3->error(500, "That key is invalid.");
+        }
+      }
+
+      $sale= new DB\SQL\Mapper($db, 'sale');
+      $sales= $sale->find([ 'email = ? AND status = ?', $email, 'cart' ],
+                          [ 'order' => 'id' ]);
+    }
 
     if (!$sales)
       $f3->error(500, "No carts found.");

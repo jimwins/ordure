@@ -202,22 +202,14 @@ class Auth {
           $cart->name= $person['name'];
           $cart->save();
 
-          $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
-                    $_SERVER['HTTP_HOST'] : false);
-
-          SetCookie('cartID', $cart->uuid, null /* don't expire */,
-                    '/', $domain, true, true);
+          Sale::remember_cart($f3, $cart->uuid);
         }
       } else {
         $cart= new DB\SQL\Mapper($db, 'sale');
         $cart->load(array("person_id = ? AND status = 'cart'", $person['id']));
         if (!$cart->dry()) {
           error_log("Loading latest open cart {$cart->uuid}\n");
-          $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
-                    $_SERVER['HTTP_HOST'] : false);
-
-          SetCookie('cartID', $cart->uuid, null /* don't expire */,
-                    '/', $domain, true, true);
+          Sale::remember_cart($f3, $cart->uuid);
         }
       }
 
@@ -335,6 +327,20 @@ class Auth {
     }
 
     $f3->set('person', self::authenticated_user_details($f3));
+
+    $db= $f3->get('DBH');
+    $cart= new DB\SQL\Mapper($db, 'sale');
+    $cart->items= '(SELECT SUM(quantity)
+                      FROM sale_item WHERE sale_id = sale.id)';
+    $cart->total= 'CAST(shipping + ROUND(shipping_tax, 2) +
+                        (SELECT SUM(quantity * sale_price(retail_price,
+                                                          discount_type,
+                                                          discount)
+                                    + ROUND(tax, 2))
+                           FROM sale_item WHERE sale_id = sale.id)
+                     AS DECIMAL(9,2))';
+    $carts= $cart->find(array("person_id = ? AND status = 'cart'", $person_id));
+    $f3->set('carts', $carts);
 
     echo Template::instance()->render('account.html');
   }

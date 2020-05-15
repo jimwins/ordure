@@ -25,7 +25,63 @@
       You don't have any rewards points yet.
     </false>
   </check>
-  <h2>
+
+  <check if="count(@carts) > 1">
+    <h2>Shopping Carts</h2>
+    <p>
+      Looks like you have more than one shopping cart. You can switch
+      here, or combine them into one cart.
+    </p>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Carts</h3>
+      </div>
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <td>#</td>
+            <td>Created</td>
+            <td>Last Modified</td>
+            <td>Items</td>
+          </tr>
+        </thead>
+        <tbody>
+          <repeat group="{{ @carts}}" value="{{ @sale }}">
+            <tr>
+              <td>
+                <a href="/cart?uuid={{ @sale.uuid }}">
+                  {{ sprintf('%05d', @sale.id) }}
+                </a>
+                <check if="{{ @COOKIE.cartID == @sale.uuid }}">
+                  (active)
+                </check>
+              </td>
+              <td>
+                {{ @sale.created }}
+              </td>
+              <td>
+                {{ @sale.modified }}
+              </td>
+              <td>
+                {{ @sale.items }}
+              </td>
+            </tr>
+          </repeat>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4">
+              <a href="/cart/combine-carts" class="btn btn-primary">
+                Combine All
+              </a>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </check>
+
 
   <h2>Where to next?</h2>
   <div class="list-group">
