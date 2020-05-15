@@ -118,24 +118,43 @@ class Catalog {
     $product->brand_name= '(SELECT name
                               FROM brand
                              WHERE brand = brand.id)';
-    if ($f3->get('DROPSHIP_ONLY')) {
-      $product->stocked= '(SELECT SUM(is_dropshippable)
-                             FROM item
-                             JOIN scat_item ON item.code = scat_item.code
-                            WHERE item.product = product.id
-                              AND item.active)';
-    } else {
-      $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
-                             FROM item
-                             JOIN scat_item ON item.code = scat_item.code
-                            WHERE item.product = product.id
-                              AND item.active)';
-    }
+    $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
+                                                        "uuid", image.uuid,
+                                                        "name", image.name,
+                                                        "alt_text", image.alt_text,
+                                                        "width", image.width,
+                                                        "height", image.height,
+                                                        "ext", image.ext))
+                        FROM product_to_image
+                        LEFT JOIN image ON image.id = product_to_image.image_id
+                       WHERE product_to_image.product_id = product.id
+                       GROUP BY product.id)';
+    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
+                           FROM item
+                           JOIN scat_item ON item.code = scat_item.code
+                          WHERE item.product = product.id
+                            AND item.active)';
+    $product->is_dropshippable= '(SELECT SUM(is_dropshippable)
+                           FROM item
+                           JOIN scat_item ON item.code = scat_item.code
+                          WHERE item.product = product.id
+                            AND item.active)';
 
+    $ds= \Sale::can_dropship($f3) ? '!!is_dropshippable,' : '';
     $products= $product->find(array('department = ? AND active',
                                     $dept->id),
                               array('order' =>
-                                      '!active, brand_name, name'));
+                                      "!!IFNULL(stocked,0),$ds !active, brand_name, name"));
+
+
+    foreach ($products as &$product) {
+      $product['slug']= Catalog::getProductSlug($f3, $product['id']);
+      $product->media= json_decode($product->media, true);
+      if (!$product->media && $product->image) {
+        $product->media= [ [ 'src' => $product->image,
+                             'alt_text' => $product->name ] ];
+      }
+    }
 
     $f3->set('products', $products);
 
@@ -230,9 +249,8 @@ class Catalog {
     }
     $active= " AND active";
 
-    $pq= $f3->get('DROPSHIP_ONLY') ?
-          'scat_item.is_dropshippable' :
-          'IFNULL(scat_item.purchase_quantity, item.purchase_quantity)';
+    $pq= \Sale::can_ship($f3) || \Sale::can_pickup($f3) ? 'scat_item.purchase_quantity' : 'scat_item.is_dropshippable';
+
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
                 $pq purchase_quantity,

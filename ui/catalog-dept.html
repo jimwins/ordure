@@ -1,5 +1,31 @@
 <include href="header.html" />
 <include href="catalog-header.html" />
+<style type="text/css">
+  .product-thumbnail {
+    position: relative;
+    width: 100%;
+    border: none;
+  }
+  .product-thumbnail:before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+  }
+  .product-thumbnail a {
+    margin: 0; padding: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+  .product-thumbnail a img {
+    width: 100%;
+    height: 100%;
+    object-fit: scale-down;
+  }
+</style>
 <div class="row">
   <div class="col-sm-9 col-sm-push-3">
     <check if="{{ isset(@dept) }}">
@@ -32,46 +58,48 @@
         {{ @PAGE.content ? @markdown(@PAGE.content) : '' | raw }}
       </div>
     </div>
+
     <check if="isset(@products)">
-      <table class="table table-striped table-hover">
-        <thead>
-          <tr>
-            <th>Brand</th>
-            <th>Product</th>
-            <check if="@DROPSHIP_ONLY">
-              <true>
-                <th class="text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this product currently available for order.">Available for Order</th>
-              </true>
-              <false>
-                <th class="text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this product is stocked in our store or only available via special order.">Available in Store</th>
-              </false>
-            </check>
-          </tr>
-        </thead>
-        <tbody>
-          <repeat group="{{ @products }}" value="{{ @product }}" counter="{{ @index }}">
-            <tr data-product="{{ @product.id }}">
-              <td>{{ @product.brand_name }}</td>
-              <td>
-                <a onclick="gtag('event', 'select_content', { 'items' : [ { 'id': 'p{{@product.id}}','name':'{{@product.name}}','list_name':'Department','brand':'{{@product.brand_name}}','list_position':'{{@index}}' }] })"
-                   href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">
-                  {{ @product.name }}
-                </a>
-              </td>
-              <td class="text-center">
-                <check if="! @product.stocked">
+      <repeat group="{{ @products }}" value="{{ @product }}">
+	<div class="row">
+	  <div class="col-sm-2">
+	    <div class="thumbnail product-thumbnail">
+	      <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
+                <check if="{{ @product.media }}">
+		  <img class="media-object"
+		       src="{{ @product.media[0].src ? @STATIC . @product.media[0].src : @MEDIA . '/file/c_fit,w_256,h_256/' . @product.media[0].uuid . '.jpg' }}"
+		       alt="{{ @product.media[0].alt_text }}">
+                </check>
+	      </a>
+	    </div>
+	  </div>
+	  <div class="col-sm-10">
+	    <h4 class="media-heading">
+	      <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
+		{{ @product.name }}
+	      </a>
+              <small>
+                {{ @product.brand_name }}
+              </small>
+	      <check if="! @product.stocked">
+                <check if="@product.is_dropshippable">
                   <true>
-                    <span class="fa fa-thumbs-o-down text-muted" title="Available by special order"></span>
+                    <small class="pull-right">
+                      <i class="fa fa-globe"></i> Drop Ship Only
+                    </small>
                   </true>
                   <false>
-                    <span class="fa fa-thumbs-up {{ @product.stocked ? 'text-success' : 'text-warning' }}" title="{{ @product.stocked ? 'Currently available in store' : 'Currently out of stock' }}"></span>
+                    <small class="pull-right">
+                      <i class="fa fa-globe"></i> Special Order Only
+                    </small>
                   </false>
                 </check>
-              </td>
-            </tr>
-          </repeat>
-        </tbody>
-      </table>
+              </check>
+	    </h4>
+            <p>{{ @first_paragraph(@markdown(@product.description)) | raw}}
+	  </div>
+	</div>
+      </repeat>
       <script>
 gtag('event', 'view_item_list', {
   "items": [

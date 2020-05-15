@@ -242,10 +242,6 @@ class Sale {
       or $f3->error(404);
     $sale->copyTo('sale');
 
-    $person= new DB\SQL\Mapper($db, 'person');
-    $person->load(array('id = ?', $sale->person_id));
-    $person->copyTo('person');
-
     $billing_address= new DB\SQL\Mapper($db, 'sale_address');
     $billing_address->load(array('id = ?', $sale->billing_address_id));
     $billing_address->copyTo('billing_address');
@@ -263,11 +259,13 @@ class Sale {
     $item->name= "IFNULL(override_name,
                          (SELECT name FROM item WHERE id = item_id))";
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
-    if ($f3->config('DROPSHIP_ONLY')) {
-      $item->purchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = (SELECT code FROM item WHERE id = item_id)), (SELECT purchase_quantity FROM item WHERE id = item_id))";
-    } else {
+
+    if (self::can_pickup($f3) || self::can_ship($f3)) {
       $item->purchase_quantity= "IFNULL((SELECT scat_item.purchase_quantity FROM scat_item WHERE scat_item.code = (SELECT code FROM item WHERE id = item_id)), (SELECT purchase_quantity FROM item WHERE id = item_id))";
+    } else {
+      $item->purchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = (SELECT code FROM item WHERE id = item_id)), (SELECT purchase_quantity FROM item WHERE id = item_id))";
     }
+
     $item->detail= "(SELECT IFNULL(CONCAT(IF(item.retail_price,
                                              'MSRP $', 'List $'),
                                           sale_item.retail_price,
@@ -913,10 +911,10 @@ class Sale {
     $item->nretail_price= "IFNULL((SELECT retail_price FROM scat_item WHERE scat_item.code = item.code), retail_price)";
     $item->discount_type= "(SELECT discount_type FROM scat_item WHERE scat_item.code = item.code)";
     $item->discount= "(SELECT discount FROM scat_item WHERE scat_item.code = item.code)";
-    if ($f3->get('DROPSHIP_ONLY')) {
-      $item->npurchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
-    } else {
+    if (self::can_pickup($f3) || self::can_ship($f3)) {
       $item->npurchase_quantity= "IFNULL((SELECT scat_item.purchase_quantity FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
+    } else {
+      $item->npurchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
     }
     $item->load(array('code = ?', $item_code))
       or $f3->error(404);
@@ -1072,10 +1070,10 @@ class Sale {
         continue;
       }
 
-      if ($f3->config('DROPSHIP_ONLY')) {
-        $purchase_quantity= $item->is_dropshippable;
-      } else {
+      if (self::can_pickup($f3) || self::can_ship($f3)) {
         $purchase_quantity= $item->purchase_quantity;
+      } else {
+        $purchase_quantity= $item->is_dropshippable;
       }
 
       if ($val > 0 && ($val % $purchase_quantity) != 0) {
@@ -3033,5 +3031,57 @@ Your order is now being processed, and you will receive another email when your 
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
     self::send_order_email($f3);
     $f3->reroute("status");
+  }
+
+  static function can_order($f3) {
+    switch ($f3->get('ORDERING_AVAIL')) {
+    case 'all':
+      return true;
+    case 'rewards':
+      return (bool)\Auth::authenticated_user($f3);
+    case 'rewardsplus':
+      $person= \Auth::authenticated_user_details($f3);
+      return (bool)$person['rewardsplus'];
+    }
+    return false;
+  }
+
+  static function can_pickup($f3) {
+    switch ($f3->get('PICKUP_AVAIL')) {
+    case 'all':
+      return true;
+    case 'rewards':
+      return (bool)\Auth::authenticated_user($f3);
+    case 'rewardsplus':
+      $person= \Auth::authenticated_user_details($f3);
+      return (bool)$person['rewardsplus'];
+    }
+    return false;
+  }
+
+  static function can_ship($f3) {
+    switch ($f3->get('SHIPPING_AVAIL')) {
+    case 'all':
+      return true;
+    case 'rewards':
+      return (bool)\Auth::authenticated_user($f3);
+    case 'rewardsplus':
+      $person= \Auth::authenticated_user_details($f3);
+      return (bool)$person['rewardsplus'];
+    }
+    return false;
+  }
+
+  static function can_dropship($f3) {
+    switch ($f3->get('DROPSHIP_AVAIL')) {
+    case 'all':
+      return true;
+    case 'rewards':
+      return (bool)\Auth::authenticated_user($f3);
+    case 'rewardsplus':
+      $person= \Auth::authenticated_user_details($f3);
+      return (bool)$person['rewardsplus'];
+    }
+    return false;
   }
 }

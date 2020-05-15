@@ -209,11 +209,12 @@ gtag('event', 'view_item', {
             <thead>
               <tr>
                 <th class="col-xs-2">Item No.</th>
-                <th class="col-xs-4">Description</th>
-                <th class="col-xs-2">List</th>
+                <th class="col-xs-3">Description</th>
+                <th class="col-xs-1">List</th>
                 <th class="col-xs-1">Sale</th>
-                <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is stocked in our store or only available via special order.">Availability</th>
-                <check if="{{ @FEATURE_cart }}">
+                <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in available for pick up, shipping, special order, or drop-ship.">Availability</th>
+                <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in stock at the store.">In Stock</th>
+                <check if="{{ @FEATURE_cart && @CAN_ORDER }}">
                   <th class="col-xs-1"></th>
                 </check>
               </tr>
@@ -238,31 +239,50 @@ gtag('event', 'view_item', {
                       </strong>
                     </td>
                     <td class="text-center">
-                      <check if="@DROPSHIP_ONLY">
+                      <small>
+                        <check if="@item.stocked > 0 && @CAN_SHIP">
+                          <true>
+                            <check if="@item.is_dropshippable">
+                              <true>
+                                Shipped from store or drop-shipped
+                              </true>
+                              <false>
+                                Shipped from store
+                              </false>
+                            </check>
+                          </true>
+                          <false>
+                            <check if="@item.is_dropshippable">
+                              <true>
+                                Drop-ship only
+                              </true>
+                              <false>
+                                Special order
+                              </false>
+                            </check>
+                          </false>
+                        </check>
+                      </small>
+                    </td>
+                    <td class="text-center">
+                      <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
                         <true>
-                          <check if="@item.is_dropshippable">
+                          <check if="@item.stocked > 0">
                             <true>
-                              <small class="text-muted">Available</small>
+                             <small class="text-success">In stock</small>
                             </true>
                             <false>
-                              <small class="text-muted">Not available</small>
+                             <small class="text-danger">Out of stock</small>
                             </false>
                           </check>
                         </true>
                         <false>
-                          <check if="!(@item.minimum_quantity || @item.stocked > 0)">
+                          <check if="@CAN_DROPSHIP && @item.is_dropshippable">
                             <true>
-                              <small class="text-muted">Special order</small>
+                              <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
                             </true>
                             <false>
-                              <check if="@item.stocked > 0">
-                                <true>
-                                 <small class="text-success">In stock</small>
-                                </true>
-                                <false>
-                                 <small class="text-warning">Out of stock</small>
-                                </false>
-                              </check>
+                              <small>Special order</small>
                             </false>
                           </check>
                         </false>
@@ -277,10 +297,7 @@ gtag('event', 'view_item', {
                         <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
                       </check>
                     </td>
-                    <check if="@FEATURE_cart &&
-                               (\Auth::authenticated_user(\Base::instance()) ||
-                                @SHIPPING_STATUS_OVERRIDE != 'closed') &&
-                               !(@DROPSHIP_ONLY && !@item.is_dropshippable)">
+                    <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && @item.stocked) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
                       <true>
                         <td>
                           <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"

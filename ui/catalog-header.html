@@ -2,21 +2,34 @@
   <strong>Our downtown store is temporarily closed due to the "Safer at
   Home" emergency order in Los Angeles.</strong>
 
-  <check if="{{ !\Auth::authenticated_user(\Base::instance()) && @SHIPPING_STATUS_OVERRIDE == 'closed' }}">
+  <check if="{{ !@CAN_ORDER }}">
     <true>
       We have also suspended all online ordering while we do some work our
       online store. We hope to be back soon!
     </true>
     <false>
-      <check if="@DROPSHIP_ONLY">
+      <check if="@CAN_SHIP">
         <true>
-          We are able to ship a limited selection of products from warehouses in
-          other states. Some of these products must be ordered in case
+          We are now shipping products from our inventory from the store.
+        </true>
+      </check>
+      <check if="@CAN_DROPSHIP">
+        <true>
+          We are {{ @CAN_SHIP ? 'also' : '' }} able to drop-ship a limited selection of products from warehouses
+          in other states. Some of these products must be ordered in case
           quantities.
         </true>
       </check>
+      <check if="@CAN_PICKUP">
+        <true>
+          You can pick up your order at the store.
+        </true>
+        <false>
+          We are not offering curbside pickup at this time.
+        </false>
+      </check>
       <check if="@SALE_MINIMUM">
-        There is a ${{ @SALE_MINIMUM }} order minimum at this time.
+        There is a ${{ @SALE_MINIMUM }} order minimum.
       </check>
     </false>
   </check>

@@ -330,10 +330,13 @@ require '../lib/gift-card.php';
 GiftCard::addRoutes($f3);
 
 /* Handle sale URLs */
-if ($f3->get('FEATURE_sale')) {
 require '../lib/sale.php';
 Sale::addRoutes($f3);
-}
+
+$f3->set('CAN_ORDER', \Sale::can_order($f3));
+$f3->set('CAN_PICKUP', \Sale::can_pickup($f3));
+$f3->set('CAN_SHIP', \Sale::can_ship($f3));
+$f3->set('CAN_DROPSHIP', \Sale::can_dropship($f3));
 
 /* Handle rewards URLs */
 require '../lib/rewards.php';
