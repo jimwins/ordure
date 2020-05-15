@@ -1,17 +1,17 @@
 <include href="header.html" />
 <include href="catalog-header.html" />
 <style type="text/css">
-  .thumbnail {
+  .product-thumbnail {
     position: relative;
     width: 100%;
     border: none;
   }
-  .thumbnail:before {
+  .product-thumbnail:before {
     content: "";
     display: block;
     padding-top: 100%;
   }
-  .thumbnail a {
+  .product-thumbnail a {
     margin: 0; padding: 0;
     display: block;
     position: absolute;
@@ -20,7 +20,7 @@
     bottom: 0;
     right: 0;
   }
-  .thumbnail a img {
+  .product-thumbnail a img {
     width: 100%;
     height: 100%;
     object-fit: scale-down;
@@ -58,7 +58,7 @@
       <repeat group="{{ @products }}" value="{{ @product }}">
 	<div class="row">
 	  <div class="col-sm-2">
-	    <div class="thumbnail">
+	    <div class="product-thumbnail">
 	      <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
                 <check if="{{ @product.media }}">
 		  <img class="media-object"
