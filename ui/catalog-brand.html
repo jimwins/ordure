@@ -28,16 +28,16 @@
 </style>
 <div class="row">
   <div class="col-sm-9 col-sm-push-3">
-    <check if="{{ isset(@dept) }}">
+    <check if="{{ isset(@brand) }}">
       <ol class="breadcrumb">
         <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
-        <check if="{{ isset(@subdept) }}">
+        <check if="{{ isset(@brand) }}">
           <false>
-            <li>{{ @dept.name }}</li>
+            <li>Brands</li>
           </false>
           <true>
-            <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
-            <li>{{ @subdept.name }}</li>
+            <li><a href="{{ @BASE . '/' . @CATALOG . '/brand' }}">Brands</a></li>
+            <li>{{ @brand.name }}</li>
           </true>
         </check>
       </ol>
