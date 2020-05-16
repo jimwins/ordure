@@ -46,14 +46,13 @@ gtag('event', 'begin_checkout', {
         <label>Shipping Address</label>
         <div id="shipping_error" class="alert alert-danger"
              style="display: none"></div>
-        <!--
-        <div>
-          <label>
-            <input type="checkbox" id="in_store_pickup" name="in_store_pickup">
-            Pick up your order at the store
-          </label>
-        </div>
-        -->
+        <check if="@CAN_PICKUP">
+          <div class="alert alert-danger">
+            Please note that all orders paid using Amazon Pay must be shipped
+            to you. To order for curbside pickup, you must pay by credit card
+            or PayPal using <a href="/cart/checkout">our regular checkout</a>.
+          </div>
+        </check>
         <div id="addressBookWidgetDiv"
              style="width:100%; height:240px;">
         </div> 
