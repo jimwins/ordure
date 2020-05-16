@@ -745,7 +745,6 @@ class Sale {
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    self::send_order_email($f3, $comment);
     self::send_order_paid_email($f3);
 
     if ($f3->get('AJAX')) {
@@ -1997,7 +1996,6 @@ class Sale {
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    self::send_order_email($f3);
     self::send_order_paid_email($f3);
   }
 
@@ -2147,7 +2145,6 @@ if (0) {
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    self::send_order_email($f3);
     self::send_order_paid_email($f3);
   }
 
@@ -2242,8 +2239,6 @@ if (0) {
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
-
-    self::send_order_email($f3);
   }
 
   function process_other_payment($f3, $args) {
@@ -2278,8 +2273,6 @@ if (0) {
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
-
-    self::send_order_email($f3);
   }
 
   function place_order($f3, $args) {
