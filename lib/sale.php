@@ -383,15 +383,6 @@ class Sale {
     $status= $rate= $special= [];
     $weight= 0.0;
 
-    if (($override= $f3->get("SHIPPING_STATUS_OVERRIDE"))) {
-      $person_id= \Auth::authenticated_user($f3);
-
-      // let through logged in users
-      if (!$person_id) {
-        return [ $override, '', [ '' ] ];
-      }
-    }
-
     if (($minimum= $f3->get("SALE_MINIMUM")) && $minimum > $sale->total) {
       $status['below_minimum']++;
     }
@@ -417,7 +408,7 @@ class Sale {
       $item= new DB\SQL\Mapper($db, 'item');
       $item->load(array('code = ?', $sale_item['code']));
       // hazmat? (extra charge)
-      if ($item->hazmat) {
+      if ($item->hazmat && $sale->shipping_address_id != 1) {
         $special['hazmat']++;
       }
       // unknown dimensions?

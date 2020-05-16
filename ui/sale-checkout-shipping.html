@@ -22,7 +22,7 @@ gtag('event', 'checkout_progress', {
       </h3>
     </div>
     <div class="panel-body">
-      <check if="@DROPSHIP_ONLY">
+      <check if="!@CAN_PICKUP">
         <true>
           <p>
             <strong>Where do you want to us to ship the order?</strong>
