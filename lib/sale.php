@@ -69,6 +69,8 @@ class Sale {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
       $f3->route("GET|HEAD /cart/checkout", 'Sale->cart_checkout');
       $f3->route("POST /cart/add-item", 'Sale->add_item');
+      // not very REST of us
+      $f3->route("GET /cart/remove-item", 'Sale->remove_item');
       $f3->route("POST /cart/update", 'Sale->update_items');
       $f3->route("POST /cart/update-person", 'Sale->set_person');
       $f3->route("POST /cart/calculate-shipping", 'Sale->calculate_shipping');
@@ -937,25 +939,40 @@ class Sale {
   }
 
   function remove_item($f3, $args) {
-    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
-      $f3->error(403);
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
 
     $db= $f3->get('DBH');
-
-    $sale_uuid= $f3->get('PARAMS.sale');
-    $sale_item_id= $f3->get('REQUEST.item');
 
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
+    $sale_item_id= $f3->get('REQUEST.item');
+
+    error_log("Removing $sale_item_id from $sale_uuid\n");
+
     $line= new DB\SQL\Mapper($db, 'sale_item');
     $line->load(array('id = ?', $sale_item_id))
       or $f3->error(404);
+    if ($line->sale_id != $sale->id) {
+      $f3->error(500);
+    }
     $line->erase();
 
     $this->update_shipping_and_tax($f3, $sale);
 
-    return $this->json($f3, $args);
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute('/cart?uuid=' . $sale->uuid .
+                 '&removed=1');
   }
 
   function update_item($f3, $args) {
