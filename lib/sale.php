@@ -3085,6 +3085,19 @@ Your order is now being processed, and you will receive another email when your 
     return false;
   }
 
+  static function can_deliver($f3) {
+    switch ($f3->get('DELIVERY_AVAIL')) {
+    case 'all':
+      return true;
+    case 'rewards':
+      return (bool)\Auth::authenticated_user($f3);
+    case 'rewardsplus':
+      $person= \Auth::authenticated_user_details($f3);
+      return (bool)$person['rewardsplus'];
+    }
+    return false;
+  }
+
   static function can_dropship($f3) {
     switch ($f3->get('DROPSHIP_AVAIL')) {
     case 'all':
