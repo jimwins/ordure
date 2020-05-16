@@ -486,6 +486,8 @@ class Sale {
   function cart_checkout($f3, $args) {
     $uuid= $f3->get('COOKIE.cartID');
 
+    $db= $f3->get('DBH');
+
     /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
 
     if ($uuid) {
@@ -514,7 +516,19 @@ class Sale {
           $stage= 'review';
         }
         elseif ($sale->shipping_address_id) {
-          $stage= 'payment';
+          $address= new DB\SQL\Mapper($db, 'sale_address');
+          $address->load(array('id = ?', $sale->shipping_address_id))
+            or $f3->error(404);
+          if ($address->verified) {
+            $stage= 'payment';
+          } else {
+            \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
+            $easypost= \EasyPost\Address::retrieve($address->easypost_id);
+            $f3->set("ADDRESS_NOT_VERIFIED", 1);
+            $f3->set("verifications", $easypost->verifications->delivery->errors);
+            error_log((string)$easypost);
+            $stage= 'shipping';
+          }
         }
         elseif ($sale->person_id || ($sale->email && $sale->name)) {
           $stage= 'shipping';
@@ -1192,26 +1206,45 @@ class Sale {
         or $f3->error(404);
     }
 
-    /* Split ZIP+4, might all be in zip5 */
-    $zip5= trim($f3->get('REQUEST.zip5'));
-    if (preg_match('/^(\d{5})-(\d{4})$/', $zip5, $m)) {
-      $zip5= $m[1];
-      $zip4= $m[2];
-    } else {
-      $zip4= trim($f3->get('REQUEST.zip4'));
-    }
+    \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
+    $address_params= [
+      "verify" => [ "delivery" ],
+      "name" => trim($f3->get('REQUEST.name')),
+      "company" => trim($f3->get('REQUEST.company')),
+      "street1" => trim($f3->get('REQUEST.address1')),
+      "street2" => trim($f3->get('REQUEST.address2')),
+      "city" => trim($f3->get('REQUEST.city')),
+      "state" => trim($f3->get('REQUEST.state')),
+      "zip" => trim($f3->get('REQUEST.zip5')),
+      "country" => "US",
+      "phone" => trim($f3->get('REQUEST.phone')),
+    ];
+    $easypost= \EasyPost\Address::create($address_params);
 
-    $address->name= trim($f3->get('REQUEST.name'));
-    $address->company= trim($f3->get('REQUEST.company'));
-    $address->address1= trim($f3->get('REQUEST.address1'));
-    $address->address2= trim($f3->get('REQUEST.address2'));
-    $address->city= trim($f3->get('REQUEST.city'));
-    $address->state= trim($f3->get('REQUEST.state'));
+    error_log("EP: ". (string)$easypost);
+
+    $address->easypost_id= $easypost->id;
+    $address->name= $easypost->name;
+    $address->company= $easypost->company;
+    $address->address1= $easypost->street1;
+    $address->address2= $easypost->street2;
+    $address->city= $easypost->city;
+    $address->state= $easypost->state;
+    list($zip5, $zip4)= explode('-', $easypost->zip);
     $address->zip5= $zip5;
     $address->zip4= $zip4;
-    $address->phone= trim($f3->get('REQUEST.phone'));
-    $address->verified= 0;
+    $address->phone= $easypost->phone;
+    $address->verified= $easypost->verifications->delivery->success ? '1' : '0';
+    if ($easypost->verifications->delivery->details->longitude) {
+      $distance= haversineGreatCircleDistance(
+        34.043810, -118.250320,
+        $easypost->verifications->delivery->details->latitude,
+        $easypost->verifications->delivery->details->longitude,
+        3959 /* want miles */
+      );
 
+      $address->distance= $distance;
+    }
     $address->save();
 
     if ($type == 'shipping') {
@@ -1222,7 +1255,7 @@ class Sale {
 
     $sale->save();
 
-    if ($type == 'shipping') {
+    if ($type == 'shipping' && $address->verified) {
       $this->update_shipping_and_tax($f3, $sale);
     }
 
@@ -3110,4 +3143,32 @@ Your order is now being processed, and you will receive another email when your 
     }
     return false;
   }
+}
+
+/**
+ * from: https://stackoverflow.com/a/10054282
+ * Calculates the great-circle distance between two points, with
+ * the Haversine formula.
+ * @param float $latitudeFrom Latitude of start point in [deg decimal]
+ * @param float $longitudeFrom Longitude of start point in [deg decimal]
+ * @param float $latitudeTo Latitude of target point in [deg decimal]
+ * @param float $longitudeTo Longitude of target point in [deg decimal]
+ * @param float $earthRadius Mean earth radius in [m]
+ * @return float Distance between points in [m] (same as earthRadius)
+ */
+function haversineGreatCircleDistance(
+  $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
+{
+  // convert from degrees to radians
+  $latFrom = deg2rad($latitudeFrom);
+  $lonFrom = deg2rad($longitudeFrom);
+  $latTo = deg2rad($latitudeTo);
+  $lonTo = deg2rad($longitudeTo);
+
+  $latDelta = $latTo - $latFrom;
+  $lonDelta = $lonTo - $lonFrom;
+
+  $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+    cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
+  return $angle * $earthRadius;
 }

@@ -49,6 +49,17 @@ gtag('event', 'checkout_progress', {
         </false>
       </check>
 
+      <check if="@ADDRESS_NOT_VERIFIED">
+        <div class="alert alert-danger">
+          <strong>We were unable to verify that shipping address.</strong>
+          <ul>
+            <repeat group="{{ @verifications }}" value="{{ @data }}">
+              <li>{{ @data.message }}</li>
+            </repeat>
+          </ul>
+        </div>
+      </check>
+
       <form method="POST" action="{{ @BASE }}/cart/set-address">
         <div class="row">
 
