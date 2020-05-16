@@ -64,7 +64,7 @@
             Shipping &amp; handling:
           </false>
         </check>
-        <check if="{{ @sale.status == 'cart' && !@DROPSHIP_ONLY }}">
+        <check if="{{ @sale.status == 'cart' && !@sale.shipping_address_id && @CAN_PICKUP }}">
           <br>or pick up in store for no charge.
         </check>
         <check if="@DEBUG">
