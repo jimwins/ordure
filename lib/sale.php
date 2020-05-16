@@ -265,6 +265,7 @@ class Sale {
     } else {
       $item->purchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = (SELECT code FROM item WHERE id = item_id)), (SELECT purchase_quantity FROM item WHERE id = item_id))";
     }
+    $item->is_dropshippable= "(SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = (SELECT code FROM item WHERE id = item_id))";
 
     $item->detail= "(SELECT IFNULL(CONCAT(IF(item.retail_price,
                                              'MSRP $', 'List $'),

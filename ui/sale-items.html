@@ -19,10 +19,19 @@
         <input type="text" style="width: 4em; text-align: right"
                class="form-control input-sm"
                name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
-        <check if="{{@data.purchase_quantity > 1 }}">
-          <small class="help-block">
-            Must be multiple of {{ @data.purchase_quantity }}
-          </span>
+        <check if="{{ @data.purchase_quantity > 1 }}">
+          <true>
+            <small class="help-block">
+              Must be multiple of {{ @data.purchase_quantity }}
+            </span>
+          </true>
+          <false>
+            <check if="{{ @CAN_DROPSHIP && (@data.is_dropshippable > 1) }}">
+              <small class="help-block">
+                Must be multiple of {{ @data.is_dropshippable }} for drop-ship
+              </span>
+            </check>
+          </false>
         </check>
       </td>
   </true>
