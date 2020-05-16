@@ -914,17 +914,28 @@ class Sale {
       or $f3->error(404);
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
-    $line->sale_id= $sale->id;
-    $line->item_id= $item->id;
-    $line->quantity= $item->npurchase_quantity;
-    $line->retail_price= $item->nretail_price;
-    $line->discount_type= $item->discount_type;
-    $line->discount= $item->discount;
-    $line->discount_manual= 0;
-    $line->tic= $item->tic;
-    $line->tax= 0.00;
 
-    $line->insert();
+    $existing= $line->find([
+      'sale_id = ? AND item_id = ?',
+      $sale->id, $item->id
+    ]);
+
+    if ($existing) {
+      $existing[0]->quantity+= $item->npurchase_quantity;
+      $existing[0]->save();
+    } else {
+      $line->sale_id= $sale->id;
+      $line->item_id= $item->id;
+      $line->quantity= $item->npurchase_quantity;
+      $line->retail_price= $item->nretail_price;
+      $line->discount_type= $item->discount_type;
+      $line->discount= $item->discount;
+      $line->discount_manual= 0;
+      $line->tic= $item->tic;
+      $line->tax= 0.00;
+
+      $line->insert();
+    }
 
     // reload sale so shipping gets recalculated correctly
     $sale= $this->load($f3, $sale_uuid, 'uuid');
