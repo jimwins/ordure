@@ -1,0 +1,90 @@
+<script>
+gtag('event', 'checkout_progress', {
+  "items": [
+<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
+<check if="{{ @index > 1 }}">,</check>
+{
+  'id': "p{{ @item.product_id }}",
+  'name': "{{ @item.product_name }}",
+  'brand': "{{ @item.brand_name }}",
+  'variant': "{{ @item.code }}",
+  'quantity': "{{ @item.quantity }}",
+  'price': "{{ @item.sale_price }}",
+}
+</repeat>
+  ]
+});
+</script>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        Shipping Method
+      </h3>
+    </div>
+    <div class="panel-body">
+      <p>
+        <strong>How do you want us to get this order to you?</strong>
+      </p>
+
+      <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+        <check if="@CAN_DELIVER">
+          <div class="radio">
+            <label>
+              <input type="radio" name="method" value="bike">
+              <check if="@shipping_rate == 'truck'">
+                <true>
+                  {{ @sale.subtotal < 100 ? '$9.99' : 'FREE' }} &mdash;
+                </true>
+                <false>
+                  {{ @sale.subtotal < 200 ? '$14.99' : 'FREE' }} &mdash;
+                </false>
+              </check>
+              <i class="fa fa-bicycle"></i>
+              Deliver it by bike courier
+            </label>
+          </div>
+        </check>
+
+        <check if="@CAN_TRUCK">
+          <div class="radio">
+            <label>
+              <input type="radio" name="method" value="truck">
+              $50.00 &mdash;
+              <i class="fa fa-truck"></i>
+              Ship it by local truck delivery
+            </label>
+          </div>
+        </check>
+
+        <div class="radio">
+          <label>
+            <input type="radio" name="method" value="default" checked>
+            <check if="{{ @default_shipping_rate === null }}">
+              <true>
+                TBD &mdash;
+              </true>
+              <false>
+                {{ amount(@default_shipping_rate) }} &mdash;
+              </false>
+            </check>
+            <i class="fa fa-plane"></i>
+            Ship by USPS, UPS, etc.
+          </label>
+        </div>
+
+        <p>
+          For local bike delivery, you will be contacted before your order
+          leaves the store and someone must be able to receive the
+          (contact-less) delivery. If the messenger is not able to deliver
+          your order, it will be returned to the store and you will be charged
+          for re-delivery.
+        </p>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          Set Delivery Method
+        </button>
+      </form>
+
+    </div>
+  </div>
+</form>

@@ -74,31 +74,39 @@
       <td class="text-right">{{ @amount(@sale.subtotal) }}</td>
     </tr>
     <tr>
-      <th colspan="5" class="text-right">
-        <check if="{{ @sale.shipping == 50.00 }}">
-          <true>
-            Local delivery:
-          </true>
-          <false>
+      <check if="{{ ! @sale.shipping_address_id || (@CAN_PICKUP && @sale.shipping_method === null) }}">
+        <true>
+          <th colspan="5" class="text-right">
             Shipping &amp; handling:
-          </false>
-        </check>
-        <check if="{{ @sale.status == 'cart' && !@sale.shipping_address_id && @CAN_PICKUP }}">
-          <br>or pick up in store for no charge.
-        </check>
-        <check if="@DEBUG">
-          <br><small>Rate: {{ @shipping_rate }}</small>
-        </check>
-      </th>
-<check if="{{ @FEATURE_cart && (@sale.status == 'cart' || @sale.status == 'review')
-            && in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
-  <true>
-      <td class="text-right text-danger">TBD</td>
-  </true>
-  <false>
-      <td class="text-right" id="shipping">{{ @amount(@sale.shipping) }}</td>
-  </false>
-</check>
+            <check if="{{ @sale.status == 'cart' && @CAN_PICKUP }}">
+              <br>or pick up in store for no charge.
+            </check>
+          </th>
+          <td class="text-right text-danger">TBD</td>
+        </true>
+        <false>
+          <th colspan="5" class="text-right">
+            <check if="{{ @sale.shipping_address_id == 1 }}">
+              <true>
+                Pickup at store:
+              </true>
+              <false>
+                <check if="{{ @sale.shipping_method == 'bike' }}">
+                  <true>
+                    Bike delivery:
+                  </true>
+                  <false>
+                    Shipping &amp; handling:
+                  </false>
+                </check>
+              </false>
+            </check>
+          </th>
+          <td class="text-right" id="shipping">
+            {{ @amount(@sale.shipping) }}
+          </td>
+        </false>
+      </check>
     </tr>
     <tr>
       <th colspan="5" class="text-right">

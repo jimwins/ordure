@@ -78,6 +78,7 @@ class Sale {
                  'Sale->change_shipping_option');
       $f3->route("POST /cart/set-address", 'Sale->set_address');
       $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
+      $f3->route("POST /cart/set-shipping-method", 'Sale->set_shipping_method');
       $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
       $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("POST /cart/amz-get-details", 'Sale->amz_get_details');
@@ -501,7 +502,7 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
-      $stages= [ 'login', 'shipping', 'payment', 'amz-select' ];
+      $stages= [ 'login', 'shipping', 'shipping-method', 'payment', 'amz-select' ];
       $stage= $f3->get('REQUEST.stage');
 
       if ($f3->get('REQUEST.access_token')) {
@@ -520,13 +521,19 @@ class Sale {
           $address->load(array('id = ?', $sale->shipping_address_id))
             or $f3->error(404);
           if ($address->verified) {
-            $stage= 'payment';
+            if (!$sale->shipping_method &&
+                self::can_deliver($f3) && $address->distance < 2)
+            {
+              $stage= 'shipping-method';
+            } else {
+              $stage= 'payment';
+            }
           } else {
             \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
             $easypost= \EasyPost\Address::retrieve($address->easypost_id);
             $f3->set("ADDRESS_NOT_VERIFIED", 1);
-            $f3->set("verifications", $easypost->verifications->delivery->errors);
-            error_log((string)$easypost);
+            $f3->set("verifications",
+                      $easypost->verifications->delivery->errors);
             $stage= 'shipping';
           }
         }
@@ -536,6 +543,11 @@ class Sale {
         else {
           $stage= 'login';
         }
+      }
+
+      if ($stage == 'shipping-method') {
+        $default_rate= $this->calculate_default_shipping($f3, $sale);
+        $f3->set('default_shipping_rate', $default_rate);
       }
 
       $f3->set('stage', $stage);
@@ -1135,6 +1147,34 @@ class Sale {
                  ($added ? '&added=' . rawurlencode($added) : ''));
   }
 
+  function calculate_default_shipping($f3, $sale) {
+    $shipping_rate= $f3->get('shipping_rate');
+    $shipping_status= $f3->get('shipping_status');
+    $shipping= 0.00;
+
+    switch ($shipping_rate) {
+    case 'small':
+      $shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
+      break;
+    case 'medium':
+      $shipping= $sale->subtotal < 200.00 ? 19.99 : 0.00;
+      break;
+    case 'large':
+      $shipping= $sale->subtotal < 300.00 ? 29.99 : 0.00;
+      break;
+    case 'truck':
+      return null;
+    }
+
+    $special_conditions= $f3->get('special_conditions');
+
+    if (in_array('hazmat', $special_conditions)) {
+      $shipping+= 10.00;
+    }
+
+    return $shipping;
+  }
+
   function update_shipping($f3, $sale) {
     if ($sale->shipping_manual)
       return;
@@ -1144,25 +1184,15 @@ class Sale {
 
     // Calculate shipping if not in-store pick-up
     if ($sale->shipping_address_id != 1) {
-      $shipping_status= $f3->get('shipping_status');
-      $shipping_rate= $f3->get('shipping_rate');
-
-      switch ($shipping_rate) {
-      case 'small':
-        $sale->shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
-        break;
-      case 'medium':
-        $sale->shipping= $sale->subtotal < 200.00 ? 19.99 : 0.00;
-        break;
-      case 'large':
-        $sale->shipping= $sale->subtotal < 300.00 ? 29.99 : 0.00;
-        break;
-      }
-
-      $special_conditions= $f3->get('special_conditions');
-
-      if (in_array('hazmat', $special_conditions)) {
-        $sale->shipping+= 10.00;
+      if ($sale->shipping_method == 'bike') {
+        $shipping_rate= $f3->get('shipping_rate');
+        if ($shipping_rate != 'truck') {
+          $sale->shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
+        } else {
+          $sale->shipping= $sale->subtotal < 200.00 ? 14.99 : 0.00;
+        }
+      } else {
+        $sale->shipping= $this->calculate_default_shipping($f3, $sale);
       }
     }
 
@@ -1221,8 +1251,6 @@ class Sale {
     ];
     $easypost= \EasyPost\Address::create($address_params);
 
-    error_log("EP: ". (string)$easypost);
-
     $address->easypost_id= $easypost->id;
     $address->name= $easypost->name;
     $address->company= $easypost->company;
@@ -1249,6 +1277,7 @@ class Sale {
 
     if ($type == 'shipping') {
       $sale->shipping_address_id= $address->id;
+      $sale->shipping_method= null;
     } else {
       $sale->billing_address_id= $address->id;
     }
@@ -1428,6 +1457,41 @@ class Sale {
       $f3->error(500);
 
     $sale->shipping_address_id= 1;
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
+  }
+
+  function set_shipping_method($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid)
+      $f3->error(404);
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
+    $method= $f3->get('REQUEST.method');
+    $sale->shipping_method= $method;
 
     $sale->save();
 
