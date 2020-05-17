@@ -291,6 +291,7 @@ class Sale {
     $item->brand_name= "(SELECT brand.name FROM item JOIN product ON product.id = item.product JOIN brand ON product.brand = brand.id WHERE item.id = item_id)";
     $item->weight= "(SELECT weight FROM item WHERE item_id = item.id)";
     $item->width= "(SELECT width FROM item WHERE item_id = item.id)";
+    $item->length= "(SELECT length FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
