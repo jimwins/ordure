@@ -192,7 +192,7 @@ class Sale {
     $days= (int)$f3->get('REQUEST.days');
     if (!$days) $days= 2;
 
-    $q= "SELECT item.code, item.name, item.width, item.weight,
+    $q= "SELECT item.code, item.name, item.width, item.length, item.weight,
                 (SELECT stock FROM scat_item WHERE scat_item.code = item.code)
                   AS stock,
                 SUM(quantity) total
