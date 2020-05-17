@@ -107,7 +107,7 @@
              </span>
             </td>
             <td><small data-bind="text: $data.code,
-                                  css: { 'text-danger' : !$data.weight() || !$data.width() }"></small></td>
+                                  css: { 'text-danger' : !($data.weight() > 0 && $data.length() > 0) }"></small></td>
             <td>
               <span class="editable">
                 <span data-key="override_name" data-bind="text: $data.name"></span>
