@@ -214,14 +214,19 @@ $("#giftcard-use").on("submit", function (ev) {
   return false;
 });
 
-$("#other-use").on("submit", function (ev) {
+document.getElementById('other-use').addEventListener('submit', (ev) => {
+  ev.preventDefault()
+
   var $form= $(ev.target);
+  let formData= new FormData(ev.target);
 
   $form.find('[type="submit"]').prop('disabled', true);
   $form.find('.errors').addClass('hidden');
 
   $.ajax({ dataType: 'json', method: 'POST',
-           url: $form.attr('action') })
+           url: $form.attr('action'),
+           data: Object.fromEntries(formData)
+  })
    .done(function (data) {
      if (data.paid) {
        window.location.href= "/sale/{{ @sale.uuid }}/thanks";

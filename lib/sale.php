@@ -2347,7 +2347,10 @@ if (0) {
 
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
-    $amount= $sale->total - $sale->paid;
+    $amount= (float)$f3->get('REQUEST.amount');
+    if (!$amount || $amount > $sale->total - $sale->paid) {
+      $f3->error(500, "Invalid amount.");
+    }
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
