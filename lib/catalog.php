@@ -8,6 +8,7 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product/@item", 'Catalog->product');
     $f3->route("GET|HEAD /$CATALOG/brand", 'Catalog->brands');
     $f3->route("GET|HEAD /$CATALOG/brand/@brand", 'Catalog->brand');
 
@@ -252,6 +253,9 @@ class Catalog {
     $pq= \Sale::can_ship($f3) || \Sale::can_pickup($f3) ? 'scat_item.purchase_quantity' : 'scat_item.is_dropshippable';
 
     $q= "SELECT item.id, item.code, item.name, item.short_name, variation,
+                '' description,
+                (SELECT COUNT(*) FROM item_to_image WHERE item_id = item.id)
+                  media,
                 IFNULL(scat_item.retail_price, item.retail_price) retail_price,
                 $pq purchase_quantity,
                 length, width, height, weight,
@@ -280,6 +284,32 @@ class Catalog {
 
     $f3->set('items', $items);
     $f3->set('variations', $variations);
+
+    if ($f3->get('PARAMS.item')) {
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->description= '""';
+      $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
+                           scat_item.discount_type,
+                           scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
+      $item->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
+                                                          "uuid", image.uuid,
+                                                          "name", image.name,
+                                                          "alt_text", image.alt_text,
+                                                          "width", image.width,
+                                                          "height", image.height,
+                                                          "ext", image.ext))
+                          FROM item_to_image
+                          LEFT JOIN image ON image.id = item_to_image.image_id
+                         WHERE item_to_image.item_id = item.id
+                         GROUP BY item.id)';
+      $item->stocked= '(SELECT stock + minimum_quantity
+                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->is_dropshippable= '(SELECT is_dropshippable
+                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->load(array('code = ?', $f3->get('PARAMS.item')));
+      $item->media= json_decode($item->media, true);
+      $f3->set('featured_item', $item);
+    }
 
     $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');
 
