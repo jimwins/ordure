@@ -202,14 +202,14 @@ class Auth {
           $cart->name= $person['name'];
           $cart->save();
 
-          Sale::remember_cart($f3, $cart->uuid);
+          $cart->remember_cart($f3, $cart->uuid);
         }
       } else {
         $cart= new DB\SQL\Mapper($db, 'sale');
         $cart->load(array("person_id = ? AND status = 'cart'", $person['id']));
         if (!$cart->dry()) {
           error_log("Loading latest open cart {$cart->uuid}\n");
-          Sale::remember_cart($f3, $cart->uuid);
+          $cart->remember_cart($f3, $cart->uuid);
         }
       }
 
