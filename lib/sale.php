@@ -471,7 +471,7 @@ class Sale {
         $f3->reroute($f3->get('BASE') . '/cart');
       }
 
-      $this->remember_cart($f3, $uuid);
+      self::remember_cart($f3, $uuid);
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
@@ -845,7 +845,7 @@ class Sale {
     }
   }
 
-  function remember_cart($f3, $uuid) {
+  static function remember_cart($f3, $uuid) {
     $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
               $_SERVER['HTTP_HOST'] : false);
 
@@ -911,7 +911,7 @@ class Sale {
           $sale->save();
         }
 
-        $this->remember_cart($f3, $sale_uuid);
+        self::remember_cart($f3, $sale_uuid);
       } else {
         $f3->get('log')->info("Loading cart from UUID '$sale_uuid'.");
       }
