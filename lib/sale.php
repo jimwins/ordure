@@ -941,10 +941,12 @@ class Sale {
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
 
-    $existing= $line->find([
-      'sale_id = ? AND item_id = ?',
-      $sale->id, $item->id
-    ]);
+    if ($item->npurchase_quantity > 0) {
+      $existing= $line->find([
+        'sale_id = ? AND item_id = ?',
+        $sale->id, $item->id
+      ]);
+    }
 
     if ($existing) {
       $existing[0]->quantity+= $item->npurchase_quantity;
