@@ -249,7 +249,7 @@ gtag('event', 'view_item', {
                     </td>
                     <td class="text-center">
                       <small>
-                        <check if="@item.stocked > 0 && @CAN_SHIP">
+                        <check if="@CAN_SHIP">
                           <true>
                             <check if="@item.is_dropshippable">
                               <true>

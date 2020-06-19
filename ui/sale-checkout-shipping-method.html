@@ -31,12 +31,12 @@ gtag('event', 'checkout_progress', {
           <div class="radio">
             <label>
               <input type="radio" name="method" value="bike">
-              <check if="@shipping_rate == 'truck'">
+              <check if="{{ @shipping_rate == 'truck' }}">
                 <true>
-                  {{ @sale.subtotal < 100 ? '$9.99' : 'FREE' }} &mdash;
+                  {{ @sale.subtotal < 200 ? '$14.99' : 'FREE' }} &mdash;
                 </true>
                 <false>
-                  {{ @sale.subtotal < 200 ? '$14.99' : 'FREE' }} &mdash;
+                  {{ @sale.subtotal < 100 ? '$9.99' : 'FREE' }} &mdash;
                 </false>
               </check>
               <i class="fa fa-bicycle"></i>
