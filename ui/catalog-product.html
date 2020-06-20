@@ -306,7 +306,7 @@ gtag('event', 'view_item', {
                         <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
                       </check>
                     </td>
-                    <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && @item.stocked) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
+                    <check if="@FEATURE_cart && @CAN_ORDER && ((@CAN_PICKUP || @CAN_SHIP) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
                       <true>
                         <td>
                           <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
