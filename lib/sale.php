@@ -1166,7 +1166,7 @@ class Sale {
       $shipping= $sale->subtotal < 300.00 ? 29.99 : 0.00;
       break;
     case 'truck':
-      return null;
+      return 0.00;
     }
 
     $special_conditions= $f3->get('special_conditions');
