@@ -52,6 +52,12 @@ gtag('event', 'checkout_progress', {
             </label>
             <div id="card-element" class="form-control"></div>
           </div>
+
+          <div class="form-group">
+            <label for="comment">Any special requests?</label>
+            <textarea class="form-control" rows="6" name="comment"></textarea>
+          </div>
+
           <div id="card-errors" class="alert alert-danger hidden" role="alert">
           </div>
           <button class="btn btn-primary">
@@ -76,16 +82,23 @@ gtag('event', 'checkout_progress', {
     <div id="pay-paypal" class="panel-collapse collapse" role="tabpanel" aria-labelledby="pay-paypal-heading">
       <div class="panel-body">
         <div class="paypal-prompt">
-          <div class="paypal-errors alert alert-danger hidden"></div>
-          <div class="form-group">
-            <label>
-              <span>Amount to be paid</span>
-              <input type="text" class="form-control" disabled
-                     value="{{ @amount(@sale.total - @sale.paid) }}">
-            </label>
-          </div>
+          <form id="paypal-form">
+            <div class="paypal-errors alert alert-danger hidden"></div>
+            <div class="form-group">
+              <label>
+                <span>Amount to be paid</span>
+                <input type="text" class="form-control" disabled
+                       value="{{ @amount(@sale.total - @sale.paid) }}">
+              </label>
+            </div>
 
-          <div id="paypal-button"></div>
+            <div class="form-group">
+              <label for="comment">Any special requests?</label>
+              <textarea class="form-control" rows="6" name="comment"></textarea>
+            </div>
+
+            <div id="paypal-button"></div>
+          </form>
         </div>
         <div class="paypal-waiting hidden">
           <div class="progress progress-striped active"
@@ -137,6 +150,12 @@ gtag('event', 'checkout_progress', {
                      name="balance" value="0">
             </label>
           </div>
+
+          <div class="form-group">
+            <label for="comment">Any special requests?</label>
+            <textarea class="form-control" rows="6" name="comment"></textarea>
+          </div>
+
           <input type="hidden" name="amount" value="{{ @sale.total - @sale.paid }}">
           <button type="submit" class="btn btn-primary">
             Pay

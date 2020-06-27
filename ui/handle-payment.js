@@ -57,9 +57,10 @@ loadScript('https://js.stripe.com/v3/',
 
     // Submit the form
     if (form.getAttribute('data-ajax')) {
+      let formData= new FormData(form)
       $.ajax({ dataType: 'json', method: 'POST',
                url: form.getAttribute('action'),
-               data: { stripeToken: token.id }})
+               data: Object.fromEntries(formData) })
        .done(function (data) {
          <check if="{{ @sale }}">
         gtag('event', 'purchase', {
@@ -116,12 +117,11 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
     onApprove: function(data, actions) {
       // Capture the funds from the transaction
       return actions.order.capture().then(function(details) {
+        let formData= new FormData(document.getElementById('paypal-form'))
+        formData.append('order_id', details.id)
         return fetch('/sale/{{ @sale.uuid }}/process-paypal-payment', {
           method: 'post',
-          headers: {
-            'content-type': 'application/x-www-form-urlencoded'
-          },
-          body: "order_id=" + details.id
+          body: formData
         }).then(function (data) {
          <check if="{{ @sale }}">
           // XXX error handling?

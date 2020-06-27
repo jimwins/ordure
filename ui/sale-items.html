@@ -74,7 +74,7 @@
       <td class="text-right">{{ @amount(@sale.subtotal) }}</td>
     </tr>
     <tr>
-      <check if="{{ ! @sale.shipping_address_id || (@CAN_PICKUP && @sale.shipping_method === null) }}">
+      <check if="{{ ! @sale.shipping_address_id || (@CAN_PICKUP && @sale.shipping_address_id != 1 && @sale.shipping_method === null) }}">
         <true>
           <th colspan="5" class="text-right">
             Shipping &amp; handling:

@@ -38,12 +38,20 @@ gtag('event', 'checkout_progress', {
             internationally.)
           </p>
 
-          <form method="POST"
-                action="{{ @BASE }}/cart/set-in-store-pickup">
-            <button type="submit" class="btn btn-primary btn-block">
-              <i class="fa fa-building"></i> Pick it up at the store!
-            </button>
-          </form>
+          <p>
+            <form method="POST"
+                  action="{{ @BASE }}/cart/set-in-store-pickup">
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa fa-building"></i> Pick it up at the store!
+              </button>
+            </form>
+          </p>
+
+          <p>
+            You will be contacted when your pick-up is ready. Current pick-up
+            hours are generally being scheduled Tuesday through Saturday
+            between noon and 3pm.
+          </p>
 
           <hr>
         </false>

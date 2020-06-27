@@ -512,7 +512,7 @@ class Sale {
 
       if (!in_array($stage, $stages)) {
         $shipping_rate= $f3->get('shipping_rate');
-        if ($sale->shipping_address_id &&
+        if ($sale->shipping_address_id > 1 &&
             in_array($shipping_rate, [ 'truck', 'unknown' ]))
         {
           $stage= 'review';
@@ -522,7 +522,8 @@ class Sale {
           $address->load(array('id = ?', $sale->shipping_address_id))
             or $f3->error(404);
           if ($address->verified) {
-            if (!$sale->shipping_method &&
+            if ($address->id != 1 &&
+                !$sale->shipping_method &&
                 self::can_deliver($f3) && $address->distance < 2)
             {
               $stage= 'shipping-method';
@@ -2086,6 +2087,16 @@ class Sale {
 
     self::capture_sales_tax($f3, $sale);
 
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
     $sale->status= 'paid';
     $sale->save();
 
@@ -2235,6 +2246,16 @@ if (0) {
 
     self::capture_sales_tax($f3, $sale);
 
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
     $sale->status= 'paid';
     $sale->save();
 
@@ -2319,6 +2340,16 @@ if (0) {
       'card' => $f3->get('REQUEST.card'),
     ));
     $payment->save();
+
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
 
     if ($sale->total - ($sale->paid + $amount) > 0) {
       $sale->status= 'unpaid';
