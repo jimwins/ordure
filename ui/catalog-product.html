@@ -471,14 +471,14 @@ gtag('event', 'view_item', {
             </check>
 
             <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && @featured_item.stocked) || (@CAN_DROPSHIP && @featured_item.is_dropshippable)) ">
-              <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'featured_items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@featured_item.code}}', 'quantity': '{{@featured_item.purchase_quantity}}', 'price': '{{@featured_item.sale_price}}' } ] })"
-                    action="/cart/add-featured_item" method="POST">
+              <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+                    action="/cart/add-item" method="POST">
                 <input type="hidden"
-                       name="featured_item" value="{{ @featured_item.code }}">
+                       name="item" value="{{ @item.code }}">
                 <div class="input-group">
                   <span class="input-group-addon" id="quantity-addon1">Quantity</span>
                   <input type="text" class="form-control" name="quantity"
-                         value="{{ @featured_item.purchase_quantity }}">
+                         value="{{ @item.purchase_quantity }}">
                   <div class="input-group-btn">
                     <button type="submit" class="btn btn-primary">
                       <i class="fa fa-plus-square"></i> Add to Cart
