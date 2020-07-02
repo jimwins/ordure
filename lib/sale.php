@@ -539,7 +539,7 @@ class Sale {
             $stage= 'shipping';
           }
         }
-        elseif ($sale->person_id || ($sale->email && $sale->name)) {
+        elseif ($sale->email && $sale->name) {
           $stage= 'shipping';
         }
         else {
