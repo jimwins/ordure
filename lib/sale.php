@@ -528,6 +528,11 @@ class Sale {
             {
               $stage= 'shipping-method';
             } else {
+              if ($sale->shipping_method != 'default') {
+                $sale->shipping_method= 'default';
+                $sale->save();
+                $sale= $this->load($f3, $uuid, 'uuid');
+              }
               $stage= 'payment';
             }
           } else {
