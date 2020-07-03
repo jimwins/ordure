@@ -286,7 +286,7 @@ gtag('event', 'view_item', {
                           </check>
                         </true>
                         <false>
-                          <check if="@CAN_DROPSHIP && @item.is_dropshippable">
+                          <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
                             <true>
                               <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
                             </true>
