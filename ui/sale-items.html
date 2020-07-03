@@ -76,6 +76,7 @@
     <tr>
       <check if="{{ ! @sale.shipping_address_id || (@CAN_PICKUP && @sale.shipping_address_id != 1 && @sale.shipping_method === null) }}">
         <true>
+          <set shipping_calculated="0">
           <th colspan="5" class="text-right">
             Shipping &amp; handling:
             <check if="{{ @sale.status == 'cart' && @CAN_PICKUP }}">
@@ -85,6 +86,7 @@
           <td class="text-right text-danger">TBD</td>
         </true>
         <false>
+          <set shipping_calculated="1">
           <th colspan="5" class="text-right">
             <check if="{{ @sale.shipping_address_id == 1 }}">
               <true>
@@ -121,7 +123,7 @@
       </th>
       <td class="text-right" id="tax">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
-            && !@sale.tax_calculated }}">
+            && !(@shipping_calculated && @sale.tax_calculated) }}">
   <true>
         <span class="text-danger">TBD</span>
   </true>
@@ -135,7 +137,7 @@
       <th colspan="5" class="text-right">Total:</th>
       <td class="text-right" id="total">
 <check if="{{ @FEATURE_cart && @sale.status == 'cart'
-            && !@sale.tax_calculated }}">
+            && !(@shipping_calculated && @sale.tax_calculated) }}">
   <true>
         <span class="text-danger">TBD</span>
   </true>
