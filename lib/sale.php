@@ -1804,7 +1804,9 @@ class Sale {
   function update_sales_tax($f3, $sale) {
     /* No address or shipping rate? Can't do it. */
     if ((!$sale->shipping_address_id && !$sale->billing_address_id) ||
-        in_array($f3->get('shipping_rate'), [ 'truck', 'unknown' ])) {
+        ($sale->shipping_address_id != 1 && $sale->shipping_method != 'bike' &&
+         in_array($f3->get('shipping_rate'), [ 'truck', 'unknown' ])))
+    {
       $sale->tax_calculated= null;
       $sale->save();
       return;
