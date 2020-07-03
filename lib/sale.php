@@ -656,6 +656,8 @@ class Sale {
 
       $address->save();
 
+      // XXX all amazon orders forced to default shipping for now
+      $sale->shipping_method= 'default';
       $sale->shipping_address_id= $address->id;
     } else {
       $details= $res->toArray();
