@@ -328,6 +328,15 @@ class Sale {
     $f3->set('shipping_rate', $shipping_rate);
     $f3->set('special_conditions', $special_conditions);
 
+    $notes= new DB\SQL\Mapper($db, 'sale_note');
+    $notes= $notes->find(array('sale_id = ?', $sale->id),
+                                 array('order' => 'id'));
+    $notes_out= array();
+    foreach ($notes as $i) {
+      $notes_out[]= $i->cast();
+    }
+    $f3->set('notes', $notes_out);
+
     return $sale;
   }
 
@@ -2013,6 +2022,7 @@ class Sale {
                             'shipping_address' => $f3->get('shipping_address'),
                             'items' => $f3->get('items'),
                             'payments' => $f3->get('payments'),
+                            'notes' => $f3->get('notes'),
                             'shipping_status' => $f3->get('shipping_status'),
                             'shipping_rate' => $f3->get('shipping_rate'),
                             'special_conditions' =>
