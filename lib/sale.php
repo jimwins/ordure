@@ -779,12 +779,14 @@ class Sale {
     // save comment
     $comment= $f3->get('REQUEST.comment');
 
-    $db= $f3->get('DBH');
-    $note= new DB\SQL\Mapper($db, 'sale_note');
-    $note->sale_id= $sale->id;
-    $note->person_id= $sale->person_id;
-    $note->content= $comment;
-    $note->save();
+    if (trim($comment) != '') {
+      $db= $f3->get('DBH');
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
@@ -2435,8 +2437,6 @@ if (0) {
       $f3->error(404);
     }
 
-    $comment= $f3->get('REQUEST.comment');
-
     $sale= $this->load($f3, $uuid, 'uuid');
     if ($sale->status != 'cart')
       $f3->error(500, "There's no cart here.");
@@ -2452,13 +2452,17 @@ if (0) {
     $sale->status= 'review';
     $sale->save();
 
+    $comment= $f3->get('REQUEST.comment');
+
     // save comment
-    $db= $f3->get('DBH');
-    $note= new DB\SQL\Mapper($db, 'sale_note');
-    $note->sale_id= $sale->id;
-    $note->person_id= $sale->person_id;
-    $note->content= $comment;
-    $note->save();
+    if (trim($comment) != '') {
+      $db= $f3->get('DBH');
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
@@ -2959,14 +2963,16 @@ Your order is now being processed, and you will receive another email when your 
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
-    $message= $f3->get('REQUEST.note');
+    $comment= $f3->get('REQUEST.note');
 
-    $db= $f3->get('DBH');
-    $note= new DB\SQL\Mapper($db, 'sale_note');
-    $note->sale_id= $sale->id;
-    $note->person_id= \Auth::authenticated_user($f3);
-    $note->content= $message;
-    $note->save();
+    if (trim($comment) != '') {
+      $db= $f3->get('DBH');
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= \Auth::authenticated_user($f3);
+      $note->content= $comment;
+      $note->save();
+    }
 
     self::send_order_note($f3, $message);
 
