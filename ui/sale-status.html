@@ -16,6 +16,11 @@
           </p>
         </check>
         <check if="{{ @sale.status == 'paid' || @sale.status == 'processing' }}">
+          <div class="alert alert-danger">
+            We will email updates about your order, you may want to add <a
+            href="mailto:info@rawmaterialsla.com">info@rawmaterialsla.com</a>
+            to your address book to prevent them being miscategorized as spam.
+          </div>
           <p class="text-success">
             <strong>Thanks for your order!</strong> We will let you know when
             your order has shipped, or contact you if there are any troubles.
