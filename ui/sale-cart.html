@@ -143,7 +143,7 @@
           </check>
           <check if="{{ @shipping_status == 'immediate' && (@CAN_SHIP || @CAN_PICKUP) }}">
             <p class="lead alert alert-success">
-              These are in stock at the store and eligible for immediate
+              These are in stock at the store and eligible for
               shipment{{ @CAN_PICKUP ? ' or pick-up' : '' }}. We will contact you if any problems
               arise in having your order ready!
             </p>
