@@ -23,7 +23,7 @@
           </div>
           <p class="text-success">
             <strong>Thanks for your order!</strong> We will let you know when
-            your order has shipped, or contact you if there are any troubles.
+            your order <check if="{{ @sale.shipping_address_id == 1 }}"><true>is ready for pickup</true><false>has shipped</false></check>, or contact you if there are any troubles.
           </p>
         </check>
         <check if="{{ @sale.status == 'cancelled' }}">
