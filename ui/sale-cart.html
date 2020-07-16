@@ -150,8 +150,8 @@
           </check>
           <check if="{{ @shipping_status == 'stock_limited' && (@CAN_SHIP || @CAN_PICKUP) }}">
           <!-- XXX drop ship as option -->
-            <p class="lead alert alert-warning">
-              Not all of the items in your cart are currently in stock,
+            <p class="lead alert alert-danger">
+              <b>Not all of the items in your cart are currently in stock,</b>
               so your order will take additional time to prepare. We will
               email you with an estimated {{ @CAN_PICKUP ? 'pick-up/' : '' }}shipping date once your
               order has been processed.
