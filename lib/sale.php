@@ -2256,13 +2256,20 @@ if (0) {
     echo json_encode($response->result);
   }
 
-  function process_paypal_payment($f3, $args) {
+  function handle_paypal_payment($f3, $uuid, $order_id) {
     $db= $f3->get('DBH');
 
-    $uuid= $f3->get('PARAMS.sale');
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    $order_id= $f3->get('REQUEST.order_id');
+    $existing= new DB\SQL\Mapper($db, 'sale_payment');
+    // gross, but data is binary so can't use MySQL JSON magic yet
+    $has= $existing->load(array('data LIKE CONCAT("%id_:_",?,"%")', $order_id));
+
+    // if we already have it, don't do it again!
+    if ($has) {
+      error_log("Already processed PayPal $order_id");
+      return;
+    }
 
     $client= $this->get_paypal_client($f3);
 
@@ -2300,6 +2307,13 @@ if (0) {
     $sale= $this->load($f3, $uuid, 'uuid');
 
     self::send_order_paid_email($f3);
+  }
+
+  function process_paypal_payment($f3, $args) {
+    $uuid= $f3->get('PARAMS.sale');
+    $order_id= $f3->get('REQUEST.order_id');
+
+    return $this->handle_paypal_payment($f3, $uuid, $order_id);
   }
 
   function get_giftcard_balance($f3, $args) {

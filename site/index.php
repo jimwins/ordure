@@ -347,6 +347,47 @@ Rewards::addRoutes($f3);
 require '../lib/events.php';
 Events::addRoutes($f3);
 
+$f3->route('GET|POST /~webhook/paypal', function ($f3) {
+  $body= $f3->get('BODY');
+
+  $webhook_id= $f3->get('PAYPAL_WEBHOOK_ID');
+
+  // adapted from https://stackoverflow.com/a/62870569
+  if ($webhook_id) {
+    $headers= $f3->get('HEADERS');
+
+    $data= join('|',
+                $headers['Paypal-Transmission-Id'],
+                $headers['Paypal-Transmission-Time'],
+                $webhook_id,
+                crc32($body));
+
+    $cert= file_get_contents($headers['Paypal-Cert-Url']);
+    $pubkey= openssl_pkey_get_public($cert);
+
+    $sig= base64_decode($headers['Paypal-Transmission-Sig']);
+
+    $res= openssl_verify($data, $sig, $key, 'sha256WithRSAEncryption');
+
+    if ($res == 0) {
+      $f3->error(500, "Webhook signature validation failed.");
+    } elseif ($res < 0) {
+      error_log("Error validating signature: " . openssl_error_string());
+      $f3->error(500, "Error validating signature: " . openssl_error_string());
+    }
+  }
+
+  $data= json_decode($body);
+
+  if ($data->event_type == 'CHECKOUT.ORDER.APPROVED') {
+    $uuid= $data->resource->purchase_units[0]->reference_id;
+    $order_id= $data->resource->id;
+
+    return (new Sale())->handle_paypal_payment($f3, $uuid, $order_id);
+  }
+
+});
+
 $f3->route('GET|POST /~webhook/sandbox-paypal', function ($f3) {
   $client= new \GuzzleHttp\Client();
   $url= $f3->get('SANDBOX') . '/~webhook/paypal';
