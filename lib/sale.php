@@ -2190,6 +2190,31 @@ if (0) {
     }
 }
 
+    /* Less detail to the amount if order is partially paid already. */
+    if ($sale->paid) {
+      $amount=
+        [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $sale->total - $sale->paid),
+        ];
+    } else {
+      $amount=
+        [
+          'currency_code' => 'USD',
+          'value' => sprintf('%.2f', $sale->total),
+          'breakdown' => [
+            'item_total' => [
+              'currency_code' => 'USD',
+              'value' => sprintf('%.2f', $sale->subtotal + $sale->shipping),
+            ],
+            'tax_total' => [
+              'currency_code' => 'USD',
+              'value' => sprintf('%.2f', $sale->tax),
+            ],
+          ],
+        ];
+    }
+
     $order= [
       'intent' => 'CAPTURE',
       'application_context' => [
@@ -2199,20 +2224,7 @@ if (0) {
       'purchase_units' => [
         [
           'reference_id' => $sale->uuid,
-          'amount' => [
-            'currency_code' => 'USD',
-            'value' => sprintf('%.2f', $sale->total),
-            'breakdown' => [
-              'item_total' => [
-                'currency_code' => 'USD',
-                'value' => sprintf('%.2f', $sale->subtotal + $sale->shipping),
-              ],
-              'tax_total' => [
-                'currency_code' => 'USD',
-                'value' => sprintf('%.2f', $sale->tax),
-              ],
-            ],
-          ],
+          'amount' => $amount,
           'items' => $paypal_items,
           'shipping' => [
             'name' => [
