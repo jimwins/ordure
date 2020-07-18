@@ -347,6 +347,28 @@ Rewards::addRoutes($f3);
 require '../lib/events.php';
 Events::addRoutes($f3);
 
+$f3->route('GET|POST /~webhook/sandbox-paypal', function ($f3) {
+  $client= new \GuzzleHttp\Client();
+  $url= $f3->get('SANDBOX') . '/~webhook/paypal';
+
+  $headers= $f3->get('HEADERS');
+  $res= $client->request($f3->get('SERVER.REQUEST_METHOD'), $url, [
+    'headers' => [
+      'Content-type' => $f3->get('SERVER.HTTP_CONTENT_TYPE'),
+      'Paypal-Transmission-Id' => $headers['Paypal-Transmission-Id'],
+      'Paypal-Transmission-Time' => $headers['Paypal-Transmission-Time'],
+      'Paypal-Cert-Url' => $headers['Paypal-Cert-Url'],
+      'Paypal-Transmission-Sig' => $headers['Paypal-Transmission-Sig'],
+    ],
+    'body' => $f3->get('BODY'),
+  ]);
+
+  // TODO pass through headers
+  echo $res->getBody();
+
+});
+
+
 /* Pass through webhooks to Scat */
 $f3->route('GET|POST /~webhook/@name', function ($f3) {
   $key= $f3->get('REQUEST.key');
