@@ -3011,7 +3011,6 @@ Your order will be reviewed, and you will receive another email within one busin
     $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
     $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
               $f3->get('sale.email');
-    $bcc= $from;
 
     return $postmark->sendEmail(
       $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
