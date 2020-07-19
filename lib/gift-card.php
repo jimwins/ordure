@@ -39,41 +39,6 @@ class GiftCard {
       $f3->error(500, $err['message']);
     }
 
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
-
-    $text= Template::instance()->render('email-gift-card-sale.txt');
-
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'text' => $text,
-        'subject' => $kit ? 'Sale: AzLotusArt Kit' : "Sale: Gift Card",
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => '',
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
-
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      error_log(sprintf("SparkPost failure: %s (%s)",
-                        $e->getMessage(), $e->getCode()));
-    }
-
     /* Create sale */
     $db= $f3->get('DBH');
 
