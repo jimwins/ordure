@@ -479,9 +479,7 @@ class Auth {
   }
 
   function email_login_link($f3, $person) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $title= "Log in to your account";
     $f3->set('title', $title);
@@ -493,49 +491,25 @@ class Auth {
 
     $html= Template::instance()->render('email-template.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $title,
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => '',
-            'email' => $person->email,
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+
+    return $postmark->sendEmail(
+      $from, $person->email, $title, $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function email_conflict_report($f3, $person_id) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $title= "User conflict reported";
     $f3->set('title', $title);
@@ -554,42 +528,21 @@ class Auth {
 
     $html= Template::instance()->render('email-template.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $title,
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => '',
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $title, $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 }

@@ -2686,9 +2686,7 @@ if (0) {
   }
 
   function send_order_email($f3, $comment= null) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $f3->set('comment', $comment);
     $title= "Order " . $f3->get('sale.status') . ': ' .
@@ -2704,49 +2702,28 @@ if (0) {
 
     $html= Template::instance()->render('email-invoice.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $title,
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => '',
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
+              $f3->get('sale.email');
+    $bcc= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function send_order_placed_email($f3) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $order_no= sprintf("%07d", $f3->get('sale.id'));
     $f3->set('title', "Thanks for shopping with us! (Order #{$order_no})");
@@ -2764,51 +2741,24 @@ Your order will be reviewed, and you will receive another email within one busin
 
     $html= Template::instance()->render('email-invoice.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $f3->get('title'),
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'email' => $f3->get('sale.email'),
-          ],
-        ],
-        [
-          // BCC ourselves
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'header_to' => $f3->get('sale.email'),
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
+              $f3->get('sale.email');
+    $bcc= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function confirm_order($f3, $args) {
@@ -2835,9 +2785,7 @@ Your order will be reviewed, and you will receive another email within one busin
   }
 
   function send_order_reviewed_email($f3, $top, $bottom) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $order_no= sprintf("%07d", $f3->get('sale.id'));
     $f3->set('title', "Thanks for shopping with us! (Order #{$order_no})");
@@ -2853,51 +2801,24 @@ Your order will be reviewed, and you will receive another email within one busin
 
     $html= Template::instance()->render('email-template.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $f3->get('title'),
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'email' => $f3->get('sale.email'),
-          ],
-        ],
-        [
-          // BCC ourselves
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'header_to' => $f3->get('sale.email'),
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
+              $f3->get('sale.email');
+    $bcc= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function send_note($f3, $args) {
@@ -2923,15 +2844,13 @@ Your order will be reviewed, and you will receive another email within one busin
       $note->save();
     }
 
-    self::send_order_note($f3, $message);
+    self::send_order_note($f3, $comment);
 
     return $this->json($f3, $args);
   }
 
   function send_order_note($f3, $note) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $order_no= sprintf("%07d", $f3->get('sale.id'));
     $f3->set('title', "Thanks for shopping with us! (Order #{$order_no})");
@@ -2941,51 +2860,24 @@ Your order will be reviewed, and you will receive another email within one busin
 
     $html= Template::instance()->render('email-template.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $f3->get('title'),
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'email' => $f3->get('sale.email'),
-          ],
-        ],
-        [
-          // BCC ourselves
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'header_to' => $f3->get('sale.email'),
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
+              $f3->get('sale.email');
+    $bcc= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function retrieve_cart($f3, $args) {
@@ -3089,9 +2981,7 @@ Your order will be reviewed, and you will receive another email within one busin
   }
 
   function send_cart_login($f3, $email) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+    $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $title= "Retrieve your Shopping Cart";
     $f3->set('title', $title);
@@ -3109,43 +2999,24 @@ Your order will be reviewed, and you will receive another email within one busin
 
     $html= Template::instance()->render('email-template.html');
 
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $title,
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => '',
-            'email' => $email,
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
+    $logo= \Postmark\Models\PostmarkAttachment::fromFile(
+      '../ui/logo.png',
+      'logo.png',
+      'image/png',
+      'cid:logo.png',
+    );
 
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
+    $attach= [ $logo ];
+
+    $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
+    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
+              $f3->get('sale.email');
+    $bcc= $from;
+
+    return $postmark->sendEmail(
+      $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
+      NULL, NULL, $bcc, NULL, $attach, NULL
+    );
   }
 
   function send_order_test($f3, $args) {

@@ -17,7 +17,6 @@
     "indigophp/hash-compat": "^1.1",
     "guzzlehttp/guzzle": "~6.0",
     "php-http/guzzle6-adapter": "^1.1",
-    "sparkpost/sparkpost": "^2.0",
     "mailerlite/mailerlite-api-v2-php-sdk": "^0.2.0",
     "easypost/easypost-php": "~3.0",
     "spomky-labs/otphp": "^8.3",
@@ -26,7 +25,8 @@
     "monolog/monolog": "^1.24",
     "graylog2/gelf-php": "^1.6",
     "cleantalk/php-antispam": "^2.3",
-    "robmorgan/phinx": "^0.10.7"
+    "robmorgan/phinx": "^0.10.7",
+    "wildbit/postmark-php": "^2.11"
   },
   "require-dev": {
     "deployer/recipes": "^6.2"
