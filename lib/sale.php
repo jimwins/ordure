@@ -791,8 +791,6 @@ class Sale {
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    self::send_order_paid_email($f3);
-
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args, $uuid);
     }
@@ -2127,8 +2125,6 @@ class Sale {
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
-
-    self::send_order_paid_email($f3);
   }
 
   function get_paypal_client($f3) {
@@ -2305,8 +2301,6 @@ if (0) {
 
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
-
-    self::send_order_paid_email($f3);
   }
 
   function process_paypal_payment($f3, $args) {
@@ -2761,77 +2755,6 @@ if (0) {
     $f3->set('content_top', Markdown::instance()->convert("Thank you for shopping at Raw Materials Art Supplies!
     
 Your order will be reviewed, and you will receive another email within one business day with information on how to pay for your order, as well as the estimated shipping time."));
-
-    $f3->clear('call_to_action');
-    $f3->clear('call_to_action_url');
-    $f3->clear('comment');
-
-    $f3->set('content_bottom', Markdown::instance()->convert("Let us know if there is anything else that we can do to help."));
-
-    $html= Template::instance()->render('email-invoice.html');
-
-    $promise= $sparky->transmissions->post([
-      'content' => [
-        'html' => $html,
-        'subject' => $f3->get('title'),
-        'from' => array('name' => 'Raw Materials Art Supplies',
-                        'email' => $f3->get('CONTACT_SALES')),
-        'inline_images' => [
-          [
-            'name' => 'logo.png',
-            'type' => 'image/png',
-            'data' => base64_encode(file_get_contents('../ui/logo.png')),
-          ],
-        ],
-      ],
-      'recipients' => [
-        [
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'email' => $f3->get('sale.email'),
-          ],
-        ],
-        [
-          // BCC ourselves
-          'address' => [
-            'name' => $f3->get('sale.name'),
-            'header_to' => $f3->get('sale.email'),
-            'email' => $f3->get('CONTACT_SALES'),
-          ],
-        ],
-      ],
-      'options' => [
-        'inlineCss' => true,
-        'transactional' => true,
-      ],
-    ]);
-
-    try {
-      $response= $promise->wait();
-      // XXX handle response
-    } catch (\Exception $e) {
-      $f3->get('log')->error(
-        sprintf("SparkPost failure: %s (%s)",
-                $e->getMessage(), $e->getCode())
-      );
-    }
-  }
-
-  function send_order_paid_email($f3) {
-    $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-    $sparky= new \SparkPost\SparkPost($httpClient,
-                           [ 'key' => $f3->get('SPARKPOST_KEY') ]);
-
-    $order_no= sprintf("%07d", $f3->get('sale.id'));
-    $f3->set('title', "Thanks for shopping with us! (Order #{$order_no})");
-    $f3->set('preheader', "Thank you for shopping at Raw Materials Art Supplies!  Your order is being processed.");
-
-    $sale= $f3->get('sale');
-    $method= $sale['shipping_address_id'] == 1
-               ? "is ready for pick up" : "has been shipped";
-    $f3->set('content_top', Markdown::instance()->convert("Thank you for shopping at Raw Materials Art Supplies!
-
-Your order is now being processed, and you will receive another email when your order $method or if we have other updates."));
 
     $f3->clear('call_to_action');
     $f3->clear('call_to_action_url');
