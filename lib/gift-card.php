@@ -103,6 +103,17 @@ class GiftCard {
     ));
     $payment->save();
 
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+
+    if (trim($comment) != '') {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
     $f3->reroute($kit ? '/azlotusart-kit-thanks' : '/gift-card/thanks');
   }
 }
