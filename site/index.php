@@ -356,11 +356,11 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   if ($webhook_id) {
     $headers= $f3->get('HEADERS');
 
-    $data= join('|',
+    $data= join('|', [
                 $headers['Paypal-Transmission-Id'],
                 $headers['Paypal-Transmission-Time'],
                 $webhook_id,
-                crc32($body));
+                crc32($body) ]);
 
     $cert= file_get_contents($headers['Paypal-Cert-Url']);
     $pubkey= openssl_pkey_get_public($cert);
