@@ -49,7 +49,9 @@ class GiftCard {
 
     $sale->save();
 
-    if ($f3->get('REQUEST.address1')) {
+    if ($f3->get('REQUEST.recipient_name') ||
+        $f3->get('REQUEST.address1'))
+    {
       $address= new DB\SQL\Mapper($db, 'sale_address');
 
       /* Split ZIP+4, might all be in zip */
@@ -63,6 +65,7 @@ class GiftCard {
 
       $name= trim($f3->get('REQUEST.recipient_name'));
       $address->name= $name ? $name : trim($f3->get('REQUEST.name'));
+      $address->email= trim($f3->get('REQUEST.recipient_email'));
       $address->company= trim($f3->get('REQUEST.company'));
       $address->address1= trim($f3->get('REQUEST.address1'));
       $address->address2= trim($f3->get('REQUEST.address2'));
