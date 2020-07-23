@@ -1880,6 +1880,7 @@ class Sale {
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
+    if (!$items) return; // No items? No tax.
     foreach ($items as $i) {
       $data['cartItems'][]= array(
         'Index' => $i->id,
