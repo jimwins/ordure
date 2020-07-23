@@ -352,6 +352,8 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
   $webhook_id= $f3->get('PAYPAL_WEBHOOK_ID');
 
+  $headers= $f3->get('HEADERS');
+
   error_log("Paypal-Transmission-Id: {$headers['Paypal-Transmission-Id']}\n");
   error_log("Paypal-Transmission-Time: {$headers['Paypal-Transmission-Time']}\n");
   error_log("Paypal-Cert-Url: {$headers['Paypal-Cert-Url']}\n");
@@ -359,8 +361,6 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
   // adapted from https://stackoverflow.com/a/62870569
   if ($webhook_id) {
-    $headers= $f3->get('HEADERS');
-
     $data= join('|', [
                 $headers['Paypal-Transmission-Id'],
                 $headers['Paypal-Transmission-Time'],
