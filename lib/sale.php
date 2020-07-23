@@ -546,6 +546,7 @@ class Sale {
             }
           } else {
             \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
+            error_log("Looking up address by id: {$address->easypost_id}\n");
             $easypost= \EasyPost\Address::retrieve($address->easypost_id);
             $f3->set("ADDRESS_NOT_VERIFIED", 1);
             $f3->set("verifications",
