@@ -530,6 +530,11 @@ class Sale {
           $address= new DB\SQL\Mapper($db, 'sale_address');
           $address->load(array('id = ?', $sale->shipping_address_id))
             or $f3->error(404);
+
+          if ($address->id && !$address->verified) {
+            $this->easypost_verify_address($f3, $address);
+          }
+
           if ($address->verified) {
             if ($address->id != 1 &&
                 !$sale->shipping_method &&
@@ -545,12 +550,7 @@ class Sale {
               $stage= 'payment';
             }
           } else {
-            \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
-            error_log("Looking up address by id: {$address->easypost_id}\n");
-            $easypost= \EasyPost\Address::retrieve($address->easypost_id);
             $f3->set("ADDRESS_NOT_VERIFIED", 1);
-            $f3->set("verifications",
-                      $easypost->verifications->delivery->errors);
             $stage= 'shipping';
           }
         }
@@ -1227,6 +1227,54 @@ class Sale {
     $sale->save();
   }
 
+  function easypost_verify_address($f3, $address) {
+    \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
+
+    if ($address->easypost_id) {
+      $easypost= \EasyPost\Address::retrieve($address->easypost_id);
+    } else {
+      $address_params= [
+        "verify" => [ "delivery" ],
+        "name" => $address->name,
+        "company" => $address->company,
+        "street1" => $address->address1,
+        "street2" => $address->address2,
+        "city" => $address->city,
+        "state" => $address->state,
+        "zip" => $address->zip5,
+        "country" => "US",
+        "phone" => $address->phone,
+      ];
+
+      $easypost= \EasyPost\Address::create($address_params);
+    }
+
+    $address->easypost_id= $easypost->id;
+    $address->name= $easypost->name;
+    $address->company= $easypost->company;
+    $address->address1= $easypost->street1;
+    $address->address2= $easypost->street2;
+    $address->city= $easypost->city;
+    $address->state= $easypost->state;
+    list($zip5, $zip4)= explode('-', $easypost->zip);
+    $address->zip5= $zip5;
+    $address->zip4= $zip4;
+    $address->phone= $easypost->phone;
+    $address->verified= $easypost->verifications->delivery->success ? '1' : '0';
+    if ($easypost->verifications->delivery->details->longitude) {
+      $distance= haversineGreatCircleDistance(
+        34.043810, -118.250320,
+        $easypost->verifications->delivery->details->latitude,
+        $easypost->verifications->delivery->details->longitude,
+        3959 /* want miles */
+      );
+
+      $address->distance= $distance;
+    }
+    $f3->set("verifications", $easypost->verifications->delivery->errors);
+    $address->save();
+  }
+
   function set_address($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale') ?: $f3->get('COOKIE.cartID');
     $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
@@ -1257,44 +1305,17 @@ class Sale {
         or $f3->error(404);
     }
 
-    \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
-    $address_params= [
-      "verify" => [ "delivery" ],
-      "name" => trim($f3->get('REQUEST.name')),
-      "company" => trim($f3->get('REQUEST.company')),
-      "street1" => trim($f3->get('REQUEST.address1')),
-      "street2" => trim($f3->get('REQUEST.address2')),
-      "city" => trim($f3->get('REQUEST.city')),
-      "state" => trim($f3->get('REQUEST.state')),
-      "zip" => trim($f3->get('REQUEST.zip5')),
-      "country" => "US",
-      "phone" => trim($f3->get('REQUEST.phone')),
-    ];
-    $easypost= \EasyPost\Address::create($address_params);
+    $address->easypost_id= null;
+    $address->name= trim($f3->get('REQUEST.name'));
+    $address->company= trim($f3->get('REQUEST.company'));
+    $address->address1= trim($f3->get('REQUEST.address1'));
+    $address->address2= trim($f3->get('REQUEST.address2'));
+    $address->city= trim($f3->get('REQUEST.city'));
+    $address->state= trim($f3->get('REQUEST.state'));
+    $address->zip5= trim($f3->get('REQUEST.zip5'));
+    $address->phone= trim($f3->get('REQUEST.phone'));
 
-    $address->easypost_id= $easypost->id;
-    $address->name= $easypost->name;
-    $address->company= $easypost->company;
-    $address->address1= $easypost->street1;
-    $address->address2= $easypost->street2;
-    $address->city= $easypost->city;
-    $address->state= $easypost->state;
-    list($zip5, $zip4)= explode('-', $easypost->zip);
-    $address->zip5= $zip5;
-    $address->zip4= $zip4;
-    $address->phone= $easypost->phone;
-    $address->verified= $easypost->verifications->delivery->success ? '1' : '0';
-    if ($easypost->verifications->delivery->details->longitude) {
-      $distance= haversineGreatCircleDistance(
-        34.043810, -118.250320,
-        $easypost->verifications->delivery->details->latitude,
-        $easypost->verifications->delivery->details->longitude,
-        3959 /* want miles */
-      );
-
-      $address->distance= $distance;
-    }
-    $address->save();
+    $this->easypost_verify_address($f3, $address);
 
     if ($type == 'shipping') {
       $sale->shipping_address_id= $address->id;
