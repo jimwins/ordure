@@ -226,7 +226,7 @@ gtag('event', 'view_item', {
                     <td nowrap>
                       <check if="@item.description || @item.media">
                         <true>
-                          <a href="{{ @product.slug . '/' . urlencode(@item.code) }}">{{ @item.code }}</a>
+                          <a href="{{ (@featured_item ? '' : @product.slug . '/') . urlencode(@item.code) }}">{{ @item.code }}</a>
                         </true>
                         <false>
                           {{ @item.code }}
