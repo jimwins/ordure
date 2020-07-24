@@ -161,9 +161,9 @@
             </p>
           </check>
           <check if="{{ @shipping_status == 'special_order' && (@CAN_SHIP || @CAN_PICKUP) }}">
-            <p class="lead alert alert-info">
-              Your order contains special order items that will take extra
-              time to prepare. We will email you with an esimated
+            <p class="lead alert alert-danger">
+              <b>Your order contains special order items that will take extra
+              time to prepare.</b> We will email you with an esimated
               {{ @CAN_PICKUP ? 'pick-up/' : '' }}shipping date once your order has been reviewed. (Most
               special order items are ready in about one week, some can take
               as long as four to six weeks.)
