@@ -212,7 +212,9 @@ gtag('event', 'view_item', {
                 <th class="col-xs-3">Description</th>
                 <th class="col-xs-1">List</th>
                 <th class="col-xs-1">Sale</th>
+              <exclude>
                 <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in available for pick up, shipping, special order, or drop-ship.">Availability</th>
+              </exclude>
                 <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in stock at the store.">In Stock</th>
                 <check if="{{ @FEATURE_cart && @CAN_ORDER }}">
                   <th class="col-xs-1"></th>
@@ -247,6 +249,7 @@ gtag('event', 'view_item', {
                         {{ @item.sale_price ? Catalog::amount(@item.sale_price * max(@item.purchase_quantity,1)) : '' }}
                       </strong>
                     </td>
+                  <exclude>
                     <td class="text-center">
                       <small>
                         <check if="@CAN_SHIP">
@@ -273,15 +276,23 @@ gtag('event', 'view_item', {
                         </check>
                       </small>
                     </td>
+                  </exclude>
                     <td class="text-center">
                       <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
                         <true>
                           <check if="@item.stocked > 0">
                             <true>
-                             <small class="text-success">In stock</small>
+                              <small class="text-success">In stock</small>
                             </true>
                             <false>
-                             <small class="text-danger">Out of stock</small>
+                              <check if="@item.minimum_quantity > 0">
+                                <true>
+                                  <small class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</small>
+                                </true>
+                                <false>
+                                  <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+                                </false>
+                              </check>
                             </false>
                           </check>
                         </true>
@@ -291,7 +302,7 @@ gtag('event', 'view_item', {
                               <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
                             </true>
                             <false>
-                              <small>Special order</small>
+                              <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
                             </false>
                           </check>
                         </false>
