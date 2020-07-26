@@ -358,6 +358,7 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   error_log("Paypal-Transmission-Time: {$headers['Paypal-Transmission-Time']}\n");
   error_log("Paypal-Cert-Url: {$headers['Paypal-Cert-Url']}\n");
   error_log("Paypal-Transmission-Sig: {$headers['Paypal-Transmission-Sig']}\n");
+  error_log("Paypal generated crc32: " . crc32($body) . "\n");
 
   // adapted from https://stackoverflow.com/a/62870569
   if ($webhook_id) {
