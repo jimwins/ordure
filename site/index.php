@@ -373,7 +373,7 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
     $sig= base64_decode($headers['Paypal-Transmission-Sig']);
 
-    $res= openssl_verify($data, $sig, $key, 'sha256WithRSAEncryption');
+    $res= openssl_verify($data, $sig, $pubkey, 'sha256WithRSAEncryption');
 
     if ($res == 0) {
       $f3->error(500, "Webhook signature validation failed.");
