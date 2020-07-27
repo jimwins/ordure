@@ -101,8 +101,8 @@ gtag('event', 'checkout_progress', {
           </div>
 
           <div class="form-group col-sm-12">
-            <label for="phone">Phone (optional)</label>
-            <input type="text" class="form-control" name="phone"
+            <label for="phone">Phone</label>
+            <input type="text" class="form-control" name="phone" required
                    autocomplete="tel-national"
                    placeholder="213-627-7223"
                    value="{{ @shipping_address.phone }}">
