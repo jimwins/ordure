@@ -2796,6 +2796,10 @@ Your order will be reviewed, and you will receive another email within one busin
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
 
+    if (!$sale->shipping_method && $sale->shipping > 0) {
+      $sale->shipping_method= 'default';
+    }
+
     $sale->status= 'unpaid';
     $sale->save();
 
