@@ -385,7 +385,7 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
   $data= json_decode($body);
 
-  if ($data->event_type == 'CHECKOUT.ORDER.APPROVED') {
+  if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
     $uuid= $data->resource->purchase_units[0]->reference_id;
     $order_id= $data->resource->id;
 
