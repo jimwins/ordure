@@ -840,7 +840,7 @@ class Sale {
                            ['CaptureResult']
                            ['CaptureDetails']
                            ['CaptureStatus']
-                           ['CreationTimestamp'];
+                           ['LastUpdateTimestamp'];
             # XXX should convert to local timezone since that's how we roll
             $pay->captured= (new \Datetime($when))->format('Y-m-d H:i:s');
 
