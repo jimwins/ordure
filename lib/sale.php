@@ -857,7 +857,7 @@ class Sale {
 
           $pay->save();
         } else {
-          error_log("response " . json_encode($$res->toArray()));
+          error_log("response " . json_encode($res->toArray()));
           $f3->error(500, "Error processing Amazon payment.");
         }
       }
