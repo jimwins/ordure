@@ -143,11 +143,8 @@ class Page {
       echo Template::instance()->render($template);
     } elseif ($item->load(array('code=?', $path))) {
       $slug= Catalog::getProductSlug($f3, $item->product);
-      if ($slug) {
-        $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug); 
-      } else {
-        $f3->error(404);
-      }
+      $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug .
+                   '/' . $item->code);
     } elseif (is_file($path)) {
       \Web::instance()->send($path, NULL, 0, false);
     } else {
@@ -386,6 +383,7 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   $data= json_decode($body);
 
   if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
+    $order_href= $data->resource->links[3]->href;
     $uuid= $data->resource->purchase_units[0]->reference_id;
     $order_id= $data->resource->id;
 
