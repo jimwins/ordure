@@ -8,7 +8,7 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
-    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product/@item", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product/*", 'Catalog->product');
     $f3->route("GET|HEAD /$CATALOG/brand", 'Catalog->brands');
     $f3->route("GET|HEAD /$CATALOG/brand/@brand", 'Catalog->brand');
 
@@ -285,7 +285,7 @@ class Catalog {
     $f3->set('items', $items);
     $f3->set('variations', $variations);
 
-    if ($f3->get('PARAMS.item')) {
+    if ($args['*']) {
       $item= new DB\SQL\Mapper($db, 'item');
       $item->description= '""';
       $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
@@ -306,7 +306,7 @@ class Catalog {
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
-      $item->load(array('code = ?', $f3->get('PARAMS.item')));
+      $item->load(array('code = ?', $args['*']));
       $item->media= json_decode($item->media, true);
       $f3->set('featured_item', $item);
     }
@@ -633,7 +633,7 @@ class Catalog {
     /* Check if this a direct match for an item code */
     if ($term && preg_match('!^[-A-Z0-9/.]+$!i', $term)) {
       $item= new DB\SQL\Mapper($db, 'item');
-      $item->load(array('code=?', $term));
+      $item->load(array('code=? AND active', $term));
 
       if (!$item->dry()) {
         $product= new DB\SQL\Mapper($db, 'product');
@@ -649,7 +649,7 @@ class Catalog {
             if (!$dept->dry()) {
               $f3->reroute('/'. $f3->get('CATALOG') . '/' .
                            $dept->slug . '/' . $subdept_slug . '/' .
-                           $product->slug, false);
+                           $product->slug . '/' . $item->code, false);
             }
           }
         }
