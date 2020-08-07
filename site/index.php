@@ -141,7 +141,7 @@ class Page {
 
       $template= empty($path) ? 'home.html' : 'page.html';
       echo Template::instance()->render($template);
-    } elseif ($item->load(array('code=?', $path))) {
+    } elseif ($item->load(array('code=? AND active', $path))) {
       $slug= Catalog::getProductSlug($f3, $item->product);
       $f3->reroute('/' . $f3->get('CATALOG') . '/' . $slug .
                    '/' . $item->code);
