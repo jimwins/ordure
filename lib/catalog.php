@@ -286,6 +286,9 @@ class Catalog {
     $f3->set('variations', $variations);
 
     if ($args['*']) {
+      // sometimes 'product' arg leaks into '*'?
+      $code= preg_replace("!^{$args['product']}/!", '', $args['*']);
+
       $item= new DB\SQL\Mapper($db, 'item');
       $item->description= '""';
       $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
@@ -306,7 +309,7 @@ class Catalog {
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
-      $item->load(array('code = ?', $args['*']));
+      $item->load(array('code = ?', $code));
       $item->media= json_decode($item->media, true);
       $f3->set('featured_item', $item);
     }
