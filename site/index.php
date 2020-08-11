@@ -208,43 +208,17 @@ $f3->route('POST /contact', function ($f3, $args) {
 
   $template= preg_replace('/[^a-z]/', '', $f3->get('REQUEST.template'));
 
-  $httpClient= new \Http\Adapter\Guzzle6\Client(new \GuzzleHttp\Client());
-  $sparky= new \SparkPost\SparkPost($httpClient,
-                         [ 'key' => $f3->get('SPARKPOST_KEY') ]);
+  $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
   $text= Template::instance()->render('email-' . $template . '.txt');
 
-  $promise= $sparky->transmissions->post([
-    'content' => [
-      'text' => $text,
-      'subject' => $f3->get('REQUEST.subject'),
-      'from' => array('name' => 'Raw Materials Art Supplies',
-                      'email' => $f3->get('CONTACT_SALES')),
-      'reply_to' => $f3->get('REQUEST.email')
-    ],
-    'recipients' => [
-      [
-        'address' => [
-          'name' => '',
-          'email' => $f3->get('CONTACT'),
-        ],
-      ],
-    ],
-    'options' => [
-      'inlineCss' => true,
-      'transactional' => true,
-      // Don't mess with URLs
-      'click_tracking' => false,
-    ],
-  ]);
+  $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
 
-  try {
-    $response= $promise->wait();
-    // XXX handle response
-  } catch (\Exception $e) {
-    error_log(sprintf("SparkPost failure: %s (%s)",
-                      $e->getMessage(), $e->getCode()));
-  }
+  return $postmark->sendEmail(
+    $from, $f3->get('CONTACT'), $f3->get('REQUEST.subject'),
+    NULL, $text, NULL, NULL,
+    $f3->get('REQUEST.email'), NULL, NULL, NULL, NULL, NULL
+  );
 
   $db= $f3->get('DBH');
 
