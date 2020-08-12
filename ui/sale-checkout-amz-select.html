@@ -44,16 +44,33 @@ gtag('event', 'begin_checkout', {
     <div class="panel-body">
       <div class="form-group">
         <label>Shipping Address</label>
+        <check if="@CAN_PICKUP">
+          <p>
+            <strong>Where do you want to us to ship the order?</strong>
+            We can have your order prepared for pick-up at the store, or
+            we can ship it anywhere in the United States. (Sorry, we don't ship
+            internationally.)
+          </p>
+
+          <p>
+            <a href="{{ @BASE }}/cart/set-in-store-pickup"
+               class="btn btn-primary btn-block">
+              <i class="fa fa-building"></i> Pick it up at the store!
+            </a>
+          </p>
+
+          <p>
+            You will be contacted when your pick-up is ready. Current pickup
+            hours are Tuesday through Saturday between noon and 3pm.
+          </p>
+        </check>
+
+        <p>
+          Or select your address for shipping:
+        </p>
+
         <div id="shipping_error" class="alert alert-danger"
              style="display: none"></div>
-        <check if="@CAN_PICKUP">
-          <div class="alert alert-danger">
-            <b>Please note that all orders paid using Amazon Pay must be shipped
-            to you.</b> To order for curbside pickup, you must pay by credit
-            card or PayPal using <a href="/cart/checkout">our regular
-            checkout</a>.
-          </div>
-        </check>
         <div id="addressBookWidgetDiv"
              style="width:100%; height:240px;">
         </div> 
