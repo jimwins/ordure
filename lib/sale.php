@@ -77,7 +77,7 @@ class Sale {
       $f3->route("POST /cart/change-shipping-option",
                  'Sale->change_shipping_option');
       $f3->route("POST /cart/set-address", 'Sale->set_address');
-      $f3->route("POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
+      $f3->route("GET|POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
       $f3->route("POST /cart/set-shipping-method", 'Sale->set_shipping_method');
       $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
       $f3->route("POST /cart/place-order", 'Sale->place_order');
@@ -1489,8 +1489,10 @@ class Sale {
       $sale_uuid= $f3->get('COOKIE.cartID');
     }
 
-    if (!$sale_uuid)
+    if (!$sale_uuid) {
+      error_log("No sale_uuid found.\n");
       $f3->error(404);
+    }
 
     $db= $f3->get('DBH');
 
