@@ -2513,7 +2513,7 @@ if (0) {
     // reload
     $sale= $this->load($f3, $uuid, 'uuid');
 
-    self::send_order_email($f3, $comment);
+    self::send_order_review_email($f3, $comment);
     self::send_order_placed_email($f3);
 
     $this->forget_cart($f3, $args);
@@ -2711,7 +2711,7 @@ if (0) {
     echo "Success!";
   }
 
-  function send_order_email($f3, $comment= null) {
+  function send_order_review_email($f3, $comment= null) {
     $postmark= new \Postmark\PostmarkClient($f3->get('POSTMARK_TOKEN'));
 
     $f3->set('comment', $comment);
@@ -2738,13 +2738,11 @@ if (0) {
     $attach= [ $logo ];
 
     $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
-    $to_list= str_replace(',', '', $f3->get('sale.name')) . " " .
-              $f3->get('sale.email');
-    $bcc= $from;
+    $to_list= $from;
 
     return $postmark->sendEmail(
       $from, $to_list, $f3->get('title'), $html, NULL, NULL, NULL,
-      NULL, NULL, $bcc, NULL, $attach, NULL
+      NULL, NULL, NULL, NULL, $attach, NULL
     );
   }
 
@@ -3050,7 +3048,7 @@ Your order will be reviewed, and you will receive another email within one busin
 
   function send_order_test($f3, $args) {
     $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
-    self::send_order_email($f3);
+    self::send_order_review_email($f3);
     $f3->reroute("status");
   }
 
