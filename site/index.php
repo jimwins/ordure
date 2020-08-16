@@ -214,7 +214,7 @@ $f3->route('POST /contact', function ($f3, $args) {
 
   $from= "Raw Materials Art Supplies " . $f3->get('CONTACT_SALES');
 
-  return $postmark->sendEmail(
+  $postmark->sendEmail(
     $from, $f3->get('CONTACT'), $f3->get('REQUEST.subject'),
     NULL, $text, NULL, NULL,
     $f3->get('REQUEST.email'), NULL, NULL, NULL, NULL, NULL
