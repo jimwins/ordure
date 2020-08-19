@@ -325,11 +325,13 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
   $headers= $f3->get('HEADERS');
 
+/*
   error_log("Paypal-Transmission-Id: {$headers['Paypal-Transmission-Id']}\n");
   error_log("Paypal-Transmission-Time: {$headers['Paypal-Transmission-Time']}\n");
   error_log("Paypal-Cert-Url: {$headers['Paypal-Cert-Url']}\n");
   error_log("Paypal-Transmission-Sig: {$headers['Paypal-Transmission-Sig']}\n");
   error_log("Paypal generated crc32: " . crc32($body) . "\n");
+*/
 
   // adapted from https://stackoverflow.com/a/62870569
   if ($webhook_id) {
@@ -347,16 +349,13 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
     $res= openssl_verify($data, $sig, $pubkey, 'sha256WithRSAEncryption');
 
     if ($res == 0) {
-      error_log("Webhook signature validation failed.\n");
-      //$f3->error(500, "Webhook signature validation failed.");
+      $f3->error(500, "Webhook signature validation failed.");
     } elseif ($res < 0) {
-      error_log("Error validating signature: " . openssl_error_string() . "\n");
-      //$f3->error(500, "Error validating signature: " . openssl_error_string());
+      $f3->error(500, "Error validating signature: " . openssl_error_string());
     }
   }
 
   $data= json_decode($body);
-  error_log("PayPal body $body\n");
 
   if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
     $sale= new Sale();
@@ -367,18 +366,17 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
         $order_href= $link->href;
       }
     }
-    error_log("PayPal order_href is $order_href\n");
+
     $order_id= basename(parse_url($order_href, PHP_URL_PATH));
-    error_log("PayPal order_id is $order_id\n");
+
 
     $client= $sale->get_paypal_client($f3);
 
     $response= $client->execute(
       new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
     );
-    error_log("paypal response: " . json_encode($response->result) . "\n");
 
-    $uuid= $response->result->resource->purchase_units[0]->reference_id;
+    $uuid= $response->result->purchase_units[0]->reference_id;
 
     return $sale->handle_paypal_payment($f3, $uuid, $order_id);
   }
