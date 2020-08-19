@@ -347,10 +347,11 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
     $res= openssl_verify($data, $sig, $pubkey, 'sha256WithRSAEncryption');
 
     if ($res == 0) {
-      $f3->error(500, "Webhook signature validation failed.");
+      error_log("Webhook signature validation failed.\n");
+      //$f3->error(500, "Webhook signature validation failed.");
     } elseif ($res < 0) {
-      error_log("Error validating signature: " . openssl_error_string());
-      $f3->error(500, "Error validating signature: " . openssl_error_string());
+      error_log("Error validating signature: " . openssl_error_string() . "\n");
+      //$f3->error(500, "Error validating signature: " . openssl_error_string());
     }
   }
 
@@ -361,7 +362,12 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
     $sale= new Sale();
 
     // this is so dumb.
-    $order_href= $data->resource->links[3]->href;
+    foreach ($data->resource->links as $link) {
+      if ($link->rel == 'up') {
+        $order_href= $link->href;
+      }
+    }
+    error_log("PayPal order_href is $order_href\n");
     $order_id= basename(parse_url($order_href, PHP_URL_PATH));
     error_log("PayPal order_id is $order_id\n");
 
