@@ -357,11 +357,23 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   $data= json_decode($body);
 
   if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
-    $order_href= $data->resource->links[3]->href;
-    $uuid= $data->resource->purchase_units[0]->reference_id;
-    $order_id= $data->resource->id;
+    $sale= new Sale();
 
-    return (new Sale())->handle_paypal_payment($f3, $uuid, $order_id);
+    // this is so dumb.
+    $order_href= $data->resource->links[3]->href;
+    $order_id= basename(parse_url($order_href, PHP_URL_PATH));
+    error_log("PayPal order_id is $order_id\n");
+
+    $client= $sale->get_paypal_client($f3);
+
+    $response= $client->execute(
+      new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
+    );
+    error_log("paypal response: " . json_encode($response->result) . "\n");
+
+    $uuid= $response->result->resource->purchase_units[0]->reference_id;
+
+    return $sale->handle_paypal_payment($f3, $uuid, $order_id);
   }
 
 });
