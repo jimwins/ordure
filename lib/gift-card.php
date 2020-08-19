@@ -25,7 +25,6 @@ class GiftCard {
         "amount" => $amount,
         "currency" => "usd",
         "source" => $token,
-        "receipt_email" => $f3->get('REQUEST.email'),
       ));
     } catch (\Stripe\Error\Card $e) {
       // The card has been declined!
