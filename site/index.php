@@ -355,6 +355,7 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   }
 
   $data= json_decode($body);
+  error_log("PayPal body $body\n");
 
   if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
     $sale= new Sale();
