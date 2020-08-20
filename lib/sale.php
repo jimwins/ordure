@@ -1173,6 +1173,7 @@ class Sale {
     $shipping_rate= $f3->get('shipping_rate');
     $shipping_status= $f3->get('shipping_status');
     $shipping= 0.00;
+    $shipping_tax= 0.00;
 
     switch ($shipping_rate) {
     case 'small':
@@ -1623,6 +1624,7 @@ class Sale {
 
     if ($shipping == 'auto') {
       $sale->shipping= 0.00;
+      $sale->shipping_tax= 0.00;
       $sale->shipping_manual= 0;
     } else {
       $sale->shipping= $shipping;
