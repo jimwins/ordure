@@ -404,6 +404,30 @@ $f3->route('GET|POST /~webhook/sandbox-paypal', function ($f3) {
 
 });
 
+/* Pass through test/staging webhooks */
+$f3->route('GET|POST /~webhook/test/@name', function ($f3) {
+  $key= $f3->get('REQUEST.key');
+
+  if ($key != $f3->get('WEBHOOK_KEY')) {
+    $f3->error(500, 'Wrong key.');
+  }
+
+  $client= new \GuzzleHttp\Client();
+  $url= $f3->get('SANDBOX_BACKEND') . $f3->get('SERVER.REQUEST_URI');
+
+  // TODO pass along headers
+  $res= $client->request($f3->get('SERVER.REQUEST_METHOD'), $url, [
+    'headers' => [
+      'Content-type' => $f3->get('SERVER.HTTP_CONTENT_TYPE'),
+    ],
+    'body' => $f3->get('BODY'),
+  ]);
+
+  // TODO pass through headers
+  echo $res->getBody();
+
+});
+
 
 /* Pass through webhooks to Scat */
 $f3->route('GET|POST /~webhook/@name', function ($f3) {
