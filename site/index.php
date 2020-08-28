@@ -413,7 +413,8 @@ $f3->route('GET|POST /~webhook/test/@name', function ($f3) {
   }
 
   $client= new \GuzzleHttp\Client();
-  $url= $f3->get('SANDBOX_BACKEND') . $f3->get('SERVER.REQUEST_URI');
+  $request_uri= preg_replace('!/test/!', '/', $f3->get('SERVER.REQUEST_URI'));
+  $url= $f3->get('SANDBOX_BACKEND') . $request_uri;
 
   // TODO pass along headers
   $res= $client->request($f3->get('SERVER.REQUEST_METHOD'), $url, [
