@@ -214,7 +214,7 @@ $("#giftcard-use").on("submit", function (ev) {
   return false;
 });
 
-document.getElementById('other-use').addEventListener('submit', (ev) => {
+document.getElementById('other-use')?.addEventListener('submit', (ev) => {
   ev.preventDefault()
 
   var $form= $(ev.target);
