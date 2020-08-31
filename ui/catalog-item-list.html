@@ -1,0 +1,96 @@
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th class="col-xs-2">Item No.</th>
+      <th class="col-xs-3">Description</th>
+      <th class="col-xs-1">List</th>
+      <th class="col-xs-1">Sale</th>
+      <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in stock at the store.">In Stock</th>
+      <check if="{{ @FEATURE_cart && @CAN_ORDER }}">
+        <th class="col-xs-1"></th>
+      </check>
+    </tr>
+  </thead>
+  <tbody>
+    <repeat group="{{ @items }}" value="{{ @item }}">
+
+        <tr data-item="{{ @item.id }}">
+          <td nowrap>
+            <a href="/{{ @item.code | rawurlencode }}">{{ @item.code }}</a>
+          </td>
+          <td style="{{ @item_style_color(@item.thumbnail) }}">
+            {{ @item.name }}
+          </td>
+          <td>
+            {{ Catalog::amount(@item.retail_price * max(@item.purchase_quantity,1)) }}
+            <check if="{{ @item.purchase_quantity > 1 }}">
+              <br><small>({{ @item.purchase_quantity }} pieces)</small>
+            </check>
+          </td>
+          <td class="text-primary">
+            <strong>
+              {{ @item.sale_price ? Catalog::amount(@item.sale_price * max(@item.purchase_quantity,1)) : '' }}
+            </strong>
+          </td>
+          <td class="text-center">
+            <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
+              <true>
+                <check if="@item.stocked > 0">
+                  <true>
+                    <small class="text-success">In stock</small>
+                  </true>
+                  <false>
+                    <check if="@item.minimum_quantity > 0">
+                      <true>
+                        <small class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</small>
+                      </true>
+                      <false>
+                        <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+                      </false>
+                    </check>
+                  </false>
+                </check>
+              </true>
+              <false>
+                <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
+                  <true>
+                    <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
+                  </true>
+                  <false>
+                    <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+                  </false>
+                </check>
+              </false>
+            </check>
+            <check if="@item.prop65">
+              <a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+            </check>
+            <check if="@item.hazmat">
+              <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+            </check>
+            <check if="@item.oversized">
+              <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+            </check>
+          </td>
+          <check if="@FEATURE_cart && @CAN_ORDER && ((@CAN_PICKUP || @CAN_SHIP) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
+            <true>
+              <td>
+                <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+                      action="/cart/add-item" method="POST">
+                  <input type="hidden"
+                         name="item" value="{{ @item.code }}">
+                  <button type="submit" class="btn btn-primary btn-xs">
+                    <i class="fa fa-plus-square"></i> Add to Cart
+                  </button>
+                </form>
+              </td>
+            </true>
+            <false>
+              <td></td>
+            </false>
+          </check>
+        </tr>
+
+    </repeat>
+  </tbody>
+</table>

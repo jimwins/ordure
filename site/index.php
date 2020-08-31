@@ -295,6 +295,7 @@ Auth::addRoutes($f3);
 /* Handle catalog URLs */
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);
+Catalog::addFunctions($f3);
 
 /* Handle buying gift card */
 require '../lib/gift-card.php';

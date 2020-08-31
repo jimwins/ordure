@@ -28,6 +28,37 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG/sitemap.xml", 'Catalog->sitemap');
   }
 
+  static function addFunctions($f3) {
+    $f3->set('itemList', function (...$items) use ($f3) {
+      return self::itemList($f3, $items);
+    });
+  }
+
+  static function itemList($f3, $list) {
+    $db= $f3->get('DBH');
+
+    $items= [];
+
+    foreach ($list as $code) {
+      $item= new DB\SQL\Mapper($db, 'item');
+      $item->description= '""';
+      $item->media= '""';
+      $item->minimum_quantity= 1;
+      $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
+                           scat_item.discount_type,
+                           scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
+      $item->stocked= '(SELECT stock + minimum_quantity
+                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->is_dropshippable= '(SELECT is_dropshippable
+                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->load(array('code = ?', $code));
+      $items[]= $item;
+    }
+
+    $f3->set('items', $items);
+
+    echo Template::instance()->render("catalog-item-list.html");
+  }
 
   static function amount($d) {
     return ($d < 0 ? '(' : '') . '$' . sprintf("%.2f", abs($d)) . ($d < 0 ? ')' : '');
