@@ -2107,6 +2107,7 @@ class Sale {
         "amount" => $amount,
         "currency" => "usd",
         "source" => $token,
+        "invoice" => $sale->id,
       ));
     } catch (\Stripe\Error\Card $e) {
       // The card has been declined!
