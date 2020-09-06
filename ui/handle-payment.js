@@ -214,32 +214,34 @@ $("#giftcard-use").on("submit", function (ev) {
   return false;
 });
 
-document.getElementById('other-use')?.addEventListener('submit', (ev) => {
-  ev.preventDefault()
+if (document.getElementById('other-use')) {
+  document.getElementById('other-use').addEventListener('submit', (ev) => {
+    ev.preventDefault()
 
-  var $form= $(ev.target);
-  let formData= new FormData(ev.target);
+    var $form= $(ev.target);
+    let formData= new FormData(ev.target);
 
-  $form.find('[type="submit"]').prop('disabled', true);
-  $form.find('.errors').addClass('hidden');
+    $form.find('[type="submit"]').prop('disabled', true);
+    $form.find('.errors').addClass('hidden');
 
-  $.ajax({ dataType: 'json', method: 'POST',
-           url: $form.attr('action'),
-           data: Object.fromEntries(formData)
-  })
-   .done(function (data) {
-     if (data.paid) {
-       window.location.href= "/sale/{{ @sale.uuid }}/thanks";
-     } else {
-       window.location.href= "/sale/{{ @sale.uuid }}/pay";
-     }
-   })
-   .fail(function (jqXHR, textStatus, errorThrown) {
-     $form.find('.errors').text(jqXHR.responseJSON.text ?
-                                jqXHR.responseJSON.text : textStatus); 
-     $form.find('.errors').removeClass('hidden');
-     $form.find('[type="submit"]').prop('disabled', false);
-   });
+    $.ajax({ dataType: 'json', method: 'POST',
+             url: $form.attr('action'),
+             data: Object.fromEntries(formData)
+    })
+     .done(function (data) {
+       if (data.paid) {
+         window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+       } else {
+         window.location.href= "/sale/{{ @sale.uuid }}/pay";
+       }
+     })
+     .fail(function (jqXHR, textStatus, errorThrown) {
+       $form.find('.errors').text(jqXHR.responseJSON.text ?
+                                  jqXHR.responseJSON.text : textStatus);
+       $form.find('.errors').removeClass('hidden');
+       $form.find('[type="submit"]').prop('disabled', false);
+     });
 
-  return false;
-});
+    return false;
+  });
+}
