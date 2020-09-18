@@ -542,7 +542,7 @@ class Sale {
             {
               $stage= 'shipping-method';
             } else {
-              if ($sale->shipping_method != 'default') {
+              if (!$sale->shipping_method) {
                 $sale->shipping_method= 'default';
                 $sale->save();
                 $sale= $this->load($f3, $uuid, 'uuid');
