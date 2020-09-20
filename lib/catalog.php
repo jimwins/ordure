@@ -123,28 +123,8 @@ class Catalog {
     echo Template::instance()->render('catalog-dept.html');
   }
 
-  function subdept($f3, $args) {
+  function find_products($f3, $where, $options) {
     $db= $f3->get('DBH');
-
-    $dept= new DB\SQL\Mapper($db, 'department');
-    $dept->products= '(SELECT COUNT(*)
-                         FROM product
-                        WHERE department = department.id)';
-
-    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
-      or $f3->error(404);
-
-    $f3->set('dept', $dept->cast());
-
-    $departments= $dept->find(array('parent=?', $dept->id),
-                              array('order' => 'name'));
-
-    $f3->set('departments', $departments);
-
-    $dept->load(array('slug=?', $f3->get('PARAMS.subdept')))
-      or $f3->error(404);
-
-    $f3->set('subdept', $dept);
 
     $product= new DB\SQL\Mapper($db, 'product');
     $product->brand_name= '(SELECT name
@@ -173,11 +153,7 @@ class Catalog {
                             AND item.active)';
 
     $ds= \Sale::can_dropship($f3) ? '!!is_dropshippable,' : '';
-    $products= $product->find(array('department = ? AND active',
-                                    $dept->id),
-                              array('order' =>
-                                      "!!IFNULL(stocked,0),$ds !active, brand_name, name"));
-
+    $products= $product->find($where, $options);
 
     foreach ($products as &$product) {
       $product['slug']= Catalog::getProductSlug($f3, $product['id']);
@@ -187,6 +163,38 @@ class Catalog {
                              'alt_text' => $product->name ] ];
       }
     }
+
+    return $products;
+  }
+
+  function subdept($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->products= '(SELECT COUNT(*)
+                         FROM product
+                        WHERE department = department.id)';
+
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
+      or $f3->error(404);
+
+    $f3->set('dept', $dept->cast());
+
+    $departments= $dept->find(array('parent=?', $dept->id),
+                              array('order' => 'name'));
+
+    $f3->set('departments', $departments);
+
+    $dept->load(array('slug=?', $f3->get('PARAMS.subdept')))
+      or $f3->error(404);
+
+    $f3->set('subdept', $dept);
+
+    $products= $this->find_products(
+      $f3,
+      [ 'department = ? AND active', $dept->id ],
+      [ 'order' => "!!IFNULL(stocked,0),$ds !active, brand_name, name" ]
+    );
 
     $f3->set('products', $products);
 
@@ -392,39 +400,11 @@ class Catalog {
 
     $f3->set('departments', $departments);
 
-    $product= new DB\SQL\Mapper($db, 'product');
-    $product->brand_name= '(SELECT name
-                              FROM brand
-                             WHERE brand = brand.id)';
-    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
-                           FROM item
-                           JOIN scat_item ON item.code = scat_item.code
-                          WHERE item.product = product.id)';
-    $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
-                                                        "uuid", image.uuid,
-                                                        "name", image.name,
-                                                        "alt_text", image.alt_text,
-                                                        "width", image.width,
-                                                        "height", image.height,
-                                                        "ext", image.ext))
-                        FROM product_to_image
-                        LEFT JOIN image ON image.id = product_to_image.image_id
-                       WHERE product_to_image.product_id = product.id
-                       GROUP BY product.id)';
-
-    $products= $product->find(array('brand = ? AND active',
-                                    $brand->id),
-                              array('order' =>
-                                      '!!IFNULL(stocked,0), !active, brand_name, name'));
-
-    foreach ($products as &$product) {
-      $product['slug']= Catalog::getProductSlug($f3, $product['id']);
-      $product->media= json_decode($product->media, true);
-      if (!$product->media && $product->image) {
-        $product->media= [ [ 'src' => $product->image,
-                             'alt_text' => $product->name ] ];
-      }
-    }
+    $products= $this->find_products(
+      $f3,
+      [ 'brand = ? AND active', $brand->id ],
+      [ 'order' => '!!IFNULL(stocked,0), !active, brand_name, name' ]
+    );
 
     $f3->set('products', $products);
 
@@ -706,23 +686,16 @@ class Catalog {
            LIMIT 100
           OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
       
-      $products= $sph->exec($q, $term);
+      $res= $sph->exec($q, $term);
 
-      /* XXX sphinx doesn't have full slug stored */
-      foreach ($products as &$product) {
-        $product['slug']= Catalog::getProductSlug($f3, $product['id']);
-        /* Sphinx may not have name, etc, either */
-        if (!$product['name']) {
-          $id= $product['id'];
-          $prod= new DB\SQL\Mapper($db, 'product');
-          $prod->brand_name= '(SELECT name
-                                    FROM brand
-                                   WHERE brand = brand.id)';
-          $prod->load(array('id=?', $id));
-          $product['name']= $prod->name;
-          $product['brand_name']= $prod->brand_name;
-        }
-      }
+      $ids= array_map(function ($i) { return $i['id']; }, $res);
+
+      /* This is a gross way of maintaining the order */
+      $products= $this->find_products(
+        $f3,
+        [ 'id IN (' . join(',', $ids) . ')' ],
+        [ 'order' => 'FIELD(id, "' . join('","', $ids) . '")' ]
+      );
 
       $f3->set('products', $products);
     }
