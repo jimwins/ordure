@@ -47,8 +47,8 @@ class Catalog {
       $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
                            scat_item.discount_type,
                            scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
-      $item->stocked= '(SELECT stock + minimum_quantity
-                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
+                          FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->load(array('code = ?', $code));
@@ -141,7 +141,7 @@ class Catalog {
                         LEFT JOIN image ON image.id = product_to_image.image_id
                        WHERE product_to_image.product_id = product.id
                        GROUP BY product.id)';
-    $product->stocked= '(SELECT SUM(stock) + SUM(minimum_quantity)
+    $product->stocked= '(SELECT SUM(IF(stock > 0, stock, 0)) + SUM(minimum_quantity)
                            FROM item
                            JOIN scat_item ON item.code = scat_item.code
                           WHERE item.product = product.id
@@ -302,7 +302,7 @@ class Catalog {
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
                 scat_item.discount_type, scat_item.discount,
-                stock stocked,
+                IF(stock > 0, stock, 0) stocked,
                 minimum_quantity, is_dropshippable,
                 item.prop65, item.oversized, item.hazmat,
                 thumbnail, active
@@ -310,7 +310,7 @@ class Catalog {
            LEFT JOIN scat_item ON scat_item.code = item.code
           WHERE product = ? $active
           ORDER BY variation, !active,
-                   IF(minimum_quantity OR stocked, 0, 1), code";
+                   IF(minimum_quantity OR stocked > 0, 0, 1), code";
 
     $items= $db->exec($q, $product['id']);
 
@@ -344,7 +344,7 @@ class Catalog {
                           LEFT JOIN image ON image.id = item_to_image.image_id
                          WHERE item_to_image.item_id = item.id
                          GROUP BY item.id)';
-      $item->stocked= '(SELECT stock + minimum_quantity
+      $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
@@ -492,7 +492,7 @@ class Catalog {
                            scat_item.discount_type,
                            scat_item.discount) sale_price,
                 discount_type, discount,
-                stock stocked,
+                IF(stock > 0, stock, 0) stocked,
                 thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
