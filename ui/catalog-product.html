@@ -181,8 +181,7 @@ gtag('event', 'view_item', {
       </div>
     </check>
 
-    <check if="{{ count(@variations) > 1 &&
-               @product.variation_style == 'tabs' }}">
+    <check if="0">
       <ul class="nav nav-tabs">
         <repeat group="{{ @variations }}"
                 key="{{ @variation }}"
@@ -195,14 +194,12 @@ gtag('event', 'view_item', {
       </ul>
     </check>
 
-    <div class="{{ @product.variation_style == 'tabs' ? 'tab-content' : '' }}">
+    <div>
       <repeat group="{{ @variations }}"
               key="{{ @variation }}"
               value="{{ @num }}"
               counter="{{ @ctr }}">
-        <check if="{{ @product.variation_style == 'flat' }}">
-          <h4>{{ @variation }}</h4>
-        </check>
+        <h4>{{ @variation }}</h4>
         <div class="tab-pane {{ @ctr == 1 ? 'active' : '' }}"
              id="v{{ @ctr }}">
           <table class="table table-condensed table-striped">
