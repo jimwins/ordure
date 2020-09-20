@@ -688,14 +688,16 @@ class Catalog {
       
       $res= $sph->exec($q, $term);
 
-      $ids= array_map(function ($i) { return $i['id']; }, $res);
+      if (count($res)) {
+        $ids= array_map(function ($i) { return $i['id']; }, $res);
 
-      /* This is a gross way of maintaining the order */
-      $products= $this->find_products(
-        $f3,
-        [ 'id IN (' . join(',', $ids) . ')' ],
-        [ 'order' => 'FIELD(id, "' . join('","', $ids) . '")' ]
-      );
+        /* This is a gross way of maintaining the order */
+        $products= $this->find_products(
+          $f3,
+          [ 'id IN (' . join(',', $ids) . ')' ],
+          [ 'order' => 'FIELD(id, "' . join('","', $ids) . '")' ]
+        );
+      }
 
       $f3->set('products', $products);
     }
