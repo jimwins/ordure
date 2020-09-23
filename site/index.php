@@ -405,6 +405,23 @@ $f3->route('GET|POST /~webhook/sandbox-paypal', function ($f3) {
 
 });
 
+$f3->route('GET|POST /~webhook/sandbox-stripe', function ($f3) {
+  $client= new \GuzzleHttp\Client();
+  $url= $f3->get('SANDBOX') . '/~webhook/stripe';
+
+  $headers= $f3->get('HEADERS');
+  $res= $client->request($f3->get('SERVER.REQUEST_METHOD'), $url, [
+    'headers' => [
+      'Content-type' => $f3->get('SERVER.HTTP_CONTENT_TYPE'),
+      'Stripe-Signature' => $headers['Stripe-Signature'],
+    ],
+    'body' => $f3->get('BODY'),
+  ]);
+
+  echo $res->getBody();
+
+});
+
 /* Pass through test/staging webhooks */
 $f3->route('GET|POST /~webhook/test/@name', function ($f3) {
   $key= $f3->get('REQUEST.key');
