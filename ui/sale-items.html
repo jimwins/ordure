@@ -163,6 +163,9 @@
           <check if="{{ @data.method == 'gift' }}">
             Paid with Gift Card 
           </check>
+          <check if="{{ @data.method == 'loyalty' }}">
+            Paid with Loyalty Reward ({{ @data.data.points }} points)
+          </check>
           <check if="{{ @data.method == 'other' }}">
             Paid
           </check>

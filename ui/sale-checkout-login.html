@@ -15,41 +15,68 @@ gtag('event', 'begin_checkout', {
   ]
 });
 </script>
-<form method="POST" action="{{ @BASE }}/cart/update-person">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">
-        Your information
-      </h3>
-    </div>
-    <div class="panel-body">
-      <div class="row">
-        <p class="col-sm-12">
-          <strong>Thanks for ordering!</strong>
-          To get started, we'll need to know who you are and how we can
-          contact you via email.
-        </p>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Your information
+    </h3>
+  </div>
+  <div class="panel-body">
+    <p>
+      <strong>Thanks for ordering!</strong>
+      To get started, we'll need to know who you are and how we can
+      contact you via email. You can either:
+    </p>
 
-        <div class="form-group col-sm-12">
+    <p>
+      <strong>Log in to your rewards account</strong> so you can use your loyalty
+      rewards! Don't have an account? <a href="/rewards">Register
+      now.</a>
+    </p>
+
+    <div class="well">
+      <form class="form-inline"
+            method="POST" action="{{ @BASE }}/login/get-link">
+        <div class="form-group">
+          <input type="hidden" name="cart" value="{{ @sale.uuid }}">
+          <label for="loyalty">
+            Phone number or email address
+          </label>
+          <input type="text" class="form-control"
+                 id="loyalty" name="loyalty"
+                 placeholder="213-627-7223">
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Get Link
+        </button>
+      </form>
+    </div>
+
+    <p>
+      <strong>Or don't log in and just proceed with checking out:</strong>
+    </p>
+
+    <div class="well">
+      <form method="POST" action="{{ @BASE }}/cart/update-person">
+        <div class="form-group">
           <label for="email">Email</label>
           <input type="email" class="form-control" name="email" required
                  placeholder="vincent.van.gogh@example.com"
                  value="{{ @sale.email }}">
         </div>
 
-        <div class="form-group col-sm-12">
+        <div class="form-group">
           <label for="name">Name</label>
           <input type="text" class="form-control" name="name" required
                  autocomplete="name"
                  placeholder="Vincent Van Gogh"
                  value="{{ @sale.name }}">
         </div>
-      </div>
-    </div>
-    <div class="panel-footer">
-      <button type="submit" class="btn btn-primary">
-        Submit
-      </button>
+
+        <button type="submit" class="btn btn-primary">
+          Submit
+        </button>
+      </form>
     </div>
   </div>
-</form>
+</div>

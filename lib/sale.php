@@ -43,6 +43,8 @@ class Sale {
                'Sale->process_paypal_payment');
     $f3->route("POST /sale/@sale/process-other-payment [ajax]",
                'Sale->process_other_payment');
+    $f3->route("POST /sale/@sale/process-rewards",
+               'Sale->process_rewards_payment');
     $f3->route("POST /sale/@sale/remove-item [ajax]", 'Sale->remove_item');
     $f3->route("POST /sale/@sale/update-item [ajax]", 'Sale->update_item');
     $f3->route("POST /sale/@sale/set-address", 'Sale->set_address');
@@ -565,6 +567,29 @@ class Sale {
       if ($stage == 'shipping-method') {
         $default_rate= $this->calculate_default_shipping($f3, $sale);
         $f3->set('default_shipping_rate', $default_rate);
+      }
+
+      // Paying? Figure out if rewards are available.
+      if ($stage == 'payment') {
+        $person= \Auth::authenticated_user_details($f3);
+        if ($person /* && !rewards_already_used */) {
+          $points= $person['points_available'];
+          $due= bcsub($sale->total, $sale->paid);
+          if ($points > 1000 && $due > 100.00) {
+            $person['points_to_use']= 1000;
+            $person['credit_available']= 100.00;
+          } elseif ($points > 250 && $due > 20.00) {
+            $person['points_to_use']= 250;
+            $person['credit_available']= 20.00;
+          } elseif ($points > 100 && $due > 6.00) {
+            $person['points_to_use']= 100;
+            $person['credit_available']= 6.00;
+          } elseif ($points > 50 && $due > 2.00) {
+            $person['points_to_use']= 50;
+            $person['credit_available']= 2.00;
+          }
+          $f3->set('rewards', $person);
+        }
       }
 
       $f3->set('stage', $stage);
@@ -2464,6 +2489,60 @@ if (0) {
     $payment->save();
 
     if ($amount != $sale->total - $sale->paid) {
+      echo json_encode(array('paid' => 0));
+      return;
+    }
+
+    self::capture_sales_tax($f3, $sale);
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    echo json_encode(array('paid' => 1));
+
+    $f3->abort(); // let client go
+
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
+  }
+
+  function process_rewards_payment($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
+
+    $due= bcsub($sale->total, $sale->paid);
+
+    $person= \Auth::authenticated_user_details($f3);
+
+    $points= $person['points_available'];
+    if ($points > 1000 && $due > 100.00) {
+      $points= 1000;
+      $amount= 100.00;
+    } elseif ($points > 250 && $due > 20.00) {
+      $points= 250;
+      $amount= 20.00;
+    } elseif ($points > 100 && $due > 6.00) {
+      $points= 100;
+      $amount= 6.00;
+    } elseif ($points > 50 && $due > 2.00) {
+      $points= 50;
+      $amount= 2.00;
+    }
+
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+    $payment->sale_id= $sale->id;
+    $payment->method= 'loyalty';
+    $payment->amount= $amount;
+    $payment->data= json_encode(array(
+      'points' => $points,
+    ));
+    $payment->save();
+
+    if ($sale->total - ($sale->paid + $amount) > 0) {
+      $sale->status= 'unpaid';
+      $sale->save();
+
       echo json_encode(array('paid' => 0));
       return;
     }

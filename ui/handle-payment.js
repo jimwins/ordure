@@ -169,6 +169,27 @@ $("#giftcard-use").on("submit", function (ev) {
   return false;
 });
 
+$("#rewards-use").on("click", function (ev) {
+  var $btn= $(ev.target);
+
+  $btn.prop('disabled', true);
+
+  $.ajax({ dataType: 'json', method: 'POST',
+           url: "/sale/{{ @sale.uuid }}/process-rewards" })
+   .done(function (data) {
+     if (data.paid) {
+       window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+     } else {
+       window.location.href= "/sale/{{ @sale.uuid }}/pay";
+     }
+   })
+   .fail(function (jqXHR, textStatus, errorThrown) {
+     window.alert(jqXHR.responseJSON.text ?  jqXHR.responseJSON.text : textStatus);
+   });
+
+  return false;
+});
+
 if (document.getElementById('other-use')) {
   document.getElementById('other-use').addEventListener('submit', (ev) => {
     ev.preventDefault()

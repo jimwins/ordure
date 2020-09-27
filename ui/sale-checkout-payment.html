@@ -32,6 +32,61 @@ gtag('event', 'checkout_progress', {
 </check>
 
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+  <check if="{{ @rewards }}">
+    <!-- Loyalty -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="pay-rewards-heading">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse"
+             data-parent="#accordion" href="#pay-rewards"
+             aria-expanded="true" area-controls="pay-rewards">
+            <i class="fa fa-birthday-cake fa-lg"></i>
+            Use Loyalty Rewards
+          </a>
+        </h4>
+      </div>
+      <div id="pay-rewards" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-rewards-heading">
+        <div class="panel-body">
+          <check if="{{ @rewards.points_available > 0 }}">
+            <true>
+              <p><b>You have {{ @rewards.points_available }} points
+              available.</b>
+
+              <check if="{{ @rewards.points_to_use }}">
+                <true>
+                  If you'd rather not use any yet, you can skip down to just
+                  pay for this order and you'll just keep racking them up!
+                  </p>
+
+                  <p>
+                    <button class="btn btn-primary btn-block btn-lg"
+                            id="rewards-use">
+                      Use {{ @rewards.points_to_use }} points
+                      for a {{ @amount(@rewards.credit_available) }}
+                      store credit
+                    </button>
+                  </p>
+                </true>
+                <false>
+                  But you aren't spending enough to be able to use any
+                  rewards right now.</p>
+                </false>
+              </check>
+            </true>
+            <false>
+              <p><b>You don't have enough points for a reward yet</b>, but
+              don't forget that you earn one point for every $1 you spend (tax
+              not included). You'll earn your first reward when you have 50
+              points!</p>
+            </false>
+          </check>
+        </div>
+      </div>
+    </div>
+  </check>
+
+  <!-- Credit Card -->
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="pay-credit-card-heading">
       <h4 class="panel-title">
@@ -84,6 +139,7 @@ gtag('event', 'checkout_progress', {
     </div>
   </div>
 
+  <!-- PayPal -->
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="pay-paypal-heading">
       <h4 class="panel-title">
@@ -130,6 +186,7 @@ gtag('event', 'checkout_progress', {
     </div>
   </div>
 
+  <!-- Gift Card -->
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="pay-giftcard-heading">
       <h4 class="panel-title">
