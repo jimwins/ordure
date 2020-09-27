@@ -62,30 +62,8 @@ loadScript('https://js.stripe.com/v3/',
                url: form.getAttribute('action'),
                data: Object.fromEntries(formData) })
        .done(function (data) {
-         <check if="{{ @sale }}">
-        gtag('event', 'purchase', {
-           "transaction_id": "{{ @sale.uuid }}",
-           "affiliation": "Online Store",
-           "value": {{ @sale.total }},
-           "currency": "USD",
-           "tax": {{ @sale.tax }},
-           "shipping": {{ @sale.shipping }},
-           "items": [
-        <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-        <check if="{{ @index > 1 }}">,</check>
-        {
-          'id': "p{{ @item.product_id }}",
-          'name': "{{ @item.product_name }}",
-          'brand': "{{ @item.brand_name }}",
-          'variant': "{{ @item.code }}",
-          'quantity': "{{ @item.quantity }}",
-          'price': "{{ @item.sale_price }}",
-        }
-        </repeat>
-          ]
-        });
-        </check>
-        window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+         reportPurchase()
+         window.location.href= "/sale/{{ @sale.uuid }}/thanks";
        })
        .fail(function (jqXHR, textStatus, errorThrown) {
          var displayError= document.getElementById('card-errors');
@@ -123,31 +101,8 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
           method: 'post',
           body: formData
         }).then(function (data) {
-         <check if="{{ @sale }}">
-          // XXX error handling?
-          gtag('event', 'purchase', {
-             "transaction_id": "{{ @sale.uuid }}",
-             "affiliation": "Online Store",
-             "value": {{ @sale.total }},
-             "currency": "USD",
-             "tax": {{ @sale.tax }},
-             "shipping": {{ @sale.shipping }},
-             "items": [
-          <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-          <check if="{{ @index > 1 }}">,</check>
-          {
-            'id': "p{{ @item.product_id }}",
-            'name': "{{ @item.product_name }}",
-            'brand': "{{ @item.brand_name }}",
-            'variant': "{{ @item.code }}",
-            'quantity': "{{ @item.quantity }}",
-            'price': "{{ @item.sale_price }}",
-          }
-          </repeat>
-            ]
-          });
-          </check>
           if (data.ok) {
+            reportPurchase()
             window.location.href= "/sale/{{ @sale.uuid }}/thanks"
           }
         });
@@ -244,4 +199,35 @@ if (document.getElementById('other-use')) {
 
     return false;
   });
+}
+
+function reportPurchase() {
+  try {
+    <check if="{{ @sale }}">
+      gtag('event', 'purchase', {
+        "transaction_id": "{{ @sale.uuid }}",
+        "affiliation": "Online Store",
+        "value": {{ @sale.total }},
+        "currency": "USD",
+        "tax": {{ @sale.tax }},
+        "shipping": {{ @sale.shipping }},
+        "items": [
+          <repeat group="{{ @items }}"
+                  value="{{ @item }}" counter="{{ @index }}">
+            <check if="{{ @index > 1 }}">,</check>
+            {
+              'id': "p{{ @item.product_id }}",
+              'name': "{{ @item.product_name }}",
+              'brand': "{{ @item.brand_name }}",
+              'variant': "{{ @item.code }}",
+              'quantity': "{{ @item.quantity }}",
+              'price': "{{ @item.sale_price }}",
+            }
+          </repeat>
+        ]
+      });
+    </check>
+  } catch (error) {
+    console.error(error)
+  }
 }
