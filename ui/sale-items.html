@@ -15,7 +15,7 @@
       <td></td>
 <check if="{{ @FEATURE_cart && @sale.status == 'cart' && !@stage}}">
   <true>
-      <td>
+      <td class="{{ !@data.stock ? 'has-error' : (@data.stock < @data.quantity ? 'has-warning' : '') }}">
         <div style="width: 6em">
           <div class="input-group input-group-sm">
             <input type="text"
@@ -29,17 +29,31 @@
             </span>
           </div>
         </div>
+        <small class="help-block">
         <check if="{{ @data.purchase_quantity > 1 }}">
           <true>
-            <small class="help-block">
-              Must be multiple of {{ @data.purchase_quantity }}
-            </span>
+            Must be multiple of {{ @data.purchase_quantity }}.<br>
           </true>
           <false>
             <check if="{{ @CAN_DROPSHIP && (@data.is_dropshippable > 1) }}">
-              <small class="help-block">
-                Must be multiple of {{ @data.is_dropshippable }} for shipping
-              </span>
+              Must be multiple of {{ @data.is_dropshippable }} for shipping.<br>
+            </check>
+          </false>
+        </check>
+        <check if="{{ @data.stock }}">
+          <true>
+            <check if="{{ @data.stock < @data.quantity }}">
+              {{ @data.stock }} currently available.
+            </check>
+          </true>
+          <false>
+            <check if="{{ @data.minimum_quantity }}">
+              <true>
+                Out of stock.
+              </true>
+              <false>
+                Special order item.
+              </false>
             </check>
           </false>
         </check>

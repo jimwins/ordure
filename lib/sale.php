@@ -295,6 +295,7 @@ class Sale {
     $item->width= "(SELECT width FROM item WHERE item_id = item.id)";
     $item->length= "(SELECT length FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
+    $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
