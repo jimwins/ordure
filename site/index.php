@@ -265,6 +265,7 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
 
   touch('/tmp/last-loaded-prices');
 
+  $f3->get('log')->debug("Loaded $rows prices.");
   echo "Loaded $rows prices.";
 });
 
