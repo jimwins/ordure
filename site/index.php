@@ -234,6 +234,7 @@ $f3->route('POST /contact', function ($f3, $args) {
 
 // Handle updated pricing
 $f3->route('POST /update-pricing', function ($f3, $args) {
+  $f3->get('log')->debug("Loading updated pricing.");
 
   $db= $f3->get('DBH');
 
