@@ -413,7 +413,7 @@ class Sale {
         $status['special']++;
       }
       // no stock and not stocked? special order.
-      if (!$scat_item->stock && !$scat_item->minimum_quantity) {
+      if (!$scat_item->stock && !$scat_item->minimum_quantity && $scat_item->purchase_quantity) {
         $status['special']++;
       }
       // more in order than in stock? stock is limited.
