@@ -16,27 +16,36 @@
 <check if="{{ @FEATURE_cart && @sale.status == 'cart' && !@stage}}">
   <true>
       <td class="{{ !@data.stock ? 'has-error' : (@data.stock < @data.quantity ? 'has-warning' : '') }}">
-        <div style="width: 6em">
-          <div class="input-group input-group-sm">
-            <input type="text"
-                   class="form-control"
-                   name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
-            <span class="input-group-btn">
-              <a href="/cart/remove-item?item={{ @data.id}}"
-                 class="btn btn-default">
-                <i class="fa fa-remove"></i>
-              </a>
-            </span>
-          </div>
-        </div>
-        <small class="help-block">
-        <check if="{{ @data.purchase_quantity > 1 }}">
+        <check if="{{ @data.kit_id }}">
           <true>
-            Must be multiple of {{ @data.purchase_quantity }}.<br>
+            {{ @data.quantity }}
+            <small class="help-block">
+              Part of a kit.<br>
           </true>
           <false>
-            <check if="{{ @CAN_DROPSHIP && (@data.is_dropshippable > 1) }}">
-              Must be multiple of {{ @data.is_dropshippable }} for shipping.<br>
+            <div style="width: 6em">
+              <div class="input-group input-group-sm">
+                <input type="text"
+                       class="form-control"
+                       name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
+                <span class="input-group-btn">
+                  <a href="/cart/remove-item?item={{ @data.id}}"
+                     class="btn btn-default">
+                    <i class="fa fa-remove"></i>
+                  </a>
+                </span>
+              </div>
+            </div>
+            <small class="help-block">
+            <check if="{{ @data.purchase_quantity > 1 }}">
+              <true>
+                Must be multiple of {{ @data.purchase_quantity }}.<br>
+              </true>
+              <false>
+                <check if="{{ @CAN_DROPSHIP && (@data.is_dropshippable > 1) }}">
+                  Must be multiple of {{ @data.is_dropshippable }} for shipping.<br>
+                </check>
+              </false>
             </check>
           </false>
         </check>
@@ -68,10 +77,18 @@
         <span>{{ @data.name }}</span>
         <div class="small">{{ @data.detail }}</div>
       </td>
-      <td class="text-right">{{ @amount(@data.sale_price) }}</td>
-      <td class="text-right">
-        {{ @amount(@data.sale_price * @data.quantity) }}
-      </td>
+      <check if="{{ @data.kit_id }}">
+        <true>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </true>
+        <false>
+          <td class="text-right">{{ @amount(@data.sale_price) }}</td>
+          <td class="text-right">
+            {{ @amount(@data.sale_price * @data.quantity) }}
+          </td>
+        </false>
+      </check>
     </tr>
   </repeat>
   </tbody>

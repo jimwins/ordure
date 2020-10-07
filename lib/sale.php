@@ -964,6 +964,8 @@ class Sale {
 
     $db= $f3->get('DBH');
 
+    $db->begin();
+
     $item_code= trim($f3->get('REQUEST.item'));
 
     $sale= $this->load($f3, $sale_uuid, 'uuid')
@@ -987,8 +989,9 @@ class Sale {
     $line= new DB\SQL\Mapper($db, 'sale_item');
 
     if ($item->npurchase_quantity > 0) {
+      /* Don't include items that are parts of a kit */
       $existing= $line->find([
-        'sale_id = ? AND item_id = ?',
+        'sale_id = ? AND item_id = ? AND kit_id IS NULL',
         $sale->id, $item->id
       ]);
     }
@@ -996,6 +999,18 @@ class Sale {
     if ($existing) {
       $existing[0]->quantity+= $item->npurchase_quantity;
       $existing[0]->save();
+
+      /* Was this a kit? Need to adjust quantities of kit items */
+      // XXX this assumes kit contents haven't changed
+      if ($item->is_kit) {
+        $q= "UPDATE sale_item, kit_item
+                SET sale_item.quantity = ? * kit_item.quantity
+              WHERE sale_id = ?
+                AND kit_item.kit_id = ?
+                AND sale_item.item_id = kit_item.item_id";
+        $db->exec($q, [ $existing[0]->quantity, $sale->id, $item->id ]);
+      }
+
     } else {
       $line->sale_id= $sale->id;
       $line->item_id= $item->id;
@@ -1008,7 +1023,25 @@ class Sale {
       $line->tax= 0.00;
 
       $line->insert();
+
+      /* Was this a kit? Need to ad the kit items */
+      // XXX this assumes kit contents haven't changed
+      if ($item->is_kit) {
+        $q= "INSERT INTO sale_item
+                    (sale_id, item_id, kit_id, quantity, retail_price, tax)
+             SELECT ?,
+                    item_id,
+                    kit_id,
+                    ? * quantity,
+                    0.00,
+                    0.00
+               FROM kit_item
+              WHERE kit_item.kit_id = ?";
+        $db->exec($q, [ $sale->id, $line->quantity, $item->id ]);
+      }
     }
+
+    $db->commit();
 
     // reload sale so shipping gets recalculated correctly
     $sale= $this->load($f3, $sale_uuid, 'uuid');
@@ -1044,10 +1077,22 @@ class Sale {
     $line= new DB\SQL\Mapper($db, 'sale_item');
     $line->load(array('id = ?', $sale_item_id))
       or $f3->error(404);
+    if ($line->kit_id) {
+      $f3->error(500, "Can't remove kit items individually.");
+    }
     if ($line->sale_id != $sale->id) {
       $f3->error(500);
     }
+    $db->begin();
+    $item= new DB\SQL\Mapper($db, 'item');
+    $item->load(array('id = ?', $line->item_id))
+      or $f3->error(404);
+    if ($item->is_kit) {
+      $q= "DELETE FROM sale_item WHERE sale_id = ? AND kit_id = ?";
+      $db->exec($q, [ $sale->id, $item->id ]);
+    }
     $line->erase();
+    $db->commit();
 
     $this->update_shipping_and_tax($f3, $sale);
 
@@ -1074,6 +1119,10 @@ class Sale {
     $line= new DB\SQL\Mapper($db, 'sale_item');
     $line->load(array('id = ?', $sale_item_id))
       or $f3->error(404);
+
+    if ($line->kit_id) {
+      $f3->error(500, "Can't edit kit items individually.");
+    }
 
     if ($f3->exists('REQUEST.quantity')) {
       $line->quantity= (int)$f3->get('REQUEST.quantity');
@@ -1145,6 +1194,8 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
+    $db->begin();
+
     if ($sale->status != 'new' && $sale->status != 'cart')
       $f3->error(500);
 
@@ -1152,6 +1203,10 @@ class Sale {
       $line= new DB\SQL\Mapper($db, 'sale_item');
       $line->load(array('id = ?', $id))
         or $f3->error(404);
+
+      if ($line->kit_id) {
+        $f3->error(500, "Can't change kit items individually.");
+      }
 
       $item= new DB\SQL\Mapper($db, 'item');
       $item->is_dropshippable= "(SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code)";
@@ -1177,10 +1232,25 @@ class Sale {
       if ((int)$val) {
         $line->quantity= (int)$val;
         $line->save();
+
+        if ($item->is_kit) {
+          $q= "UPDATE sale_item, kit_item
+                  SET sale_item.quantity = ? * kit_item.quantity
+                WHERE sale_id = ?
+                  AND kit_item.kit_id = ?
+                  AND sale_item.item_id = kit_item.item_id";
+          $db->exec($q, [ $line->quantity, $sale->id, $item->id ]);
+        }
       } else {
+        if ($line->is_kit) {
+          $q= "DELETE FROM sale_item WHERE sale_id = ? AND kit_id = ?";
+          $db->exec($q, [ $sale->id, $item->id ]);
+        }
         $line->erase();
       }
     }
+
+    $db->commit();
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 

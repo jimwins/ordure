@@ -32,6 +32,9 @@ class Catalog {
     $f3->set('itemList', function (...$items) use ($f3) {
       return self::itemList($f3, $items);
     });
+    $f3->set('kit', function ($code) use ($f3) {
+      return self::kit($f3, $code);
+    });
   }
 
   static function itemList($f3, $list) {
@@ -58,6 +61,32 @@ class Catalog {
     $f3->set('items', $items);
 
     echo Template::instance()->render("catalog-item-list.html");
+  }
+
+  static function kit($f3, $code) {
+    $db= $f3->get('DBH');
+
+    $items= [];
+
+    $item= new DB\SQL\Mapper($db, 'item');
+    $item->sale_price= "IFNULL((SELECT sale_price(scat_item.retail_price,
+                         scat_item.discount_type,
+                         scat_item.discount) FROM scat_item WHERE scat_item.code = item.code), retail_price)";
+    $item->load(array('code = ?', $code));
+
+    $f3->set('kit', $item);
+
+    $q= "SELECT item.id, code, name, retail_price, kit_item.quantity,
+                (SELECT IF(stock > 0, stock, 0) + minimum_quantity
+                   FROM scat_item WHERE item.code = scat_item.code) stocked
+           FROM kit_item
+           JOIN item ON kit_item.item_id = item.id
+          WHERE kit_id = ?";
+    $items= $db->exec($q, [ $item->id ]);
+
+    $f3->set('items', $items);
+
+    echo Template::instance()->render("catalog-kit.html");
   }
 
   static function amount($d) {
