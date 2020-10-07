@@ -417,7 +417,7 @@ class Sale {
         $status['special']++;
       }
       // more in order than in stock? stock is limited.
-      if ($scat_item->stock < $sale_item['quantity']) {
+      if ($scat_item->stock < $sale_item['quantity'] && $scat_item->purchase_quantity) {
         $status['stock_limited']++;
       }
 
