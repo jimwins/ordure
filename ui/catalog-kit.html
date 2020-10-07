@@ -48,49 +48,48 @@
               <br><small>({{ @item.purchase_quantity }} pieces)</small>
             </check>
           </td>
-          <td class="text-center">
-            <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
-              <true>
-                <check if="@item.stocked > 0">
-                  <true>
-                    <small class="text-success">In stock</small>
-                  </true>
-                  <false>
-                    <check if="@item.minimum_quantity > 0">
-                      <true>
-                        <small class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</small>
-                      </true>
-                      <false>
-                        <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
-                      </false>
-                    </check>
-                  </false>
-                </check>
-              </true>
-              <false>
-                <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
-                  <true>
-                    <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
-                  </true>
-                  <false>
-                    <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
-                  </false>
-                </check>
-              </false>
-            </check>
-            <check if="@item.prop65">
-              <a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
-            </check>
-            <check if="@item.hazmat">
-              <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
-            </check>
-            <check if="@item.oversized">
-              <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
-            </check>
-          </td>
+<td class="text-center">
+<check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
+<true>
+<check if="@item.stocked > 0">
+<true>
+<small class="text-success">In stock</small>
+</true>
+<false>
+<check if="@item.minimum_quantity > 0">
+<true>
+<small class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</small>
+</true>
+<false>
+<small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+</false>
+</check>
+</false>
+</check>
+</true>
+<false>
+<check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
+<true>
+<small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
+</true>
+<false>
+<small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+</false>
+</check>
+</false>
+</check>
+<check if="@item.prop65">
+<a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+</check>
+<check if="@item.hazmat">
+<a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+</check>
+<check if="@item.oversized">
+<a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+</check>
+</td>
           <td>{{ @item.quantity }}</td>
         </tr>
-
     </repeat>
   </tbody>
 </table>
