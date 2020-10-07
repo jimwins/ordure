@@ -997,7 +997,7 @@ class Sale {
     }
 
     if ($existing) {
-      $existing[0]->quantity+= $item->npurchase_quantity;
+      $existing[0]->quantity+= max(1, $item->npurchase_quantity);
       $existing[0]->save();
 
       /* Was this a kit? Need to adjust quantities of kit items */
@@ -1014,7 +1014,7 @@ class Sale {
     } else {
       $line->sale_id= $sale->id;
       $line->item_id= $item->id;
-      $line->quantity= $item->npurchase_quantity;
+      $line->quantity= max(1, $item->npurchase_quantity);
       $line->retail_price= $item->nretail_price;
       $line->discount_type= $item->discount_type;
       $line->discount= $item->discount;
