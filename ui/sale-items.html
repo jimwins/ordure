@@ -56,12 +56,15 @@
             </check>
           </true>
           <false>
-            <check if="{{ @data.minimum_quantity }}">
+            <check if="{{ @data.minimum_quantity && @data.purchase_quantity }}">
               <true>
                 Out of stock.
               </true>
               <false>
-                Special order item.
+                <check if="{{ @data.purchase_quantity }}">
+                  Special order item.
+                </check>
+                <exclude>No purchase quantity means it doesn't have stock.</exclude>
               </false>
             </check>
           </false>
