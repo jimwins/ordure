@@ -290,6 +290,10 @@ $f3->route('GET /track/gso/@code', function ($f3, $args) {
   $f3->reroute('https://www.gso.com/Tracking/PackageDetail?TrackingNumber=' . $f3->get('PARAMS.code'));
 });
 
+$f3->route('GET /track/yrc/@code', function ($f3, $args) {
+  $f3->reroute('http://my.yrc.com/dynamic/national/servlet?CONTROLLER=com.rdwy.ec.rextracking.http.controller.ProcessPublicTrackingController&PRONumber=' . $f3->get('PARAMS.code'));
+});
+
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
