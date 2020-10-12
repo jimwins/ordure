@@ -80,7 +80,7 @@ class Catalog {
                 (SELECT minimum_quantity
                    FROM scat_item
                   WHERE item.code = scat_item.code) minimum_quantity,
-                (SELECT IF(stock > 0, stock, 0) + minimum_quantity
+                (SELECT IF(stock > 0, stock, 0)
                    FROM scat_item WHERE item.code = scat_item.code) stocked
            FROM kit_item
            JOIN item ON kit_item.item_id = item.id
