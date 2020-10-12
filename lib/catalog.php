@@ -77,6 +77,9 @@ class Catalog {
     $f3->set('kit', $item);
 
     $q= "SELECT item.id, code, name, retail_price, kit_item.quantity,
+                (SELECT minimum_quantity
+                   FROM scat_item
+                  WHERE item.code = scat_item.code) minimum_quantity,
                 (SELECT IF(stock > 0, stock, 0) + minimum_quantity
                    FROM scat_item WHERE item.code = scat_item.code) stocked
            FROM kit_item
