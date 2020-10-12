@@ -8,10 +8,13 @@ class API {
     if (!$page->load(array('slug=?', $_REQUEST['slug']))) {
       $page->slug= $_REQUEST['slug'];
       $page->format= 'markdown';
+      $page->description= '';
     }
     $ret= $page->cast();
-    $text= Template::instance()->resolve($ret['content']);
-    $ret['rendered']= Markdown::instance()->convert($text);
+    if ($ret['content']) {
+      $text= Template::instance()->resolve($ret['content']);
+      $ret['rendered']= Markdown::instance()->convert($text);
+    }
     echo jsonp($f3, $ret);
   }
 

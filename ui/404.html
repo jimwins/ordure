@@ -5,6 +5,6 @@
   <p id="buttons"><a href="{{ @BASE }}/" class="btn btn-primary btn-lg" role="button">Start from the top &raquo;</a></p>
 </div>
 <script>
-  var slug404= "{{ str_replace(@BASE . "/", "", @URI) }}";
+  var slug404= "{{ preg_replace('!^/!', '', @URI) }}";
 </script>
 <include href="footer.html" />
