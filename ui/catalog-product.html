@@ -478,6 +478,52 @@ gtag('event', 'view_item', {
               </div>
             </check>
 
+            <div class="input-group">
+              <label>
+                Status
+              </label>
+              <p class="form-control-static">
+                      <check if="(@CAN_SHIP || @CAN_PICKUP) && (@featured_item.minimum_quantity || @featured_item.stocked)">
+                        <true>
+                          <check if="@featured_item.stocked > 0">
+                            <true>
+                              <span class="text-success">In stock</span>
+                            </true>
+                            <false>
+                              <check if="@featured_item.minimum_quantity > 0">
+                                <true>
+                                  <span class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</span>
+                                </true>
+                                <false>
+                                  <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                </false>
+                              </check>
+                            </false>
+                          </check>
+                        </true>
+                        <false>
+                          <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @featured_item.is_dropshippable">
+                            <true>
+                              <span class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</span>
+                            </true>
+                            <false>
+                              <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                            </false>
+                          </check>
+                        </false>
+                      </check>
+                      <check if="@featured_item.prop65">
+                        <a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+                      </check>
+                      <check if="@featured_item.hazmat">
+                        <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+                      </check>
+                      <check if="@featured_item.oversized">
+                        <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+                      </check>
+              </p>
+            </div>
+
             <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && @featured_item.stocked) || (@CAN_DROPSHIP && @featured_item.is_dropshippable)) ">
               <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@featured_item.code}}', 'quantity': '{{@featured_item.purchase_quantity}}', 'price': '{{@featured_item.sale_price}}' } ] })"
                     action="/cart/add-item" method="POST">

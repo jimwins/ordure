@@ -376,6 +376,8 @@ class Catalog {
                           LEFT JOIN image ON image.id = item_to_image.image_id
                          WHERE item_to_image.item_id = item.id
                          GROUP BY item.id)';
+      $item->minimum_quantity= '(SELECT minimum_quantity
+                             FROM scat_item WHERE item.code = scat_item.code)';
       $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
