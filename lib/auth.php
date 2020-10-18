@@ -17,6 +17,12 @@ class Auth {
     $f3->route("GET|HEAD /logout", 'Auth->logout');
   }
 
+  static function addFunctions($f3) {
+    $f3->set('currentUser', function () use ($f3) {
+      return self::authenticated_user($f3);
+    });
+  }
+
   static function prehash($password) {
     return base64_encode(hash('sha256', $password, true));
   }

@@ -297,6 +297,7 @@ $f3->route('GET /track/yrc/@code', function ($f3, $args) {
 /* Handle authentication */
 require '../lib/auth.php';
 Auth::addRoutes($f3);
+Auth::addFunctions($f3);
 
 /* Handle catalog URLs */
 require '../lib/catalog.php';

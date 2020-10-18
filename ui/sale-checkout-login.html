@@ -22,39 +22,50 @@ gtag('event', 'begin_checkout', {
     </h3>
   </div>
   <div class="panel-body">
-    <p>
-      <strong>Thanks for ordering!</strong>
-      To get started, we'll need to know who you are and how we can
-      contact you via email. You can either:
-    </p>
+    <check if="{{ @currentUser() }}">
+      <true>
+        <p>
+          <strong>You are signed in to your rewards account!</strong>
+          But we also need both your name and email to process this online
+          order.
+        </p>
+      </true>
+      <false>
+        <p>
+          <strong>Thanks for ordering!</strong>
+          To get started, we'll need to know who you are and how we can
+          contact you via email. You can either:
+        </p>
 
-    <p>
-      <strong>Log in to your rewards account</strong> so you can use your loyalty
-      rewards! Don't have an account? <a href="/rewards">Register
-      now.</a>
-    </p>
+        <p>
+          <strong>Log in to your rewards account</strong> so you can use your loyalty
+          rewards! Don't have an account? <a href="/rewards">Register
+          now.</a>
+        </p>
 
-    <div class="well">
-      <form class="form-inline"
-            method="POST" action="{{ @BASE }}/login/get-link">
-        <div class="form-group">
-          <input type="hidden" name="cart" value="{{ @sale.uuid }}">
-          <label for="loyalty">
-            Phone number or email address
-          </label>
-          <input type="text" class="form-control"
-                 id="loyalty" name="loyalty"
-                 placeholder="213-627-7223">
+        <div class="well">
+          <form class="form-inline"
+                method="POST" action="{{ @BASE }}/login/get-link">
+            <div class="form-group">
+              <input type="hidden" name="cart" value="{{ @sale.uuid }}">
+              <label for="loyalty">
+                Phone number or email address
+              </label>
+              <input type="text" class="form-control"
+                     id="loyalty" name="loyalty"
+                     placeholder="213-627-7223">
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Get Link
+            </button>
+          </form>
         </div>
-        <button type="submit" class="btn btn-primary">
-          Get Link
-        </button>
-      </form>
-    </div>
 
-    <p>
-      <strong>Or don't log in and just proceed with checking out:</strong>
-    </p>
+        <p>
+          <strong>Or don't log in and just proceed with checking out:</strong>
+        </p>
+      </false>
+    </check>
 
     <div class="well">
       <form method="POST" action="{{ @BASE }}/cart/update-person">
