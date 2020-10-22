@@ -2203,6 +2203,11 @@ class Sale {
         "amount" => $amount,
         "currency" => "usd",
         "source" => $token,
+        "billing_details" => [
+          "email" => $sale->email,
+          "name" => $sale->name,
+//          "phone" => $sale->phone,
+        ],
         "metadata" => [
           "sale_id" => $sale->id,
           "sale_uuid" => $sale->uuid,
