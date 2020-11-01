@@ -593,7 +593,7 @@ class Catalog {
   function wordforms($f3, $args) {
     $db= $f3->get('DBH');
 
-    $q= "SELECT CONCAT(source, ' > ', dest) wordform FROM wordform";
+    $q= "SELECT CONCAT(source, ' => ', dest) wordform FROM wordform";
     $wordforms= $db->exec($q);
 
     foreach ($wordforms as $wordform) {

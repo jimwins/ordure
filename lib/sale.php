@@ -591,6 +591,10 @@ class Sale {
           }
           $f3->set('rewards', $person);
         }
+
+        /* Get our Stripe payment intent */
+        $pi= $this->get_payment_intent($f3, $sale);
+        $f3->set('stripe_client_secret', $pi->client_secret);
       }
 
       $f3->set('stage', $stage);
@@ -2165,6 +2169,57 @@ class Sale {
     return $this->json($f3, $args);
   }
 
+  function get_payment_intent($f3, $sale) {
+    $stripe= new \Stripe\StripeClient($f3->get('STRIPE_SECRET_KEY'));
+
+    bcscale(2);
+    $due= bcsub($sale->total, $sale->paid);
+    $amount= (int)bcmul($due, 100);
+
+    if ($sale->stripe_payment_intent_id) {
+      $payment_intent= $stripe->paymentIntents->retrieve(
+        $sale->stripe_payment_intent_id
+      );
+
+      $stripe->customers->update($payment_intent->customer, [
+        'email' => $sale->email,
+        'name' => $sale->name,
+//        'phone' => $sale->phone,
+        'metadata' => [
+          "person_id" => $sale->person_id,
+        ],
+      ]);
+
+      if ($payment_intent->amount != $amount) {
+        $stripe->paymentIntents->update($sale->stripe_payment_intent_id, [
+          'amount' => $amount,
+        ]);
+      }
+    } else {
+      $customer= $stripe->customers->create([
+        'email' => $sale->email,
+        'name' => $sale->name,
+//        'phone' => $sale->phone,
+        'metadata' => [
+          "person_id" => $sale->person_id,
+        ],
+      ]);
+      $payment_intent= $stripe->paymentIntents->create([
+        'customer' => $customer->id,
+        'amount' => $amount,
+        'currency' => 'usd',
+        'metadata' => [
+          "sale_id" => $sale->id,
+          "sale_uuid" => $sale->uuid,
+        ],
+      ]);
+
+      $sale->stripe_payment_intent_id= $payment_intent->id;
+    }
+
+    return $payment_intent;
+  }
+
   function process_creditcard_payment($f3, $args) {
     $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
                     'publishable_key' => $f3->get('STRIPE_KEY'));
@@ -2203,13 +2258,6 @@ class Sale {
         "amount" => $amount,
         "currency" => "usd",
         "source" => $token,
-/*
-        "billing_details" => [
-          "email" => $sale->email,
-          "name" => $sale->name,
-//          "phone" => $sale->phone,
-        ],
-*/
         "metadata" => [
           "sale_id" => $sale->id,
           "sale_uuid" => $sale->uuid,
