@@ -971,6 +971,7 @@ class Sale {
     $db->begin();
 
     $item_code= trim($f3->get('REQUEST.item'));
+    $quantity= max((int)$f3->get('REQUEST.quantity'), 1);
 
     $sale= $this->load($f3, $sale_uuid, 'uuid')
       or $f3->error(404);
@@ -1001,7 +1002,7 @@ class Sale {
     }
 
     if ($existing) {
-      $existing[0]->quantity+= max(1, $item->npurchase_quantity);
+      $existing[0]->quantity+= max($quantity, $item->npurchase_quantity);
       $existing[0]->save();
 
       /* Was this a kit? Need to adjust quantities of kit items */
@@ -1018,7 +1019,7 @@ class Sale {
     } else {
       $line->sale_id= $sale->id;
       $line->item_id= $item->id;
-      $line->quantity= max(1, $item->npurchase_quantity);
+      $line->quantity= max($quantity, $item->npurchase_quantity);
       $line->retail_price= $item->nretail_price;
       $line->discount_type= $item->discount_type;
       $line->discount= $item->discount;
