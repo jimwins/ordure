@@ -429,15 +429,50 @@ $f3->route('GET|POST /~webhook/sandbox-stripe', function ($f3) {
 
 });
 
+/* Amazon webhooks */
+$f3->route('GET|POST /~webhook/amazon', function ($f3) {
+  $headers= $f3->get('HEADERS');
+  $body= $f3->get('BODY');
+
+  $handler= new \AmazonPay\IpnHandler($headers, $body);
+
+  $data= $handler->toArray();
+
+  error_log(json_encode($data)."\n");
+
+/*
+  if ($data['ObjectType'] == 'Notification') {
+    $sale= new Sale();
+
+    // this is so dumb.
+    foreach ($data->resource->links as $link) {
+      if ($link->rel == 'up') {
+        $order_href= $link->href;
+      }
+    }
+
+    $order_id= basename(parse_url($order_href, PHP_URL_PATH));
+
+    $client= $sale->get_paypal_client($f3);
+
+    $response= $client->execute(
+      new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
+    );
+
+    $uuid= $response->result->purchase_units[0]->reference_id;
+
+    return $sale->handle_paypal_payment($f3, $uuid, $order_id);
+  }
+*/
+});
+
 $f3->route('GET|POST /~webhook/sandbox-amazon', function ($f3) {
   $client= new \GuzzleHttp\Client();
   $url= $f3->get('SANDBOX') . '/~webhook/amazon';
 
   $headers= $f3->get('HEADERS');
   $res= $client->request($f3->get('SERVER.REQUEST_METHOD'), $url, [
-    'headers' => [
-      'Content-type' => $f3->get('SERVER.HTTP_CONTENT_TYPE'),
-    ],
+    'headers' => $headers,
     'body' => $f3->get('BODY'),
   ]);
 
