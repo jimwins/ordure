@@ -593,8 +593,10 @@ class Sale {
         }
 
         /* Get our Stripe payment intent */
+        /* Not yet
         $pi= $this->get_payment_intent($f3, $sale);
         $f3->set('stripe_client_secret', $pi->client_secret);
+        */
       }
 
       $f3->set('stage', $stage);
