@@ -2218,6 +2218,7 @@ class Sale {
       ]);
 
       $sale->stripe_payment_intent_id= $payment_intent->id;
+      $sale->save();
     }
 
     return $payment_intent;
