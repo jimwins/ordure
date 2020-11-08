@@ -84,16 +84,29 @@ loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
            function() {
   paypal.Buttons({
     createOrder: function (data, actions) {
-      return fetch('/sale/{{ @sale.uuid }}/get-paypal-order')
-        .then(function(res) {
-          return res.json()
-        })
-        .then(function(data) {
-          return data.id
-        })
+      return fetch('/sale/{{ @sale.uuid }}/get-paypal-order', {
+        // fake AJAX header so we get JSON errors
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            if (data.text == 'Payment already completed.') {
+              window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+            } else {
+              return Promise.reject(new Error(data.text))
+            }
+          })
+        }
+        return res.json()
+      })
+      .then(function(data) {
+        return data.id
+      })
     },
     onApprove: function(data, actions) {
       // Capture the funds from the transaction
+      // XXX show processing...
       return actions.order.capture().then(function(details) {
         let formData= new FormData(document.getElementById('paypal-form'))
         formData.append('order_id', details.id)
