@@ -2333,45 +2333,6 @@ class Sale {
 
     $ship_to= $f3->get('shipping_address');
 
-    $items= $f3->get('items');
-    $paypal_items= [];
-if (0) {
-    foreach ($items as $item) {
-      $paypal_items[]= [
-        'name' => $item['name'],
-        'unit_amount' => [
-          'currency_code' => 'USD',
-          'value' => sprintf('%.2f', $item['sale_price']),
-        ],
-        'tax' => [
-          'currency_code' => 'USD',
-          'value' => sprintf('%.2f', $item['tax']),
-        ],
-        'quantity' => $item['quantity'],
-        'sku' => $item['code'],
-        'category' => 'PHYSICAL_GOODS',
-      ];
-    }
-
-    /* PayPal doesn't understand taxable shipping, so treat as an item */
-    if ($sale->shipping > 0.00) {
-      $paypal_items[]= [
-        'name' => "Shipping",
-        'unit_amount' => [
-          'currency_code' => 'USD',
-          'value' => sprintf('%.2f', $sale->shipping),
-        ],
-        'tax' => [
-          'currency_code' => 'USD',
-          'value' => sprintf('%.2f', $sale->shipping_tax),
-        ],
-        'quantity' => 1,
-        'sku' => 'ZZ-SHIPPING',
-        'category' => 'PHYSICAL_GOODS',
-      ];
-    }
-}
-
     /* Less detail to the amount if order is partially paid already. */
     if ($sale->paid) {
       $amount=
@@ -2406,8 +2367,9 @@ if (0) {
       'purchase_units' => [
         [
           'reference_id' => $sale->uuid,
+          'custom_id' => $sale->uuid,
           'amount' => $amount,
-          'items' => $paypal_items,
+          'items' => [],
           'shipping' => [
             'name' => [
               'full_name' => $ship_to['name'],
@@ -2429,11 +2391,59 @@ if (0) {
 
     $client= $this->get_paypal_client($f3);
 
-    $request= new \PayPalCheckoutSdk\Orders\OrdersCreateRequest();
-    $request->prefer('return=representation');
-    $request->body= json_encode($order);
+    if ($sale->paypal_order_id) {
+      $response= $client->execute(
+        new \PayPalCheckoutSdk\Orders\OrdersGetRequest($sale->paypal_order_id)
+      );
 
-    $response= $client->execute($request);
+      $paypal_order= $response->result;
+
+      if ($paypal_order->status == 'COMPLETED') {
+        // Already completed? What are we doing here?
+        $f3->error(500, "Payment already completed.");
+      }
+
+      $patch= [
+        [
+          'op' => 'replace',
+          'path' => "/purchase_units/@reference_id=='{$sale->uuid}'/amount",
+          'value' => $order['purchase_units'][0]['amount'],
+        ],
+        [
+          'op' => 'replace',
+          'path' => "/purchase_units/@reference_id=='{$sale->uuid}'/shipping/name",
+          'value' => $order['purchase_units'][0]['shipping']['name'],
+        ],
+        [
+          'op' => 'replace',
+          'path' => "/purchase_units/@reference_id=='{$sale->uuid}'/shipping/address",
+          'value' => $order['purchase_units'][0]['shipping']['address'],
+        ],
+      ];
+
+      $request= new \PayPalCheckoutSdk\Orders\OrdersPatchRequest(
+        $sale->paypal_order_id
+      );
+      $request->body= json_encode($patch);
+
+      try {
+        $patch_response= $client->execute($request);
+      } catch (\PayPalHttp\HttpException $e) {
+        error_log("HttpException {$e->statusCode}: {$e->result}");
+        throw $e;
+      }
+
+    } else {
+      $request= new \PayPalCheckoutSdk\Orders\OrdersCreateRequest();
+      $request->prefer('return=representation');
+      $request->body= json_encode($order);
+
+      $response= $client->execute($request);
+
+      $sale->paypal_order_id= $response->result->id;
+      $sale->save();
+
+    }
 
     echo json_encode($response->result);
   }
@@ -2444,8 +2454,7 @@ if (0) {
     $sale= $this->load($f3, $uuid, 'uuid');
 
     $existing= new DB\SQL\Mapper($db, 'sale_payment');
-    // gross, but data is binary so can't use MySQL JSON magic yet
-    $has= $existing->load(array('data LIKE CONCAT("%id_:_",?,"%")', $order_id));
+    $has= $existing->load(array('data->"$.id" = ?', $order_id));
 
     // if we already have it, don't do it again!
     if ($has) {

@@ -333,14 +333,6 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
 
   $headers= $f3->get('HEADERS');
 
-/*
-  error_log("Paypal-Transmission-Id: {$headers['Paypal-Transmission-Id']}\n");
-  error_log("Paypal-Transmission-Time: {$headers['Paypal-Transmission-Time']}\n");
-  error_log("Paypal-Cert-Url: {$headers['Paypal-Cert-Url']}\n");
-  error_log("Paypal-Transmission-Sig: {$headers['Paypal-Transmission-Sig']}\n");
-  error_log("Paypal generated crc32: " . crc32($body) . "\n");
-*/
-
   // adapted from https://stackoverflow.com/a/62870569
   if ($webhook_id) {
     $data= join('|', [
@@ -368,23 +360,31 @@ $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   if ($data->event_type == 'PAYMENT.CAPTURE.COMPLETED') {
     $sale= new Sale();
 
-    // this is so dumb.
-    foreach ($data->resource->links as $link) {
-      if ($link->rel == 'up') {
-        $order_href= $link->href;
+    if (($uuid= $data->resource->custom_id)) {
+      $sale_obj= $sale->load($f3, $uuid, 'uuid');
+      $order_id= $sale_obj->paypal_order_id;
+
+      error_log("Loading order_id {$order_id} by custom_id {$uuid}\n");
+
+    } else { // an old payment where we didn't set custom_id
+      // this is so dumb.
+      foreach ($data->resource->links as $link) {
+        if ($link->rel == 'up') {
+          $order_href= $link->href;
+        }
       }
+
+      $order_id= basename(parse_url($order_href, PHP_URL_PATH));
+      error_log("Loading order by parsed up link {$order_id}\n");
+
+      $client= $sale->get_paypal_client($f3);
+
+      $response= $client->execute(
+        new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
+      );
+
+      $uuid= $response->result->purchase_units[0]->reference_id;
     }
-
-    $order_id= basename(parse_url($order_href, PHP_URL_PATH));
-
-
-    $client= $sale->get_paypal_client($f3);
-
-    $response= $client->execute(
-      new \PayPalCheckoutSdk\Orders\OrdersGetRequest($order_id)
-    );
-
-    $uuid= $response->result->purchase_units[0]->reference_id;
 
     return $sale->handle_paypal_payment($f3, $uuid, $order_id);
   }
