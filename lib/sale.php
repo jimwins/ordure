@@ -35,6 +35,10 @@ class Sale {
                'Sale->get_giftcard_balance');
     $f3->route("POST /sale/@sale/process-giftcard-payment",
                'Sale->process_giftcard_payment');
+    $f3->route("GET /sale/@sale/get-stripe-payment-intent",
+               'Sale->get_stripe_payment_intent');
+    $f3->route("POST /sale/@sale/process-stripe-payment",
+               'Sale->process_stripe_payment');
     $f3->route("POST /sale/@sale/process-creditcard-payment",
                'Sale->process_creditcard_payment');
     $f3->route("GET /sale/@sale/get-paypal-order",
@@ -591,12 +595,6 @@ class Sale {
           }
           $f3->set('rewards', $person);
         }
-
-        /* Get our Stripe payment intent */
-        /* Not yet
-        $pi= $this->get_payment_intent($f3, $sale);
-        $f3->set('stripe_client_secret', $pi->client_secret);
-        */
       }
 
       $f3->set('stage', $stage);
@@ -2172,7 +2170,10 @@ class Sale {
     return $this->json($f3, $args);
   }
 
-  function get_payment_intent($f3, $sale) {
+  function get_stripe_payment_intent($f3, $args) {
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
+
     $stripe= new \Stripe\StripeClient($f3->get('STRIPE_SECRET_KEY'));
 
     bcscale(2);
@@ -2183,6 +2184,10 @@ class Sale {
       $payment_intent= $stripe->paymentIntents->retrieve(
         $sale->stripe_payment_intent_id
       );
+
+      if ($payment_intent->status == 'succeeded') {
+        $f3->error(500, "Payment already completed.");
+      }
 
       $stripe->customers->update($payment_intent->customer, [
         'email' => $sale->email,
@@ -2221,7 +2226,76 @@ class Sale {
       $sale->save();
     }
 
-    return $payment_intent;
+    echo json_encode([
+      'secret' => $payment_intent->client_secret,
+    ]);
+  }
+
+  function handle_stripe_payment($f3, $uuid) {
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    $payment_intent_id= $sale->stripe_payment_intent_id;
+
+    $existing= new DB\SQL\Mapper($db, 'sale_payment');
+    $has= $existing->load([
+      'data->"$.payment_intent_id" = ?', $payment_intent_id
+    ]);
+
+    // if we already have it, don't do it again!
+    if ($has) {
+      error_log("Already processed Stripe payment $payment_intent_id\n");
+      return;
+    }
+
+    $stripe= new \Stripe\StripeClient($f3->get('STRIPE_SECRET_KEY'));
+
+    $payment_intent= $stripe->paymentIntents->retrieve($payment_intent_id, []);
+
+    if ($payment_intent->status != 'succeeded') {
+      $f3->error(500, "Can only handle successful payment attempts here.");
+    }
+
+    foreach ($payment_intent->charges->data as $charge) {
+      $payment= new DB\SQL\Mapper($db, 'sale_payment');
+      $payment->sale_id= $sale->id;
+      $payment->method= 'credit';
+      $payment->amount= $charge->amount / 100;
+      $payment->data= json_encode([
+        'payment_intent_id' => $payment_intent_id,
+        'charge_id' => $charge->id,
+        'cc_brand' => $charge->payment_method_details->card->brand,
+        'cc_last4' => $charge->payment_method_details->card->last4,
+      ]);
+      $payment->save();
+    }
+
+    self::capture_sales_tax($f3, $sale);
+
+    // save comment
+    $comment= $f3->get('REQUEST.comment');
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
+    $sale->status= 'paid';
+    $sale->save();
+
+    echo json_encode(array('message' => 'Success!'));
+
+    $f3->abort(); // let client go
+
+    // reload
+    $sale= $this->load($f3, $uuid, 'uuid');
+  }
+
+  function process_stripe_payment($f3, $args) {
+    return $this->handle_stripe_payment($f3, $f3->get('PARAMS.sale'));
   }
 
   function process_creditcard_payment($f3, $args) {

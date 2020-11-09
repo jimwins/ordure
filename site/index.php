@@ -412,6 +412,33 @@ $f3->route('GET|POST /~webhook/sandbox-paypal', function ($f3) {
 
 });
 
+$f3->route('GET|POST /~webhook/stripe', function ($f3) {
+  \Stripe\Stripe::setApiKey($f3->get('STRIPE_SECRET_KEY'));
+
+  try {
+    $event= \Stripe\Webhook::constructEvent(
+      $f3->get('BODY'),
+      $f3->get('HEADERS')['Stripe-Signature'],
+      $f3->get('STRIPE_WEBHOOK_SECRET')
+    );
+  } catch(\UnexpectedValueException $e) {
+    // Invalid payload
+    $f3->error(400, "Invalid payload");
+  } catch(\Stripe\Exception\SignatureVerificationException $e) {
+    $f3->error(400, "Signature exception");
+  }
+
+  // Handle the event
+  switch ($event->type) {
+    case 'payment_intent.succeeded':
+      $paymentIntent= $event->data->object; // contains a StripePaymentIntent
+      $sale= new Sale();
+      $uuid= $paymentIntent->charges->data[0]->metadata->sale_uuid;
+      $sale->handle_stripe_payment($f3, $uuid);
+      break;
+  }
+});
+
 $f3->route('GET|POST /~webhook/sandbox-stripe', function ($f3) {
   $client= new \GuzzleHttp\Client();
   $url= $f3->get('SANDBOX') . '/~webhook/stripe';

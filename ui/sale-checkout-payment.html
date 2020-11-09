@@ -100,10 +100,7 @@ gtag('event', 'checkout_progress', {
     </div>
     <div id="pay-credit-card" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-credit-card-heading">
       <div class="panel-body">
-        <form method="POST"
-              action="/sale/{{ @sale.uuid }}/process-creditcard-payment"
-              data-ajax="1"
-              id="payment-form">
+        <form id="payment-form">
           <noscript>
             <p class="alert alert-danger">
               Sorry, you must have Javascript enabled in order to pay
@@ -129,9 +126,10 @@ gtag('event', 'checkout_progress', {
             <textarea class="form-control" rows="6" name="comment"></textarea>
           </div>
 
-          <div id="card-errors" class="alert alert-danger hidden" role="alert">
+          <div id="stripe-error" class="alert alert-danger hidden" role="alert">
           </div>
-          <button class="btn btn-primary">
+          <button id="stripe-button" class="btn btn-primary">
+            <div class="spin hidden"><i class="fa fa-spinner fa-spin"></i></div>
             Pay {{ @amount(@sale.total - @sale.paid) }}
           </button>
         </form>

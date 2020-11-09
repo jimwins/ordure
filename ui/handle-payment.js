@@ -2,81 +2,101 @@ loadScript('https://js.stripe.com/v3/',
            function() {
   var stripe= Stripe('{{ @STRIPE_KEY }}');
   var elements= stripe.elements();
+  var button= document.getElementById('stripe-button');
+  var error= document.getElementById('stripe-error');
 
-  var style= {
-    base: {
-      lineHeight: '1.429'
-    }
+  var card= elements.create("card");
+  // Stripe injects an iframe into the DOM
+  card.mount("#card-element");
+
+  card.on("change", function (event) {
+    // Disable the Pay button if there are no card details in the Element
+    button.disabled= event.empty;
+    error.textContent= event.error ? event.error.message : ''
+    if (event.error) error.classList.remove('hidden')
+  });
+
+  var form= document.getElementById("payment-form");
+  form.addEventListener("submit", function(event) {
+    event.preventDefault();
+      return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
+        // fake AJAX header so we get JSON errors
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            if (data.text == 'Payment already completed.') {
+              window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+            } else {
+              return Promise.reject(new Error(data.text))
+            }
+          })
+        }
+        return res.json()
+      })
+      .then(function(data) {
+        payWithCard(stripe, card, data.secret);
+      })
+  });
+
+  var payWithCard= function(stripe, card, clientSecret) {
+    loading(true);
+    stripe
+      .confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: card,
+          billing_details: {
+            name: '{{ @sale.name }}',
+            email: '{{ @sale.email }}',
+          }
+        }
+      })
+      .then(function(result) {
+        if (result.error) {
+          // Show error to your customer
+          showError(result.error.message);
+        } else {
+          // The payment succeeded!
+    debugger
+          orderComplete(result.paymentIntent.id);
+        }
+      });
   };
 
-  var card= elements.create('card', { style: style });
-
-  card.mount('#card-element');
-
-  card.addEventListener('change', function(event) {
-    var displayError= document.getElementById('card-errors');
-    if (event.error) {
-      displayError.textContent= event.error.message;
-      displayError.classList.remove('hidden');
-    } else {
-      displayError.textContent= '';
-      displayError.classList.add('hidden');
-    }
-  });
-
-  var form = document.getElementById('payment-form');
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    stripe.createToken(card).then(function(result) {
-      if (result.error) {
-        // Inform the customer that there was an error.
-        var errorElement= document.getElementById('card-errors');
-        errorElement.textContent= result.error.message;
-        errorElement.classList.remove('hidden');
-      } else {
-        // Send the token to your server.
-        stripeTokenHandler(result.token);
+  var orderComplete= function(paymentIntentId) {
+    return fetch('/sale/{{ @sale.uuid }}/process-stripe-payment', {
+      method: 'POST',
+    }).then(function (data) {
+      if (data.ok) {
+        reportPurchase()
+        window.location.href= "/sale/{{ @sale.uuid }}/thanks"
       }
     });
-  });
+  };
 
-  function stripeTokenHandler(token) {
-    // Insert the token ID into the form so it gets submitted to the server
-    var form= document.getElementById('payment-form');
+  // Show the customer the error from Stripe if their card fails to charge
+  var showError= function(errorMsgText) {
+    loading(false);
+    error.textContent= errorMsgText;
+    error.classList.remove('hidden');
+    setTimeout(function() {
+      error.textContent= "";
+      error.classList.add('hidden');
+    }, 4000);
+  };
 
-    // prevent double-submit
-    if (form.disabled) return;
-    form.disabled= true;
-
-    var hiddenInput= document.createElement('input');
-    hiddenInput.setAttribute('type', 'hidden');
-    hiddenInput.setAttribute('name', 'stripeToken');
-    hiddenInput.setAttribute('value', token.id);
-    form.appendChild(hiddenInput);
-
-    // Submit the form
-    if (form.getAttribute('data-ajax')) {
-      let formData= new FormData(form)
-      $.ajax({ dataType: 'json', method: 'POST',
-               url: form.getAttribute('action'),
-               data: Object.fromEntries(formData) })
-       .done(function (data) {
-         reportPurchase()
-         window.location.href= "/sale/{{ @sale.uuid }}/thanks";
-       })
-       .fail(function (jqXHR, textStatus, errorThrown) {
-         var displayError= document.getElementById('card-errors');
-         displayError.textContent= jqXHR.responseJSON.text ?
-                                   jqXHR.responseJSON.text :
-                                   textStatus;
-         displayError.classList.remove('hidden');
-         form.disabled= false;
-       });
+  // Show a spinner on payment submission
+  var loading = function(isLoading) {
+    if (isLoading) {
+      // Disable the button and show a spinner
+      button.disabled= true;
+      button.querySelector(".spin").classList.remove("hidden");
     } else {
-      form.submit();
+      button.disabled= false;
+      button.querySelector(".spin").classList.add("hidden");
     }
-  }
+  };
 
 });
 
