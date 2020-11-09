@@ -2265,7 +2265,7 @@ class Sale {
       $payment->data= json_encode([
         'payment_intent_id' => $payment_intent_id,
         'charge_id' => $charge->id,
-        'cc_brand' => $charge->payment_method_details->card->brand,
+        'cc_brand' => ucwords($charge->payment_method_details->card->brand),
         'cc_last4' => $charge->payment_method_details->card->last4,
       ]);
       $payment->save();
