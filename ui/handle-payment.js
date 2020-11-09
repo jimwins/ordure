@@ -58,7 +58,6 @@ loadScript('https://js.stripe.com/v3/',
           showError(result.error.message);
         } else {
           // The payment succeeded!
-    debugger
           orderComplete(result.paymentIntent.id);
         }
       });
