@@ -5,7 +5,8 @@ LABEL maintainer="Jim Winstead <jimw@trainedmonkey.com>"
 RUN apk add --no-cache \
       mysql-client \
       libzip-dev \
-      tzdata
+      tzdata \
+      zip
 
 RUN docker-php-ext-install \
       bcmath \
