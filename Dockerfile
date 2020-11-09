@@ -6,7 +6,8 @@ RUN apk add --no-cache \
       mysql-client \
       libzip-dev \
       tzdata \
-      zip
+      zip \
+      zlib-dev
 
 RUN docker-php-ext-install \
       bcmath \
