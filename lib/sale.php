@@ -2236,6 +2236,13 @@ class Sale {
 
     $sale= $this->load($f3, $uuid, 'uuid');
 
+    /* Avoid race between webhook and client-forwarded notification. */
+    $res= $db->exec("SELECT GET_LOCK('ordure.stripe_payment', 5) AS lck");
+    if (!$res[0]['lck']) {
+      error_log("Unable to grab ordure.stripe_payment lock\n");
+      return;
+    }
+
     $payment_intent_id= $sale->stripe_payment_intent_id;
 
     $existing= new DB\SQL\Mapper($db, 'sale_payment');
@@ -2526,6 +2533,13 @@ class Sale {
     $db= $f3->get('DBH');
 
     $sale= $this->load($f3, $uuid, 'uuid');
+
+    /* Avoid race between webhook and client-forwarded notification. */
+    $res= $db->exec("SELECT GET_LOCK('ordure.paypal_payment', 5) AS lck");
+    if (!$res[0]['lck']) {
+      error_log("Unable to grab ordure.paypal_payment lock\n");
+      return;
+    }
 
     $existing= new DB\SQL\Mapper($db, 'sale_payment');
     $has= $existing->load(array('data->"$.id" = ?', $order_id));
