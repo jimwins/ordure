@@ -4,13 +4,15 @@ LABEL maintainer="Jim Winstead <jimw@trainedmonkey.com>"
 
 RUN apk add --no-cache \
       mysql-client \
+      libzip-dev \
       tzdata
 
 RUN docker-php-ext-install \
       bcmath \
       mysqli \
       pdo \
-      pdo_mysql
+      pdo_mysql \
+      zip
 
 WORKDIR /app
 
