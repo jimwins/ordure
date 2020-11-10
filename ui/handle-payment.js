@@ -45,11 +45,7 @@ loadScript('https://js.stripe.com/v3/',
     stripe
       .confirmCardPayment(clientSecret, {
         payment_method: {
-          card: card,
-          billing_details: {
-            name: '{{ @sale.name }}',
-            email: '{{ @sale.email }}',
-          }
+          card: card
         }
       })
       .then(function(result) {
