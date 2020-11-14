@@ -103,6 +103,14 @@ gtag('event', 'view_item_list', {
         </script>
       </true>
       <false>
+        <script>
+gtag('send', {
+  hitType: 'event',
+  eventCategory: 'Search',
+  eventAction: 'Searched with no hits',
+  label: '{{ @REQUEST.q }}'
+});
+        </script>
         <p class="alert alert-warning">
           <strong>Sorry</strong>, but we didn't find anything for your search
           parameters. Please try again.
@@ -115,4 +123,3 @@ gtag('event', 'view_item_list', {
   </div>
 </div>
 <include href="footer.html" />
-
