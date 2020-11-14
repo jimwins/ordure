@@ -104,11 +104,9 @@ gtag('event', 'view_item_list', {
       </true>
       <false>
         <script>
-gtag('send', {
-  hitType: 'event',
-  eventCategory: 'Search',
-  eventAction: 'Searched with no hits',
-  label: '{{ @REQUEST.q }}'
+gtag('event', 'search', {
+  event_action: 'no_results',
+  event_label: '{{ @REQUEST.q }}'
 });
         </script>
         <p class="alert alert-warning">
