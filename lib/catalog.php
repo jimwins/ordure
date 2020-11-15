@@ -673,15 +673,15 @@ class Catalog {
   function sphinx_search($f3, $args) {
     $db= $f3->get('DBH');
 
-    $term= '';
+    $query= '';
     if ($f3->exists('REQUEST.q')) {
-      $term= $f3->get('REQUEST.q');
+      $query= $f3->get('REQUEST.q');
     }
 
     /* Check if this a direct match for an item code */
-    if ($term && preg_match('!^[-A-Z0-9/.]+$!i', $term)) {
+    if ($query && preg_match('!^[-A-Z0-9/.]+$!i', $query)) {
       $item= new DB\SQL\Mapper($db, 'item');
-      $item->load(array('code=? AND active', $term));
+      $item->load(array('code=? AND active', $query));
 
       if (!$item->dry()) {
         $product= new DB\SQL\Mapper($db, 'product');
@@ -704,7 +704,7 @@ class Catalog {
       }
     }
 
-    if ($term) {
+    if ($query) {
       $sph= new DB\SQL($f3->get('sphinx.dsn'),
                        $f3->get('sphinx.user'),
                        $f3->get('sphinx.password'),
@@ -714,13 +714,17 @@ class Catalog {
                        ));
 
      $index= $f3->get('sphinx.index') ?: 'ordure';
+
+     $retry= false;
+
+retry:
      $q= "SELECT *,WEIGHT() weight
             FROM $index
            WHERE match(?)
            LIMIT 100
           OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
       
-      $res= $sph->exec($q, $term);
+      $res= $sph->exec($q, $query);
 
       if (count($res)) {
         $ids= array_map(function ($i) { return $i['id']; }, $res);
@@ -731,6 +735,31 @@ class Catalog {
           [ 'id IN (' . join(',', $ids) . ')' ],
           [ 'order' => 'FIELD(id, "' . join('","', $ids) . '")' ]
         );
+      } elseif (!$retry) {
+        $terms= preg_split('/\\s+/', trim($query));
+        $new_terms= [];
+        $changed= 0;
+
+        foreach ($terms as $term) {
+          $res= $sph->exec("CALL SUGGEST(?,?)", [ $term, $index ]);
+          if (count($res)) {
+            $suggest= $res[0]['suggest'];
+
+            if (strcasecmp($suggest, $term)) {
+              $changed++;
+            }
+            $new_terms[]= $suggest;
+          } else {
+            $changed++;
+          }
+        }
+
+        if ($changed && count($new_terms)) {
+          $query= join(' ', $new_terms);
+          $f3->set('changed_query', $query);
+          $retry= true;
+          goto retry;
+        }
       }
 
       $f3->set('products', $products);

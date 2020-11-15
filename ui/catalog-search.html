@@ -35,6 +35,14 @@
 
     <include href="searchform.html" />
 
+    <check if="{{ isset(@changed_query) && count(@products) }}">
+      <div class="alert alert-warning">
+        <strong>No results found for your search terms.</strong>
+        We changed it to <code>{{ @changed_query }}</code> and
+        got these results.
+      </div>
+    </check>
+
     <check if="{{ isset(@dept) }}">
       <div class="page-header">
         <h1>
