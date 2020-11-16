@@ -2675,7 +2675,9 @@ class Sale {
       $note->save();
     }
 
-    if ($sale->total - ($sale->paid + $amount) > 0) {
+    // $amount is negative so we use bcsub()
+    $due= bcsub($sale->total, bcsub($sale->paid, $amount));
+    if ($due > 0.00) {
       $sale->status= 'unpaid';
       $sale->save();
 
