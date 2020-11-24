@@ -167,7 +167,7 @@ class Sale {
                         'carts' : 'default')));
 
     $sales= $sale->find($which,
-                        array('order' => 'id'));
+                        array('order' => 'id DESC', 'limit' => 100));
 
     $sales_out= array();
     foreach ($sales as $i) {
