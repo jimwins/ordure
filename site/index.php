@@ -434,6 +434,10 @@ $f3->route('GET|POST /~webhook/stripe', function ($f3) {
       $paymentIntent= $event->data->object; // contains a StripePaymentIntent
       $sale= new Sale();
       $uuid= $paymentIntent->charges->data[0]->metadata->sale_uuid;
+      if (!$uuid) {
+        error_log("No uuid on payment_intent, probably a gift card");
+        break;
+      }
       $sale->handle_stripe_payment($f3, $uuid);
       break;
   }

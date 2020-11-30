@@ -3,40 +3,39 @@
 class GiftCard {
 
   static function addRoutes($f3) {
-    $f3->route("POST /gift-card/process-order", 'GiftCard->process_order');
+    $f3->route("POST /gift-card/get-stripe-payment-intent [ajax]",
+               'GiftCard->get_stripe_payment_intent');
+    $f3->route("POST /gift-card/process-stripe-payment",
+               'GiftCard->process_stripe_payment');
   }
 
-  function process_order($f3, $args) {
-    $stripe= array( 'secret_key' => $f3->get('STRIPE_SECRET_KEY'),
-                    'publishable_key' => $f3->get('STRIPE_KEY'));
+  function get_stripe_payment_intent($f3, $args) {
+    $stripe= new \Stripe\StripeClient($f3->get('STRIPE_SECRET_KEY'));
 
-    $kit= $f3->get('REQUEST.kit');
+    bcscale(2);
+    $due= $f3->get('REQUEST.amount');
+    $amount= (int)bcmul($due, 100);
 
-    $token= json_decode($_REQUEST['token']);
-    $amount= (int)$_REQUEST['amount'];
-
-    \Stripe\Stripe::setApiKey($stripe['secret_key']);
-
-    $token= $f3->get('REQUEST.stripeToken');
-    $amount= (int)(ltrim($f3->get('REQUEST.amount'), '$') * 100);
-
-    try {
-      $charge= \Stripe\Charge::create(array(
-        "amount" => $amount,
-        "currency" => "usd",
-        "source" => $token,
-      ));
-    } catch (\Stripe\Error\Card $e) {
-      // The card has been declined!
-      $body= $e->getJsonBody();
-      $err= $body['error'];
-
-      // XXX Send email to admin
-
-      error_log(json_encode($body));
-
-      $f3->error(500, $err['message']);
+    if (!$amount) {
+      $f3->error(500, "Have to set a valid amount for the card!");
     }
+
+    $customer= $stripe->customers->create([
+      'name' => $f3->get('REQUEST.name'),
+      'email' => $f3->get('REQUEST.email'),
+    ]);
+    $payment_intent= $stripe->paymentIntents->create([
+      'customer' => $customer->id,
+      'amount' => $amount,
+      'currency' => 'usd',
+    ]);
+
+    echo json_encode([
+      'secret' => $payment_intent->client_secret,
+    ]);
+  }
+
+  function process_stripe_payment($f3, $args) {
 
     /* Create sale */
     $db= $f3->get('DBH');
@@ -81,29 +80,37 @@ class GiftCard {
       $sale->save();
     }
 
-    $line= new DB\SQL\Mapper($db, 'sale_item');
-    $line->sale_id= $sale->id;
-    $line->item_id= $kit ? 89883 : 11212; // TODO don't hard-code
-    if ($kit) {
-      $line->override_name= "AzLotusArt Kit";
+    $stripe= new \Stripe\StripeClient($f3->get('STRIPE_SECRET_KEY'));
+
+    $payment_intent_id= $f3->get('REQUEST.payment_intent_id');
+    $payment_intent= $stripe->paymentIntents->retrieve($payment_intent_id, []);
+
+    if ($payment_intent->status != 'succeeded') {
+      $f3->error(500, "Can only handle successful payment attempts here.");
     }
-    $line->quantity= 1;
-    $line->retail_price= $charge->amount / 100;
-    $line->tic= $kit ? '00000' : '10005';
-    $line->tax= 0.00;
 
-    $line->save();
+    foreach ($payment_intent->charges->data as $charge) {
+      $line= new DB\SQL\Mapper($db, 'sale_item');
+      $line->sale_id= $sale->id;
+      $line->item_id= 11212; // TODO don't hard-code
+      $line->quantity= 1;
+      $line->retail_price= $charge->amount / 100;
+      $line->tic= $kit ? '00000' : '10005';
+      $line->tax= 0.00;
 
-    $payment= new DB\SQL\Mapper($db, 'sale_payment');
-    $payment->sale_id= $sale->id;
-    $payment->method= 'credit';
-    $payment->amount= $charge->amount / 100;
-    $payment->data= json_encode(array(
-      'charge_id' => $charge->id,
-      'cc_brand' => $charge->source->brand,
-      'cc_last4' => $charge->source->last4,
-    ));
-    $payment->save();
+      $line->save();
+
+      $payment= new DB\SQL\Mapper($db, 'sale_payment');
+      $payment->sale_id= $sale->id;
+      $payment->method= 'credit';
+      $payment->amount= $charge->amount / 100;
+      $payment->data= json_encode(array(
+        'charge_id' => $charge->id,
+        'cc_brand' => $charge->source->brand,
+        'cc_last4' => $charge->source->last4,
+      ));
+      $payment->save();
+    }
 
     // save comment
     $comment= $f3->get('REQUEST.comment');
@@ -116,6 +123,6 @@ class GiftCard {
       $note->save();
     }
 
-    $f3->reroute($kit ? '/azlotusart-kit-thanks' : '/gift-card/thanks');
+    echo json_encode(array('message' => 'Success!'));
   }
 }

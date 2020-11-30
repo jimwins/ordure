@@ -19,6 +19,14 @@ loadScript('https://js.stripe.com/v3/',
   var form= document.getElementById("payment-form");
   form.addEventListener("submit", function(event) {
     event.preventDefault();
+    return getPaymentIntent(form).then(function(data) {
+      payWithCard(stripe, card, data.secret);
+    })
+  });
+
+<check if="{{ @sale.uuid }}">
+  <true>
+    var getPaymentIntent= function(form) {
       return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
         // fake AJAX header so we get JSON errors
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -35,10 +43,48 @@ loadScript('https://js.stripe.com/v3/',
         }
         return res.json()
       })
-      .then(function(data) {
-        payWithCard(stripe, card, data.secret);
+    }
+
+    var orderComplete= function(paymentIntentId) {
+      return fetch('/sale/{{ @sale.uuid }}/process-stripe-payment', {
+        method: 'POST',
+      }).then(function (data) {
+        if (data.ok) {
+          reportPurchase()
+          window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+        }
+      });
+    };
+
+  </true>
+  <false>
+    var getPaymentIntent= function(form) {
+      let formData= new FormData(form)
+      return fetch('/gift-card/get-stripe-payment-intent', {
+        // fake AJAX header so we get JSON errors
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        method: 'POST',
+        body: formData,
+      }).then(function(res) {
+        return res.json()
       })
-  });
+    }
+
+    var orderComplete= function(paymentIntentId) {
+      let formData= new FormData(form)
+      formData.set('payment_intent_id', paymentIntentId)
+      return fetch('/gift-card/process-stripe-payment', {
+        method: 'POST',
+        body: formData
+      }).then(function (data) {
+        if (data.ok) {
+          window.location.href= "/gift-card/thanks"
+        }
+      });
+    };
+
+  </false>
+</check>
 
   var payWithCard= function(stripe, card, clientSecret) {
     loading(true);
@@ -57,17 +103,6 @@ loadScript('https://js.stripe.com/v3/',
           orderComplete(result.paymentIntent.id);
         }
       });
-  };
-
-  var orderComplete= function(paymentIntentId) {
-    return fetch('/sale/{{ @sale.uuid }}/process-stripe-payment', {
-      method: 'POST',
-    }).then(function (data) {
-      if (data.ok) {
-        reportPurchase()
-        window.location.href= "/sale/{{ @sale.uuid }}/thanks"
-      }
-    });
   };
 
   // Show the customer the error from Stripe if their card fails to charge
