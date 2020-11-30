@@ -97,6 +97,8 @@ loadScript('https://js.stripe.com/v3/',
 
 loadScript('https://www.paypal.com/sdk/js?client-id={{ @PAYPAL_CLIENT_ID }}',
            function() {
+  if (!document.getElementById('paypal-button')) return;
+
   paypal.Buttons({
     createOrder: function (data, actions) {
       return fetch('/sale/{{ @sale.uuid }}/get-paypal-order', {
