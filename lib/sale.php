@@ -2171,6 +2171,8 @@ class Sale {
   }
 
   function get_stripe_payment_intent($f3, $args) {
+    $db= $f3->get('DBH');
+
     $uuid= $f3->get('PARAMS.sale');
     $sale= $this->load($f3, $uuid, 'uuid');
 
@@ -2179,6 +2181,33 @@ class Sale {
     bcscale(2);
     $due= bcsub($sale->total, $sale->paid);
     $amount= (int)bcmul($due, 100);
+
+    $customer_details= [
+      'email' => $sale->email,
+      'name' => $sale->name,
+      'metadata' => [
+        "person_id" => $sale->person_id,
+      ],
+    ];
+
+    if ($sale->shipping_address_id > 0) {
+      $address= new DB\SQL\Mapper($db, 'sale_address');
+      $address->load(array('id = ?', $sale->shipping_address_id))
+        or $f3->error(404);
+
+      $customer_details['shipping']= [
+        'name' => $address->name,
+        'phone' => $address->phone,
+        'address' => [
+          'line1' => $address->address1,
+          'line2' => $address->address2,
+          'city' => $address->city,
+          'state' => $address->state,
+          'postal_code' => $address->zip5,
+          'country' => 'US',
+        ],
+      ];
+    }
 
     if ($sale->stripe_payment_intent_id) {
       $payment_intent= $stripe->paymentIntents->retrieve(
@@ -2189,14 +2218,7 @@ class Sale {
         $f3->error(500, "Payment already completed.");
       }
 
-      $stripe->customers->update($payment_intent->customer, [
-        'email' => $sale->email,
-        'name' => $sale->name,
-//        'phone' => $sale->phone,
-        'metadata' => [
-          "person_id" => $sale->person_id,
-        ],
-      ]);
+      $stripe->customers->update($payment_intent->customer, $customer_details);
 
       if ($payment_intent->amount != $amount) {
         $stripe->paymentIntents->update($sale->stripe_payment_intent_id, [
@@ -2204,14 +2226,7 @@ class Sale {
         ]);
       }
     } else {
-      $customer= $stripe->customers->create([
-        'email' => $sale->email,
-        'name' => $sale->name,
-//        'phone' => $sale->phone,
-        'metadata' => [
-          "person_id" => $sale->person_id,
-        ],
-      ]);
+      $customer= $stripe->customers->create($customer_details);
       $payment_intent= $stripe->paymentIntents->create([
         'customer' => $customer->id,
         'amount' => $amount,
