@@ -527,45 +527,45 @@ class Sale {
       }
 
       if (!in_array($stage, $stages)) {
-        $shipping_rate= $f3->get('shipping_rate');
-        if ($sale->shipping_address_id > 1 &&
-            in_array($shipping_rate, [ 'truck', 'unknown' ]))
-        {
-          $stage= 'review';
-        }
-        elseif ($sale->shipping_address_id) {
-          $address= new DB\SQL\Mapper($db, 'sale_address');
-          $address->load(array('id = ?', $sale->shipping_address_id))
-            or $f3->error(404);
+        $stage= 'login'; // start at the beginning
 
-          if ($address->id && !$address->verified) {
-            $this->easypost_verify_address($f3, $address);
+        if ($sale->name && $sale->email) {
+          $shipping_rate= $f3->get('shipping_rate');
+          if ($sale->shipping_address_id > 1 &&
+              in_array($shipping_rate, [ 'truck', 'unknown' ]))
+          {
+            $stage= 'review';
           }
+          elseif ($sale->shipping_address_id) {
+            $address= new DB\SQL\Mapper($db, 'sale_address');
+            $address->load(array('id = ?', $sale->shipping_address_id))
+              or $f3->error(404);
 
-          if ($address->verified) {
-            if ($address->id != 1 &&
-                !$sale->shipping_method &&
-                self::can_deliver($f3) && $address->distance < 2)
-            {
-              $stage= 'shipping-method';
-            } else {
-              if (!$sale->shipping_method) {
-                $sale->shipping_method= 'default';
-                $sale->save();
-                $sale= $this->load($f3, $uuid, 'uuid');
+            if ($address->id && !$address->verified) {
+              $this->easypost_verify_address($f3, $address);
+            }
+
+            if ($address->verified) {
+              if ($address->id != 1 &&
+                  !$sale->shipping_method &&
+                  self::can_deliver($f3) && $address->distance < 2)
+              {
+                $stage= 'shipping-method';
+              } else {
+                if (!$sale->shipping_method) {
+                  $sale->shipping_method= 'default';
+                  $sale->save();
+                  $sale= $this->load($f3, $uuid, 'uuid');
+                }
+                $stage= 'payment';
               }
-              $stage= 'payment';
+            } else {
+              $f3->set("ADDRESS_NOT_VERIFIED", 1);
+              $stage= 'shipping';
             }
           } else {
-            $f3->set("ADDRESS_NOT_VERIFIED", 1);
             $stage= 'shipping';
           }
-        }
-        elseif ($sale->email && $sale->name) {
-          $stage= 'shipping';
-        }
-        else {
-          $stage= 'login';
         }
       }
 
