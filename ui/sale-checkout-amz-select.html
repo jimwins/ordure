@@ -77,6 +77,11 @@ gtag('event', 'begin_checkout', {
       </div>
 
       <div class="form-group">
+        <label>Shipping Cost</label>
+        <div><b id="shipping-cost">{{ @amount(@sale.shipping) }}</b></div>
+      </div>
+
+      <div class="form-group">
         <label>Payment Info</label>
         <div id="walletWidgetDiv" style="width:100%; height:240px;">
         </div>
@@ -132,6 +137,7 @@ function showButton() {
           if (!data.sale) return;
           // update our sale info
           $('#shipping').text('$' + data.sale.shipping);
+          $('#shipping-cost').text('$' + data.sale.shipping);
           $('#tax').text('$' + data.sale.tax);
           $('#total').text('$' + data.sale.total);
           $('#shipping_error').hide();
