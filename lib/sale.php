@@ -1767,7 +1767,8 @@ class Sale {
       'apiLoginID' => $f3->get("TAXCLOUD_ID")
     );
 
-    $client= new GuzzleHttp\Client();
+    // XXX TEMPORARY XXX disabled cert check
+    $client= new GuzzleHttp\Client([ 'verify' => false ]);
     
     $uri= "https://api.taxcloud.net/1.0/taxcloud/VerifyAddress?apiKey=" .
             $f3->get('TAXCLOUD_KEY');
