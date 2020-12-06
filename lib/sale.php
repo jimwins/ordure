@@ -2258,6 +2258,16 @@ class Sale {
       return;
     }
 
+    // save comment now in case we bail out early
+    $comment= $f3->get('REQUEST.comment');
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
     $payment_intent_id= $sale->stripe_payment_intent_id;
 
     $existing= new DB\SQL\Mapper($db, 'sale_payment');
@@ -2294,16 +2304,6 @@ class Sale {
     }
 
     self::capture_sales_tax($f3, $sale);
-
-    // save comment
-    $comment= $f3->get('REQUEST.comment');
-    if ($comment) {
-      $note= new DB\SQL\Mapper($db, 'sale_note');
-      $note->sale_id= $sale->id;
-      $note->person_id= $sale->person_id;
-      $note->content= $comment;
-      $note->save();
-    }
 
     $sale->status= 'paid';
     $sale->save();

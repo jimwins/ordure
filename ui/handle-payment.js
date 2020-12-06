@@ -46,8 +46,10 @@ loadScript('https://js.stripe.com/v3/',
     }
 
     var orderComplete= function(paymentIntentId) {
+      let formData= new FormData(form)
       return fetch('/sale/{{ @sale.uuid }}/process-stripe-payment', {
         method: 'POST',
+        body: formData
       }).then(function (data) {
         if (data.ok) {
           reportPurchase()
