@@ -1958,9 +1958,11 @@ class Sale {
 
     $db= $f3->get('DBH');
 
+    /* Always reset shipping tax, will recalculate */
+    $sale->shipping_tax= 0;
+
     /* Override tax for manual tax exemptions */
     if ($sale->tax_exemption == 'manual') {
-      $sale->shipping_tax= 0;
       $item= new DB\SQL\Mapper($db, 'sale_item');
       $items= $item->find(array('sale_id = ?', $sale->id),
                            array('order' => 'id'));
