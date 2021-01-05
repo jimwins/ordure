@@ -170,6 +170,10 @@ gtag('event', 'view_item', {
     }
   ]
 });
+gtag('event', 'page_view', {
+  'send_to': 'AW-1037436901',
+  'ecomm_prodid': 'p{{ @product.id }}'
+});
     </script>
 
     <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP">
