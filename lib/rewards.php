@@ -72,7 +72,7 @@ class Rewards {
     $loyalty->phone= $f3->get('REQUEST.phone');
     $loyalty->loyalty_number=
       preg_replace('/\D+/', '', $f3->get('REQUEST.phone'));
-    $loyalty->code= $f3->get('REQUEST.code');
+    $loyalty->code= $f3->get('REQUEST.receipt_code');
     $loyalty->subscribe= (int)$f3->get('REQUEST.subscribe');
     $loyalty->rewardsplus= (int)$f3->get('REQUEST.plus');
 
