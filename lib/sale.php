@@ -92,6 +92,7 @@ class Sale {
       $f3->route("GET|POST /cart/retrieve", 'Sale->retrieve_cart');
       $f3->route("GET /cart/combine-carts", 'Sale->combine_carts');
       $f3->route("GET /cart/forget", 'Sale->forget_cart_and_redir');
+      $f3->route("GET /cart/remember", 'Sale->remember_cart_test');
     }
   }
 
@@ -916,6 +917,16 @@ class Sale {
     $f3->reroute('/cart');
   }
 
+  function remember_cart_test($f3, $args) {
+    $uuid= $f3->get('REQUEST.cart');
+    $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
+              $_SERVER['HTTP_HOST'] : false);
+
+    SetCookie('cartID', $uuid, null /* don't expire */,
+              '/', $domain, true, true);
+    $f3->reroute('/art-supplies');
+  }
+
   function pay($f3, $args) {
     $uuid= $f3->get('PARAMS.sale');
     $sale= $this->load($f3, $uuid, 'uuid');
@@ -939,11 +950,13 @@ class Sale {
 
   function add_item($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
+    $cart= false;
 
     if ($sale_uuid) {
       if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
         $f3->error(403);
     } else {
+      $cart= true;
       $sale_uuid= $f3->get('COOKIE.cartID');
       $person_id= \Auth::authenticated_user($f3);
 
@@ -977,7 +990,7 @@ class Sale {
       or $f3->error(404);
 
     if (!in_array($sale->status, array('new','cart','review')))
-      $f3->error(500);
+      $f3->error(500, 'Cart already closed. <a href="/cart/forget">Start another one.</a>');
 
     $item= new DB\SQL\Mapper($db, 'item');
     $item->nretail_price= "IFNULL((SELECT retail_price FROM scat_item WHERE scat_item.code = item.code), retail_price)";
