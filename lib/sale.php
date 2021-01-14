@@ -1006,7 +1006,7 @@ class Sale {
 
     $line= new DB\SQL\Mapper($db, 'sale_item');
 
-    if ($item->npurchase_quantity > 0) {
+    if ($item->npurchase_quantity > 0 || $item->is_kit) {
       /* Don't include items that are parts of a kit */
       $existing= $line->find([
         'sale_id = ? AND item_id = ? AND kit_id IS NULL',
@@ -1242,7 +1242,7 @@ class Sale {
         $purchase_quantity= $item->is_dropshippable;
       }
 
-      if ($val > 0 && ($val % $purchase_quantity) != 0) {
+      if ($val > 0 && $purchase_quantity && ($val % $purchase_quantity) != 0) {
         // XXX really should provide feedback
         continue;
       }
