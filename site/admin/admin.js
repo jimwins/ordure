@@ -1,5 +1,5 @@
 $(function() {
-  $('[data-slug]').prepend($('<button type="button" class="btn btn-primary btn-xs edit-slug" style="float: right; position: relative; top: 0; right: 0"><span class="fa fa-pencil"></span></button>'));
+  $('[data-slug]').prepend($('<button type="button" class="btn btn-danger edit-slug" style="position: fixed; top: 2em; right: 2em; z-index: 300"><i class="fa fa-pencil"></i> Edit</button>'));
 
   if (typeof slug404 != 'undefined' && slug404) {
     $('#buttons').append($('<a class="edit-slug btn btn-success btn-lg" role="button" data-slug="' + slug404 + '">Create page &raquo;</a>'));
