@@ -1,10 +1,56 @@
-<div class="alert alert-warning">
-  <p class="lead">
-    <strong>Hello!</strong> We are currently only able to ship orders to the United States (including APO/FPO/DPO addresses).
-  </p>
-  <check if="@CAN_PICKUP">
-    <p class="lead">
-      You can avoid shipping charges entirely by picking up your order at our store in downtown Los Angeles.
-    </p>
-  </check>
-</div>
+<check if="@stage != 'amz-select'">
+  <ol class="breadcrumb">
+    <li>
+      <a href="/cart" title="Return to cart">
+        <i class="fa fa-shopping-cart"></i>
+        <span class="sr-only">Return to cart</span>
+      </a>
+    </li>
+    <check if="@stage_number == 1">
+      <true>
+        <li class="active">Contact</li>
+      </true>
+      <false>
+        <li><a href="/cart/checkout?stage=login">Contact</a></li>
+      </false>
+    </check>
+    <check if="@stage_number == 2">
+      <true>
+        <li class="active">Address</li>
+      </true>
+      <false>
+        <check if="@stage_number > 2">
+          <true>
+            <li><a href="/cart/checkout?stage=shipping">Address</a></li>
+          </true>
+          <false>
+            <li>Address</li>
+          </false>
+        </check>
+      </false>
+    </check>
+    <check if="@stage_number == 3">
+      <true>
+        <li class="active">Method</li>
+      </true>
+      <false>
+        <check if="@stage_number > 3 && @sale.shipping_address_id != 1">
+          <true>
+            <li><a href="/cart/checkout?stage=shipping-method">Method</a></li>
+          </true>
+          <false>
+            <li>Method</li>
+          </false>
+        </check>
+      </false>
+    </check>
+    <check if="@stage_number == 4">
+      <true>
+        <li class="active">Payment</li>
+      </true>
+      <false>
+        <li>Payment</li>
+      </false>
+    </check>
+  </ol>
+</check>

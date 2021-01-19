@@ -520,14 +520,14 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
-      $stages= [ 'login', 'shipping', 'shipping-method', 'payment', 'amz-select' ];
+      $stages= [ 'login' => 1, 'shipping' => 2, 'shipping-method' => 3, 'payment' => 4, 'amz-select' => 4 ];
       $stage= $f3->get('REQUEST.stage');
 
       if ($f3->get('REQUEST.access_token')) {
         $stage= 'amz-select';
       }
 
-      if (!in_array($stage, $stages)) {
+      if (!in_array($stage, array_keys($stages))) {
         $stage= 'login'; // start at the beginning
 
         if ($sale->name && $sale->email) {
@@ -599,6 +599,7 @@ class Sale {
       }
 
       $f3->set('stage', $stage);
+      $f3->set('stage_number', $stages[$stage]);
 
       echo Template::instance()->render('sale-checkout.html');
     } else {
