@@ -101,7 +101,7 @@
           <input type="hidden" name="added" value="{{ @REQUEST.added }}">
         </check>
       </form>
-      <check if="!@sale.email">
+      <check if="0 && !@sale.email">
         <div class="panel-body">
           <div class="well">
             <p>
@@ -177,12 +177,14 @@
             </p>
           </check>
           <check if="{{ @shipping_rate == 'unknown' && (@CAN_SHIP || @CAN_DROPSHIP) }}">
-            <p class="lead alert alert-danger">
+            <p class="lead alert alert-warning">
+              <b>Need this to be shipped?</b>
               Sorry, our system is unable to calculate the shipping costs
               for your order due to incomplete information in our system. You
               can submit your order for manual review, and we'll contact you
               with the shipping cost and instructions on how to complete the
               order.
+              <b>Don't worry, you won't have to wait for curbside pickup!</b>
             </p>
           </check>
 
