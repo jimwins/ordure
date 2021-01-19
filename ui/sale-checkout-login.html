@@ -72,6 +72,7 @@ gtag('event', 'begin_checkout', {
         <div class="form-group">
           <label for="email">Email</label>
           <input type="email" class="form-control" name="email" required
+                 autocomplete="email"
                  placeholder="vincent.van.gogh@example.com"
                  value="{{ @sale.email }}">
         </div>
