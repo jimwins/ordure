@@ -142,13 +142,6 @@
               minimum on online orders at this time.
             </p>
           </check>
-          <check if="{{ @shipping_status == 'immediate' && (@CAN_SHIP || @CAN_PICKUP) }}">
-            <p class="lead alert alert-success">
-              These are in stock at the store and eligible for
-              shipment{{ @CAN_PICKUP ? ' or pick-up' : '' }}. We will contact you if any problems
-              arise in having your order ready!
-            </p>
-          </check>
           <check if="{{ @shipping_status == 'stock_limited' && (@CAN_SHIP || @CAN_PICKUP) }}">
           <!-- XXX drop ship as option -->
             <p class="lead alert alert-danger">
