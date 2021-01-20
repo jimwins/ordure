@@ -26,7 +26,8 @@
     "graylog2/gelf-php": "^1.6",
     "cleantalk/php-antispam": "^2.3",
     "robmorgan/phinx": "^0.10.7",
-    "wildbit/postmark-php": "^2.11"
+    "wildbit/postmark-php": "^2.11",
+    "cloudstek/php-laff": "^1.1"
   },
   "require-dev": {
     "deployer/recipes": "^6.2"
