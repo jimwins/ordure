@@ -409,6 +409,8 @@ class Sale {
       $status['below_minimum']++;
     }
 
+    $item_dim= [];
+
     foreach ($items as $sale_item) {
       // Check stock
       $scat_item= new DB\SQL\Mapper($db, 'scat_item');
@@ -436,8 +438,15 @@ class Sale {
       // unknown dimensions?
       if ($item->weight == 0 || $item->length == 0) {
         $rate['unknown']++;
+      } else {
+        $item_dim= array_merge($item_dim, array_fill(0, $sale_item->quantity,
+          [
+            'length' => $item->length,
+            'width' => $item->width,
+            'height' => $item->height,
+          ]));
       }
-      $weight+= $item->weight;
+      $weight+= $item->weight * $sale_item->quantity;
       // not small?
       $size= [$item->height, $item->length, $item->width ];
       sort($size, SORT_NUMERIC);
@@ -451,6 +460,8 @@ class Sale {
         $rate['truck']++;
       }
     }
+
+    $box_size= $this->calculate_box_size($item_dim);
 
     // if overweight for medium, might be able to ship as large
     if ($medium && $weight > 20)
@@ -1452,6 +1463,16 @@ class Sale {
     }
 
     $f3->reroute($base. '/checkout?uuid=' . $sale->uuid);
+  }
+
+  function calculate_box_size($items) {
+    $laff= new \Cloudstek\PhpLaff\Packer();
+    $laff->pack($items);
+
+    $box_size= $laff->get_container_dimensions();
+    error_log("container size: " . json_encode($box_size));
+
+    return $box_size;
   }
 
   function calculate_shipping($f3, $args) {
