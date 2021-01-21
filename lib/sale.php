@@ -464,10 +464,13 @@ class Sale {
     $box_size= $this->calculate_box_size($item_dim);
 
     // if overweight for medium, might be able to ship as large
-    if ($medium && $weight > 20)
+    if ($weight > 20)
+      $rate['medium']++;
+    // if overweight for medium, might be able to ship as large
+    if ($rate['medium'] && $weight > 30)
       $rate['large']++;
     // if overweight for large, will have to get price quote
-    if ($large && $weight > 30)
+    if ($rate['large'] && $weight > 60)
       $rate['unknown']++;
 
     return [
