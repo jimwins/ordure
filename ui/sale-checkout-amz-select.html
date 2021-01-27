@@ -65,11 +65,13 @@ gtag('event', 'begin_checkout', {
           </p>
         </check>
 
-        <div class="alert alert-danger">
-          <b>It is not possible to use rewards points when paying with Amazon
-          Pay.</b> <a href="/cart/checkout">Pay with credit card or PayPal to
-          access your rewards.</a>
-        </div>
+        <check if="{{ \Auth::authenticated_user(\Base::instance()) }}">
+          <div class="alert alert-danger">
+            <b>It is not possible to use rewards points when paying with Amazon
+            Pay.</b> <a href="/cart/checkout">Pay with credit card or PayPal to
+            access your rewards.</a>
+          </div>
+        </check>
 
         <p>
           Or select your address for shipping:
