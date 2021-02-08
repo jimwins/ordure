@@ -2044,14 +2044,18 @@ class Sale {
       'cartItems' => array(),
     );
 
+    $index_map= []; $n= 1;
+
     $item= new DB\SQL\Mapper($db, 'sale_item');
     $item->sale_price= "sale_price(retail_price, discount_type, discount)";
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
     if (!$items) return; // No items? No tax.
     foreach ($items as $i) {
+      $index= $n++;
+      $index_map[$index]= $i->id;
       $data['cartItems'][]= array(
-        'Index' => $i->id,
+        'Index' => $index,
         'ItemID' => $i->item_id,
         'TIC' => $i->tic,
         'Price' => $i->sale_price,
@@ -2110,7 +2114,7 @@ class Sale {
         continue;
       }
 
-      $item->load(array('id = ?', $response->CartItemIndex))
+      $item->load(array('id = ?', $index_map[$response->CartItemIndex]))
         or $f3->error(404);
       $item->tax= $response->TaxAmount;
       $item->save();
