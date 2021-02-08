@@ -315,6 +315,9 @@ function reportPurchase() {
         ]
       });
     </check>
+    <check if="{{ @MICROSOFT_UET_ID }}">
+      window.uetq.push('event', 'purchase', { 'revenue_value': '{{ @sale.total }}', 'currency': 'USD' });
+    </check>
   } catch (error) {
     console.error(error)
   }
