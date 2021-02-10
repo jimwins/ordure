@@ -86,6 +86,50 @@ gtag('event', 'checkout_progress', {
     </div>
   </check>
 
+  <check if="{{ @sale.tax_exemption || @rewards.exemption_certificate_id }}">
+    <!-- Tax Exemption -->
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="pay-rewards-heading">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse"
+             data-parent="#accordion" href="#pay-rewards"
+             aria-expanded="true" area-controls="pay-rewards">
+            <i class="fa fa-bank fa-lg"></i>
+            Tax Exemption
+          </a>
+        </h4>
+      </div>
+      <div id="pay-rewards" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-rewards-heading">
+        <div class="panel-body">
+          <check if="{{ @sale.tax_exemption }}">
+            <true>
+              <p>
+                A tax exemption is currently being applied to this order. If
+                these items are not for resale, or otherwise subject to the
+                terms of your tax exemption, please remove the exemption.
+              </p>
+              <a href="/cart/remove-tax-exemption"
+                 class="btn btn-block btn-primary btn-lg">
+                Remove Tax Exemption
+              </a>
+            </true>
+            <false>
+              <p>
+                We have a tax exemption certificate on file for your account.
+                If these items are for resale, or otherwise subject to the
+                terms of your tax exemption, you can apply the exemption now.
+              </p>
+              <a href="/cart/apply-tax-exemption"
+                 class="btn btn-block btn-primary btn-lg">
+                Apply Tax Exemption
+              </a>
+            </false>
+          </check>
+        </div>
+      </div>
+    </div>
+  </check>
+
   <!-- Credit Card -->
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="pay-credit-card-heading">

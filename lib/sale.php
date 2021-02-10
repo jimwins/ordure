@@ -86,6 +86,9 @@ class Sale {
       $f3->route("GET|POST /cart/set-in-store-pickup", 'Sale->set_in_store_pickup');
       $f3->route("POST /cart/set-shipping-method", 'Sale->set_shipping_method');
       $f3->route("POST /cart/ship-to-billing", 'Sale->ship_to_billing_address');
+      $f3->route("GET|POST /cart/apply-tax-exemption", 'Sale->apply_tax_exemption');
+      $f3->route("GET|POST /cart/remove-tax-exemption", 'Sale->remove_tax_exemption');
+      $f3->route("POST /cart/set-shipping-method", 'Sale->set_shipping_method');
       $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("POST /cart/amz-get-details", 'Sale->amz_get_details');
       $f3->route("POST /cart/amz-process-order", 'Sale->amz_process_order');
@@ -1841,6 +1844,84 @@ class Sale {
     return $this->json($f3, $args);
   }
 
+  function apply_tax_exemption($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid) {
+      error_log("No sale_uuid found.\n");
+      $f3->error(404);
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
+    $person= \Auth::authenticated_user_details($f3);
+    error_log(json_encode($person));
+    if (!$person['exemption_certificate_id']) {
+      $f3->error(500, "No exemption available.");
+    }
+
+    $sale->tax_exemption= $person['exemption_certificate_id'];
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
+  }
+
+  function remove_tax_exemption($f3, $args) {
+    $sale_uuid= $f3->get('PARAMS.sale');
+    $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
+
+    if ($sale_uuid) {
+      if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER'))
+        $f3->error(403);
+    } else {
+      $sale_uuid= $f3->get('COOKIE.cartID');
+    }
+
+    if (!$sale_uuid) {
+      error_log("No sale_uuid found.\n");
+      $f3->error(404);
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    if ($sale->status != 'new' && $sale->status != 'cart')
+      $f3->error(500);
+
+    $sale->tax_exemption= null;
+
+    $sale->save();
+
+    $this->update_shipping_and_tax($f3, $sale);
+
+    if ($f3->get('AJAX')) {
+      return $this->json($f3, $args);
+    }
+
+    $f3->reroute($base . '/checkout?uuid=' . $sale->uuid);
+  }
+
   function set_person($f3, $args) {
     $sale_uuid= $f3->get('PARAMS.sale');
     $base= $f3->get('PARAMS.sale') ? '/sale/' . $sale_uuid : '/cart';
@@ -2043,6 +2124,10 @@ class Sale {
       ),
       'cartItems' => array(),
     );
+
+    if ($sale->tax_exemption) {
+      $data['exemptCert']= [ 'CertificateID' => $sale->tax_exemption ];
+    }
 
     $index_map= []; $n= 1;
 
