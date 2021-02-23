@@ -1,5 +1,7 @@
 <?php
 
+require '../lib/point-in-kml-polygon.php';
+
 use Respect\Validation\Validator as v;
 
 $f3->set('amount', function ($d) {
@@ -566,7 +568,7 @@ class Sale {
             if ($address->verified) {
               if ($address->id != 1 &&
                   !$sale->shipping_method &&
-                  self::can_deliver($f3) && $address->distance < 2)
+                  self::can_deliver($f3) && self::in_delivery_area($address))
               {
                 $stage= 'shipping-method';
               } else {
@@ -1404,6 +1406,8 @@ class Sale {
       );
 
       $address->distance= $distance;
+      $address->latitude= $easypost->verifications->delivery->details->latitude;
+      $address->longitude= $easypost->verifications->delivery->details->longitude;
     }
     $f3->set("verifications", $easypost->verifications->delivery->errors);
     $address->save();
@@ -3559,6 +3563,14 @@ Your order will be reviewed, and you will receive another email within one busin
       return (bool)$person['rewardsplus'];
     }
     return false;
+  }
+
+  static function in_delivery_area($address) {
+    return pointInKmzPolygon(
+      '../ui/delivery.kmz',
+      $address->latitude,
+      $address->longitude
+    );
   }
 
   static function can_dropship($f3) {
