@@ -135,12 +135,19 @@
               </true>
               <false>
                 <check if="{{ @sale.shipping_method == 'bike' }}">
-                  <true>
-                    Bike delivery:
-                  </true>
-                  <false>
-                    Shipping &amp; handling:
-                  </false>
+                  Bike delivery:
+                </check>
+                <check if="{{ @sale.shipping_method == 'cargo-bike' }}">
+                  Cargo bike delivery:
+                </check>
+                <check if="{{ preg_match('/^local', @sale.shipping_method) }}">
+                  Local delivery:
+                </check>
+                <check if="{{ @sale.shipping_method == 'economy' }}">
+                  Economy shipping &amp; handling:
+                </check>
+                <check if="{{ @sale.shipping_method == 'default' }}">
+                  Shipping &amp; handling:
                 </check>
               </false>
             </check>
