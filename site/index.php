@@ -234,8 +234,6 @@ $f3->route('POST /contact', function ($f3, $args) {
 
 // Handle updated pricing
 $f3->route('POST /update-pricing', function ($f3, $args) {
-  $f3->get('log')->debug("Loading updated pricing.");
-
   $db= $f3->get('DBH');
 
   $fn= $_FILES['prices']['tmp_name'];
@@ -266,7 +264,6 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
 
   touch('/tmp/last-loaded-prices');
 
-  $f3->get('log')->debug("Loaded $rows prices.");
   echo "Loaded $rows prices.";
 });
 

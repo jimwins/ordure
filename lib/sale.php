@@ -1480,7 +1480,6 @@ class Sale {
     $laff->pack($items);
 
     $box_size= $laff->get_container_dimensions();
-    error_log("container size: " . json_encode($box_size));
 
     return $box_size;
   }
