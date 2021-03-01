@@ -7,6 +7,10 @@
     {
       "type": "vcs",
       "url": "https://github.com/EasyPost/easypost-php"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/jimwins/php-laff"
     }
   ],
   "require": {
@@ -27,7 +31,8 @@
     "cleantalk/php-antispam": "^2.3",
     "robmorgan/phinx": "^0.10.7",
     "wildbit/postmark-php": "^2.11",
-    "cloudstek/php-laff": "^1.1"
+    "cloudstek/php-laff": "dev-master",
+    "yidas/google-maps-services": "^1.0"
   },
   "require-dev": {
     "deployer/recipes": "^6.2"
