@@ -92,3 +92,11 @@ gtag('event', 'begin_checkout', {
     </div>
   </div>
 </div>
+<check if="{{ @NEVERBOUNCE_KEY }}">
+<script type="text/javascript">
+    _NBSettings = {
+        apiKey: '{{ @NEVERBOUNCE_KEY }}'
+    };
+</script>
+<script type="text/javascript" src="https://cdn.neverbounce.com/widget/dist/NeverBounce.js"></script>
+</check>
