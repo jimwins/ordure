@@ -69,7 +69,8 @@
             </check>
           </false>
         </check>
-      </td>
+      </small>
+    </td>
   </true>
   <false>
       <td>{{ @data.quantity }}</td>
@@ -77,6 +78,9 @@
 </check>
       <td class="hidden-xs"><small>{{ @data.code }}</small></td>
       <td>
+        <check if="{{ @data.hazmat }}">
+          <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+        </check>
         <div class="visible-xs"><small>{{ @data.code }}</small></div>
         <span>{{ @data.name }}</span>
         <div class="small">{{ @data.detail }}</div>
@@ -137,10 +141,10 @@
                 <check if="{{ @sale.shipping_method == 'bike' }}">
                   Bike delivery:
                 </check>
-                <check if="{{ @sale.shipping_method == 'cargo-bike' }}">
+                <check if="{{ @sale.shipping_method == 'cargo_bike' }}">
                   Cargo bike delivery:
                 </check>
-                <check if="{{ preg_match('/^local', @sale.shipping_method) }}">
+                <check if="{{ preg_match('/^local/', @sale.shipping_method) }}">
                   Local delivery:
                 </check>
                 <check if="{{ @sale.shipping_method == 'economy' }}">
