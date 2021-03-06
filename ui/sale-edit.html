@@ -94,7 +94,7 @@
           <!-- /ko -->
           <tr>
             <th colspan="5" class="text-right">Due:</th>
-            <td class="text-right">$0.00</td>
+            <td class="text-right" data-bind="text: amount(sale.total() - sale.paid())">$0.00</td>
           </tr>
         </tfoot>
         <tbody data-bind="foreach: items">
