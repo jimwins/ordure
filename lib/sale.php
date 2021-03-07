@@ -305,6 +305,7 @@ class Sale {
     $item->height= "(SELECT height FROM item WHERE item_id = item.id)";
     $item->hazmat= "(SELECT hazmat FROM item WHERE item_id = item.id)";
     $item->oversized= "(SELECT oversized FROM item WHERE item_id = item.id)";
+    $item->no_backorder= "(SELECT no_backorder FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
 
@@ -1383,6 +1384,7 @@ class Sale {
       }
 
       $item= new DB\SQL\Mapper($db, 'item');
+      $item->stock= "(SELECT stock FROM scat_item WHERE scat_item.code = item.code)";
       $item->is_dropshippable= "(SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code)";
       $item->load(array('id = ?', $line->item_id))
         or $f3->error(404);
@@ -1399,6 +1401,12 @@ class Sale {
       }
 
       if ($val > 0 && $purchase_quantity && ($val % $purchase_quantity) != 0) {
+        // XXX really should provide feedback
+        continue;
+      }
+
+      if ($val > 0 && $val > $item->stock && $item->no_backorder) {
+        error_log("Trying to order more than is available of {$item->code}\n");
         // XXX really should provide feedback
         continue;
       }

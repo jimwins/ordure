@@ -337,6 +337,7 @@ class Catalog {
                 IF(stock > 0, stock, 0) stocked,
                 minimum_quantity, is_dropshippable,
                 item.prop65, item.oversized, item.hazmat,
+                no_backorder,
                 thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
@@ -377,6 +378,8 @@ class Catalog {
                          WHERE item_to_image.item_id = item.id
                          GROUP BY item.id)';
       $item->minimum_quantity= '(SELECT minimum_quantity
+                             FROM scat_item WHERE item.code = scat_item.code)';
+      $item->stock= '(SELECT IF(stock > 0, stock, 0)
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
                              FROM scat_item WHERE item.code = scat_item.code)';

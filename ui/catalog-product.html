@@ -287,7 +287,14 @@ gtag('event', 'view_item', {
                                   <small class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</small>
                                 </true>
                                 <false>
-                                  <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+                                  <check if="@item.no_backorder">
+                                    <true>
+                                      <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                                    </true>
+                                    <false>
+                                      <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                    </false>
+                                  </check>
                                 </false>
                               </check>
                             </false>
@@ -299,7 +306,14 @@ gtag('event', 'view_item', {
                               <small class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</small>
                             </true>
                             <false>
-                              <small data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</small>
+                                  <check if="@item.no_backorder">
+                                    <true>
+                                      <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                                    </true>
+                                    <false>
+                                      <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                    </false>
+                                  </check>
                             </false>
                           </check>
                         </false>
@@ -314,7 +328,7 @@ gtag('event', 'view_item', {
                         <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
                       </check>
                     </td>
-                    <check if="@FEATURE_cart && @CAN_ORDER && ((@CAN_PICKUP || @CAN_SHIP) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
+                    <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable))">
                       <true>
                         <td>
                           <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
@@ -495,7 +509,14 @@ gtag('event', 'view_item', {
                                   <span class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</span>
                                 </true>
                                 <false>
-                                  <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                  <check if="@featured_item.no_backorder">
+                                    <true>
+                                      <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                                    </true>
+                                    <false>
+                                      <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                    </false>
+                                  </check>
                                 </false>
                               </check>
                             </false>
@@ -507,7 +528,14 @@ gtag('event', 'view_item', {
                               <span class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</span>
                             </true>
                             <false>
-                              <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                  <check if="@featured_item.no_backorder">
+                                    <true>
+                                      <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                                    </true>
+                                    <false>
+                                      <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                    </false>
+                                  </check>
                             </false>
                           </check>
                         </false>
@@ -524,7 +552,7 @@ gtag('event', 'view_item', {
               </p>
             </div>
 
-            <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && @featured_item.stocked) || (@CAN_DROPSHIP && @featured_item.is_dropshippable)) ">
+            <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@featured_item.stock || !@featured_item.no_backorder)) || (@CAN_DROPSHIP && @featured_item.is_dropshippable))">
               <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@featured_item.code}}', 'quantity': '{{@featured_item.purchase_quantity}}', 'price': '{{@featured_item.sale_price}}' } ] })"
                     action="/cart/add-item" method="POST">
                 <input type="hidden"
