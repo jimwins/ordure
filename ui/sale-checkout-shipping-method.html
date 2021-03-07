@@ -22,68 +22,205 @@ gtag('event', 'checkout_progress', {
       </h3>
     </div>
     <div class="panel-body">
-      <p>
+      <p class="lead">
         <strong>How do you want us to get this order to you?</strong>
       </p>
 
-      <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
-        <check if="@CAN_DELIVER">
-          <div class="radio">
-            <label>
-              <input type="radio" name="method" value="bike">
-              <check if="{{ @shipping_rate == 'truck' }}">
-                <true>
-                  {{ @sale.subtotal < 200 ? '$14.99' : 'FREE' }} &mdash;
-                </true>
-                <false>
-                  {{ @sale.subtotal < 100 ? '$9.99' : 'FREE' }} &mdash;
-                </false>
-              </check>
-              <i class="fa fa-bicycle"></i>
-              Deliver it by bike courier
-            </label>
+      <check if="{{ @shipping_options.bike }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Bike Delivery</h2>
           </div>
-        </check>
-
-        <check if="@CAN_TRUCK">
-          <div class="radio">
-            <label>
-              <input type="radio" name="method" value="truck">
-              $50.00 &mdash;
-              <i class="fa fa-truck"></i>
-              Ship it by local truck delivery
-            </label>
+          <div class="panel-body">
+            <p>
+              If all of the items are in stock and the order is placed before
+              2:30pm on our delivery days (Tuesday - Saturday), your order will
+              be delivered the same day.
+            </p>
+            <p>
+              You will be contacted before your order leaves the store and
+              someone must be able to receive the (contact-less) delivery. If
+              the courier is not able to deliver your order, it will be
+              returned to the store and you will be charged for re-delivery.
+            </p>
           </div>
-        </check>
-
-        <div class="radio">
-          <label>
-            <input type="radio" name="method" value="default" checked>
-            <check if="{{ @default_shipping_rate === null }}">
-              <true>
-                TBD &mdash;
-              </true>
-              <false>
-                {{ amount(@default_shipping_rate) }} &mdash;
-              </false>
-            </check>
-            <i class="fa fa-plane"></i>
-            Ship by USPS, UPS, etc.
-          </label>
+          <div class="panel-footer">
+            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+              <input type="hidden" name="method" value="bike">
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {{ @shipping_options.bike ? amount(@shipping_options.bike) : 'FREE' }}
+                &mdash;
+                <i class="fa fa-bicycle"></i>
+                Deliver by bike courier
+              </button>
+            </form>
+          </div>
         </div>
+      </check>
 
-        <p>
-          For local bike delivery, you will be contacted before your order
-          leaves the store and someone must be able to receive the
-          (contact-less) delivery. If the messenger is not able to deliver
-          your order, it will be returned to the store and you will be charged
-          for re-delivery.
-        </p>
+      <check if="{{ @shipping_options.cargo_bike }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Cargo Bike Delivery</h2>
+          </div>
+          <div class="panel-body">
+            <p>
+              If all of the items are in stock and the order is placed before
+              2:30pm, your order will be delivered the next business day.
+            </p>
+            <p>
+              You will be contacted before your order leaves the store and
+              someone must be able to receive the (contact-less) delivery. If
+              the courier is not able to deliver your order, it will be
+              returned to the store and you will be charged for re-delivery.
+            </p>
+          </div>
+          <div class="panel-footer">
+            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+              <input type="hidden" name="method" value="cargo_bike">
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {{ @shipping_options.cargo_bike ? amount(@shipping_options.cargo_bike) : 'FREE' }}
+                &mdash;
+                <i class="fa fa-bicycle"></i>
+                Deliver by cargo bike courier
+              </button>
+            </form>
+          </div>
+        </div>
+      </check>
 
-        <button type="submit" class="btn btn-primary btn-block">
-          Set Delivery Method
-        </button>
-      </form>
+      <check if="{{ @shipping_options.economy }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">First Class Mail</h2>
+          </div>
+          <div class="panel-body">
+            <p>
+              Your order will ship within two business days (Tuesday - Saturday)
+              by First Class mail, which generally arrives within three to five
+              days depending on your distance from our store in Los Angeles.
+            </p>
+            <p>
+              You will receive an email with tracking information once your
+              package is on its way.
+            </p>
+          </div>
+          <div class="panel-footer">
+            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+              <input type="hidden" name="method" value="economy">
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {{ @shipping_options.economy ? amount(@shipping_options.economy) : 'FREE' }}
+                &mdash;
+                <i class="fa fa-plane"></i>
+                Deliver by USPS First Class Mail
+              </button>
+            </form>
+          </div>
+        </div>
+      </check>
+
+      <check if="{{ @shipping_options.default }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Standard Shipping</h2>
+          </div>
+          <div class="panel-body">
+            <p>
+              Your order will ship within two business days (Tuesday
+              - Saturday) using USPS, UPS, FedEx, or GLS. Delivery time
+              generally ranges from one to five days once it has shipped.
+              (<b>Please note</b> that delivery times may be extended by
+              weather or service delays.)
+            </p>
+            <check if="{{ array_key_exists('hazmat', @stock_status) }}">
+              <p>
+                A $10 surcharge has been added because this order includes
+                hazardous materials that require special handling.
+              </p>
+            </check>
+            <p>
+              You will receive an email with tracking information once your
+              package is on its way.
+            </p>
+          </div>
+          <div class="panel-footer">
+            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+              <input type="hidden" name="method" value="default">
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {{ @shipping_options.default ? amount(@shipping_options.default) : 'FREE' }}
+                &mdash;
+                <i class="fa fa-plane"></i>
+                Deliver by USPS, FedEx, GLS, UPS, etc.
+              </button>
+            </form>
+          </div>
+        </div>
+      </check>
+
+      <check if="{{ @shipping_options.local && !@shipping_options.bike && !@shipping_options.cargo_bike }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Bike Delivery</h2>
+          </div>
+          <div class="panel-body">
+            <p>
+              Sorry, you are not within our local bike delivery area.
+            </p>
+          </div>
+        </div>
+      </check>
+
+      <check if="{{ @shipping_options.local }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Local Delivery</h2>
+          </div>
+          <div class="panel-body">
+            <p>
+              If all of the items are in stock and the order is placed before
+              2:30pm, your order will be delivered the next business day.
+            </p>
+            <p>
+              You will be contacted before your order leaves the store and
+              someone must be able to receive the (contact-less) delivery. If
+              the courier is not able to deliver your order, it will be
+              returned to the store and you will be charged for re-delivery.
+            </p>
+          </div>
+          <div class="panel-footer">
+            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+              <input type="hidden" name="method" value="local">
+              <input type="hidden" name="size" value="{{ @shipping_options.local.size }}">
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                {{ @shipping_options.local.price ? amount(@shipping_options.local.price) : 'FREE' }}
+                &mdash;
+                <i class="fa {{ @shipping_options.local.size == 'sm' ? 'fa-car' : 'fa-truck' }}"></i>
+                Deliver by {{ @shipping_options.local.size == 'sm' ? 'car' : 'truck' }}
+              </button>
+            </form>
+          </div>
+        </div>
+      </check>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2 class="panel-title">Curbside Pickup</h2>
+        </div>
+        <div class="panel-body">
+          <p>
+            You will be contacted when your pick-up is ready. Current pickup
+            hours are Tuesday through Saturday between noon and 3pm. Orders
+            placed during those hours are generally ready to be picked up in
+            fifteen minutes.
+          </p>
+        </div>
+        <div class="panel-footer">
+          <a href="{{ @BASE }}/cart/set-in-store-pickup"
+             class="btn btn-primary btn-block btn-lg">
+            FREE - <i class="fa fa-building"></i> Pick it up at the store!
+          </a>
+        </div>
+      </div>
 
     </div>
   </div>

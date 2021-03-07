@@ -204,7 +204,8 @@ class Sale {
     $days= (int)$f3->get('REQUEST.days');
     if (!$days) $days= 2;
 
-    $q= "SELECT item.code, item.name, item.width, item.length, item.weight,
+    $q= "SELECT item.code, item.name,
+                item.width, item.length, item.height, item.weight,
                 (SELECT stock FROM scat_item WHERE scat_item.code = item.code)
                   AS stock,
                 SUM(quantity) total
@@ -304,16 +305,37 @@ class Sale {
     $item->weight= "(SELECT weight FROM item WHERE item_id = item.id)";
     $item->width= "(SELECT width FROM item WHERE item_id = item.id)";
     $item->length= "(SELECT length FROM item WHERE item_id = item.id)";
+    $item->height= "(SELECT height FROM item WHERE item_id = item.id)";
+    $item->hazmat= "(SELECT hazmat FROM item WHERE item_id = item.id)";
+    $item->oversized= "(SELECT oversized FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
-    $items_out= array();
+    $items_out= $stock_status= [];
     foreach ($items as $i) {
       $items_out[]= $i->cast();
+      if ($i->oversized) {
+        $stock_status['oversized']++;
+      }
+      if ($i->hazmat) {
+        $stock_status['hazmat']++;
+      }
+      if (in_array(0, [ $i->weight, $i->length, $i->width, $i->height ])) {
+        $stock_status['unknown']++;
+      }
+      // no stock and not stocked? special order.
+      if (!$i->stock && !$i->minimum_quantity && $i->purchase_quantity) {
+        $stock_status['special']++;
+      }
+      // more in order than in stock? stock is limited.
+      if ($i->stock < $i->quantity && $i->purchase_quantity) {
+        $stock_status['stock_limited']++;
+      }
     }
     $f3->set('items', $items_out);
+    $f3->set('stock_status', $stock_status);
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payments= $payment->find(array('sale_id = ?', $sale->id),
@@ -334,12 +356,6 @@ class Sale {
       $shipments_out[]= $i->cast();
     }
     $f3->set('shipments', $shipments_out);
-
-    list($shipping_status, $shipping_rate, $special_conditions)=
-      $this->get_shipping_estimate($f3, $sale, $items);
-    $f3->set('shipping_status', $shipping_status);
-    $f3->set('shipping_rate', $shipping_rate);
-    $f3->set('special_conditions', $special_conditions);
 
     $notes= new DB\SQL\Mapper($db, 'sale_note');
     $notes= $notes->find(array('sale_id = ?', $sale->id),
@@ -404,17 +420,24 @@ class Sale {
     $f3->reroute("/sale/{$new_sale->uuid}/edit");
   }
 
-  // returns [ shipping_status, shipping_rate, special_conditions ]
-  function get_shipping_estimate($f3, $sale, $items) {
+  function get_shipping_options($f3, $sale, $address= null) {
     $db= $f3->get('DBH');
-    $status= $rate= $special= [];
+    $status= $special= [];
     $weight= 0.0;
 
+    if (!$address) {
+      $address= new DB\SQL\Mapper($db, 'sale_address');
+      $address->load(array('id = ?', $sale->shipping_address_id))
+        or $f3->error(404);
+    }
+
     if (($minimum= $f3->get("SALE_MINIMUM")) && $minimum > $sale->total) {
-      $status['below_minimum']++;
+      return [];
     }
 
     $item_dim= [];
+
+    $items= $f3->get('items');
 
     foreach ($items as $sale_item) {
       // Check stock
@@ -423,6 +446,7 @@ class Sale {
       // no details? must be special order
       if ($scat_item->dry()) {
         $status['special']++;
+        continue;
       }
       // no stock and not stocked? special order.
       if (!$scat_item->stock && !$scat_item->minimum_quantity && $scat_item->purchase_quantity) {
@@ -433,64 +457,166 @@ class Sale {
         $status['stock_limited']++;
       }
 
-      // Check item details
-      $item= new DB\SQL\Mapper($db, 'item');
-      $item->load(array('code = ?', $sale_item['code']));
       // hazmat? (extra charge)
-      if ($item->hazmat && $sale->shipping_address_id != 1) {
-        $special['hazmat']++;
+      if ($sale_item['hazmat']) {
+        $status['hazmat']++;
       }
+      // oversized?
+      if ($sale_item['oversized']) {
+        $status['oversized']++;
+      }
+
       // unknown dimensions?
-      if ($item->weight == 0 || $item->length == 0) {
-        $rate['unknown']++;
+      if ($sale_item['weight'] == 0 || $sale_item['length'] == 0) {
+        $status['unknown']++;
       } else {
-        $item_dim= array_merge($item_dim, array_fill(0, $sale_item->quantity,
+        $item_dim= array_merge($item_dim, array_fill(0, $sale_item['quantity'],
           [
-            'length' => $item->length,
-            'width' => $item->width,
-            'height' => $item->height,
+            'length' => $sale_item['length'],
+            'width' => $sale_item['width'],
+            'height' => $sale_item['height'],
           ]));
-      }
-      $weight+= $item->weight * $sale_item->quantity;
-      // not small?
-      $size= [$item->height, $item->length, $item->width ];
-      sort($size, SORT_NUMERIC);
-      if ($size[0] > 8 || $size[1] > 19 || $size[2] > 25) {
-        $rate['large']++;
-      } else if ($size[0] > 8 || $size[1] > 15 || $size[2] > 18) {
-        $rate['medium']++;
-      }
-      // truck?
-      if ($item->oversized) {
-        $rate['truck']++;
+        $weight+= $sale_item['weight'] * $sale_item['quantity'];
       }
     }
 
-    $box_size= $this->calculate_box_size($item_dim);
+    $options= [];
 
-    // if overweight for small, might be able to ship as medium
-    if ($weight > 10)
-      $rate['medium']++;
-    // if overweight for medium, might be able to ship as large
-    if ($rate['medium'] && $weight > 20)
-      $rate['large']++;
-    // if overweight for large, will have to get price quote
-    if ($rate['large'] && $weight > 30)
-      $rate['unknown']++;
+    if (self::can_deliver($f3)) {
+      $zone= self::in_delivery_area($address);
+      if ($zone) {
+        if (preg_match('/\\$(\\d+)/', $zone, $m)) {
+          $price= $m[1];
+        } else {
+          $price= 6;
+        }
+        // TODO better distinction between bike and bike-cargo
+        if ($status['oversized']) {
+          $options['cargo_bike']= (($sale->subtotal > 199) ?
+                                    0.00 :
+                                    $price + 10 + 0.99);
+        } else {
+          $options['bike']= (($sale->subtotal > 69) ?
+                              0.00 :
+                              $price + 0.99);
+        }
+      }
+    }
 
-    return [
-      ($status['below_minimum'] ? 'below_minimum' :
-        ($status['special'] ? 'special_order' :
-          ($status['stock_limited'] ? 'stock_limited' :
-            'immediate'))),
-      $rate['unknown'] ? 'unknown' :
-        ($weight < 0 ? 'free' :
-          ($rate['truck'] ? 'truck' :
-            ($rate['large'] ? 'large' :
-              ($rate['medium'] ? 'medium' :
-                'small')))),
-      array_keys($special)
-    ];
+    if (self::can_truck($f3) && self::in_truck_area($address)) {
+      $truck_sizes= [
+        'sm' => [ 30, 25, 16 ],
+        'md' => [ 46, 38, 36 ],
+        'lg' => [ 74, 42, 36 ],
+        'xl' => [ 85, 56, 36 ],
+        'xxl' => [ 133, 60, 60 ],
+      ];
+
+      $base= [
+        'sm' => 13,
+        'md' => 35,
+        'lg' => 55,
+        'xl' => 95,
+        'xxl' => 170,
+      ];
+
+      $best= null;
+      // figure out cargo size
+      foreach ($truck_sizes as $name => $size) {
+        if ($this->fits_in_box([ $size ], $item_dim)) {
+          $best= $name;
+          break;
+        }
+      }
+
+      // figure out price
+      if ($best) {
+        list($miles, $minutes)= $this->get_truck_distance($f3, $address);
+
+        if (!$miles) {
+          error_log("Unable to figure out distance for destination.");
+        } else {
+          $price= ($base[$best] + $miles + ($minutes / 2)) * 1.05;
+          $options['local']= [
+            'size' => $best,
+            'price' => ceil($price) - 0.01
+          ];
+        }
+      }
+    }
+
+    if (self::can_ship($f3) && !$status['oversized']) {
+      $economy_boxes= [
+        [ 9, 5, 3 ],
+        [ 5, 5, 3.5 ],
+        [ 12.25, 3, 3 ],
+      ];
+
+      if ($weight < 0.9 && !$status['hazmat'] &&
+          $this->fits_in_box($economy_boxes, $item_dim))
+      {
+        $options['economy']= (($sale->subtotal > 69) ? 0.00 : 5.99);
+      }
+
+      $extra_small_boxes= array_merge($economy_boxes, [
+        [ 18.75, 3, 3 ],
+        [ 8.67, 5.37, 1.67 ],
+        [ 10, 7, 4.75 ],
+        [ 7, 7, 6 ],
+        [ 12.8, 10.9, 2.37 ],
+//        [ 14.37, 7.5, 5.12 ],
+      ]);
+
+      $small_boxes= [
+        [ 18, 15, 8 ],
+      ];
+
+      $medium_boxes= [
+        [ 19, 25, 8 ],
+      ];
+
+      if ($weight < 20 && $this->fits_in_box($extra_small_boxes, $item_dim)) {
+        $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
+      } elseif ($weight < 10 && $this->fits_in_box($small_boxes, $item_dim)) {
+        $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
+      } elseif ($weight < 20 && $this->fits_in_box($medium_boxes, $item_dim)) {
+        $options['default']= (($sale->subtotal > 199) ? 0.00 : 19.99);
+      } elseif ($weight < 30) {
+        $options['default']= (($sale->subtotal > 399) ? 0.00 : 29.99);
+      }
+
+      if (isset($options['default']) && $status['hazmat']) {
+        $options['default']+= 10;
+      }
+    }
+
+    return $options;
+  }
+
+  // returns [ $miles, $minutes ]
+  function get_truck_distance($f3, $address) {
+    try {
+      $gm= new \yidas\googleMaps\Client([
+        'key' => $f3->get('GOOGLE_API_KEY')
+      ]);
+
+      $from= "645 S Los Angeles St, Los Angeles, CA 90014";
+      $to= "{$address->address1}, " .
+           "{$address->city}, {$address->state} {$address->zip5}";
+
+      $result= $gm->distanceMatrix($from, $to);
+
+      if ($result['status'] == 'OK') {
+        return [
+          $result['rows'][0]['elements'][0]['distance']['value'] / 1609.34,
+          $result['rows'][0]['elements'][0]['duration']['value'] / 60,
+        ];
+      }
+    } catch (\Exception $e) {
+      error_log("Google exception: {$e->getMessage()}\n");
+    }
+
+    return [ 0, 0 ];
   }
 
   function cart($f3, $args) {
@@ -550,13 +676,7 @@ class Sale {
         $stage= 'login'; // start at the beginning
 
         if ($sale->name && $sale->email) {
-          $shipping_rate= $f3->get('shipping_rate');
-          if ($sale->shipping_address_id > 1 &&
-              in_array($shipping_rate, [ 'truck', 'unknown' ]))
-          {
-            $stage= 'review';
-          }
-          elseif ($sale->shipping_address_id) {
+          if ($sale->shipping_address_id) {
             $address= new DB\SQL\Mapper($db, 'sale_address');
             $address->load(array('id = ?', $sale->shipping_address_id))
               or $f3->error(404);
@@ -566,15 +686,30 @@ class Sale {
             }
 
             if ($address->verified) {
-              if ($address->id != 1 &&
-                  !$sale->shipping_method &&
-                  self::can_deliver($f3) && self::in_delivery_area($address))
+              if ($address->id != 1 && !$sale->shipping_method)
               {
-                $stage= 'shipping-method';
+                $shipping_options=
+                  $this->get_shipping_options($f3, $sale, $address);
+                if (empty($shipping_options)) {
+                  $stage= 'review';
+                } elseif (count($shipping_options) == 1 &&
+                          isset($shipping_options['default']))
+                {
+                  $sale->shipping_method= 'default';
+                  $sale->shipping= $shipping_options['default'];
+                  $sale->save();
+                  $this->update_sales_tax($f3, $sale);
+                  $sale= $this->load($f3, $uuid, 'uuid');
+                  $stage= 'payment';
+                } else {
+                  $stage= 'shipping-method';
+                }
               } else {
                 if (!$sale->shipping_method) {
                   $sale->shipping_method= 'default';
+                  $sale->shipping= 0;
                   $sale->save();
+                  $this->update_sales_tax($f3, $sale);
                   $sale= $this->load($f3, $uuid, 'uuid');
                 }
                 $stage= 'payment';
@@ -590,8 +725,11 @@ class Sale {
       }
 
       if ($stage == 'shipping-method') {
-        $default_rate= $this->calculate_default_shipping($f3, $sale);
-        $f3->set('default_shipping_rate', $default_rate);
+        if (!$shipping_options) {
+          $shipping_options=
+            $this->get_shipping_options($f3, $sale, $address);
+        }
+        $f3->set('shipping_options', $shipping_options);
       }
 
       // Paying? Figure out if rewards are available.
@@ -717,9 +855,10 @@ class Sale {
 
       $address->save();
 
-      // XXX all amazon orders forced to default shipping for now
-      $sale->shipping_method= 'default';
       $sale->shipping_address_id= $address->id;
+      // all amazon-paid orders forced to default shipping
+      $sale->shipping_method= 'default';
+
     } else {
       $details= $res->toArray();
 
@@ -1280,7 +1419,7 @@ class Sale {
           $db->exec($q, [ $line->quantity, $sale->id, $item->id ]);
         }
       } else {
-        if ($line->is_kit) {
+        if ($item->is_kit) {
           $q= "DELETE FROM sale_item WHERE sale_id = ? AND kit_id = ?";
           $db->exec($q, [ $sale->id, $item->id ]);
         }
@@ -1303,35 +1442,6 @@ class Sale {
                  ($added ? '&added=' . rawurlencode($added) : ''));
   }
 
-  function calculate_default_shipping($f3, $sale) {
-    $shipping_rate= $f3->get('shipping_rate');
-    $shipping_status= $f3->get('shipping_status');
-    $shipping= 0.00;
-    $shipping_tax= 0.00;
-
-    switch ($shipping_rate) {
-    case 'small':
-      $shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
-      break;
-    case 'medium':
-      $shipping= $sale->subtotal < 200.00 ? 19.99 : 0.00;
-      break;
-    case 'large':
-      $shipping= $sale->subtotal < 300.00 ? 29.99 : 0.00;
-      break;
-    case 'truck':
-      return 0.00;
-    }
-
-    $special_conditions= $f3->get('special_conditions');
-
-    if (in_array('hazmat', $special_conditions)) {
-      $shipping+= 10.00;
-    }
-
-    return $shipping;
-  }
-
   function update_shipping($f3, $sale) {
     if ($sale->shipping_manual)
       return;
@@ -1341,16 +1451,28 @@ class Sale {
 
     // Calculate shipping if not in-store pick-up
     if ($sale->shipping_address_id != 1) {
-      if ($sale->shipping_method == 'bike') {
-        $shipping_rate= $f3->get('shipping_rate');
-        if ($shipping_rate != 'truck') {
-          $sale->shipping= $sale->subtotal < 100.00 ? 9.99 : 0.00;
-        } else {
-          $sale->shipping= $sale->subtotal < 200.00 ? 14.99 : 0.00;
+      if ($sale->shipping_method) {
+        $method= $sale->shipping_method;
+        if (preg_match('/local_(.+)/', $method, $m)) {
+          $method= "local";
+          $size= $m[1];
         }
-      } else {
-        $sale->shipping= $this->calculate_default_shipping($f3, $sale);
+
+        $shipping_options= $this->get_shipping_options($f3, $sale);
+        if (!$method ||
+            !isset($shipping_options[$method]))
+        {
+          $method= $sale->shipping_method= 'default';
+        }
+
+        if ($method == 'local') {
+          $sale->shipping_method= 'local_' . $size;
+        }
+
+        $option= $shipping_options[$method];
+        $sale->shipping= is_array($option) ? $option['price'] : $option;
       }
+
     }
 
     $sale->save();
@@ -1475,13 +1597,26 @@ class Sale {
     $f3->reroute($base. '/checkout?uuid=' . $sale->uuid);
   }
 
-  function calculate_box_size($items) {
+  function fits_in_box($boxes, $items) {
     $laff= new \Cloudstek\PhpLaff\Packer();
-    $laff->pack($items);
 
-    $box_size= $laff->get_container_dimensions();
+    foreach ($boxes as $size) {
+      $laff->pack($items, [
+            'length' => $size[0],
+            'width' => $size[1],
+            'height' => $size[2],
+      ]);
 
-    return $box_size;
+      $container= $laff->get_container_dimensions();
+
+      if ($container['height'] <= $size[2] &&
+          !count($laff->get_remaining_boxes()))
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   function calculate_shipping($f3, $args) {
@@ -1682,11 +1817,24 @@ class Sale {
       $f3->error(500);
 
     $method= $f3->get('REQUEST.method');
-    $sale->shipping_method= $method;
+    $size= $f3->get('REQUEST.size');
+
+    $shipping_options= $this->get_shipping_options($f3, $sale);
+
+    if (!isset($shipping_options[$method])) {
+      $f3->error("Selected shipping method ('{$method}') is unavailable for this order.");
+    }
+
+    $sale->shipping_method= $method . ($size ? "_$size" : "");
+    error_log("new method: " . $method . ($size ? "_$size" : ""));
+    $sale->shipping= (is_array($shipping_options[$method]) ?
+                      $shipping_options[$method]['price'] :
+                      $shipping_options[$method]);
+    $sale->shipping_tax= 0; // reset the tax
 
     $sale->save();
 
-    $this->update_shipping_and_tax($f3, $sale);
+    $this->update_sales_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
       return $this->json($f3, $args);
@@ -2068,10 +2216,9 @@ class Sale {
   }
 
   function update_sales_tax($f3, $sale) {
-    /* No address or shipping rate? Can't do it. */
-    if ((!$sale->shipping_address_id && !$sale->billing_address_id) ||
-        ($sale->shipping_address_id != 1 && $sale->shipping_method != 'bike' &&
-         in_array($f3->get('shipping_rate'), [ 'truck', 'unknown' ])))
+    /* No shipping address or method? Can't do it. */
+    if (!$sale->shipping_address_id ||
+        ($sale->shipping_address_id > 1 && !$sale->shipping_method))
     {
       $sale->tax_calculated= null;
       $sale->save();
@@ -2284,10 +2431,6 @@ class Sale {
                             'items' => $f3->get('items'),
                             'payments' => $f3->get('payments'),
                             'notes' => $f3->get('notes'),
-                            'shipping_status' => $f3->get('shipping_status'),
-                            'shipping_rate' => $f3->get('shipping_rate'),
-                            'special_conditions' =>
-                              $f3->get('special_conditions'),
                             ),
                      JSON_PRETTY_PRINT);
   }
@@ -3583,6 +3726,11 @@ Your order will be reviewed, and you will receive another email within one busin
       return (bool)$person['rewardsplus'];
     }
     return false;
+  }
+
+  static function in_truck_area($address) {
+    // 20 miles for now, see how it goes
+    return $address->distance < 20;
   }
 
   static function can_dropship($f3) {

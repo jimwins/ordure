@@ -16,14 +16,14 @@ gtag('event', 'checkout_progress', {
 });
 </script>
 <check if="{{ @sale.shipping_address_id == 1 }}">
-  <check if="{{ @shipping_status == 'special_order' }}">
+  <check if="{{ array_key_exists('special_order', @stock_status) }}">
     <div class="alert alert-danger">
       We will contact you via email to give you an estimated date when
       your special order item(s) will be ready for pickup.
     </div>
   </check>
 
-  <check if="{{ @shipping_status == 'stock_limited' }}">
+  <check if="{{ array_key_exists('stock_limited', @stock_status) }}">
     <div class="alert alert-danger">
       We will contact you via email to give you an estimated date when
       your out of stock item(s) will be ready for pickup.

@@ -136,13 +136,13 @@
               your cart, but cannot place orders at this time.
             </p>
           </check>
-          <check if="{{ @shipping_status == 'below_minimum' }}">
+          <check if="{{ array_key_exists('below_minimum', @stock_status) }}">
             <p class="lead alert alert-danger">
               There is a ${{sprintf('%.2f', @SALE_MINIMUM)}}
               minimum on online orders at this time.
             </p>
           </check>
-          <check if="{{ @shipping_status == 'stock_limited' && (@CAN_SHIP || @CAN_PICKUP) }}">
+          <check if="{{ array_key_exists('stock_limited', @stock_status) && (@CAN_SHIP || @CAN_PICKUP) }}">
           <!-- XXX drop ship as option -->
             <p class="lead alert alert-danger">
               <b>Not all of the items in your cart are currently in stock,</b>
@@ -154,7 +154,7 @@
               </exclude>
             </p>
           </check>
-          <check if="{{ @shipping_status == 'special_order' && (@CAN_SHIP || @CAN_PICKUP) }}">
+          <check if="{{ array_key_exists('special_order', @stock_status) && (@CAN_SHIP || @CAN_PICKUP) }}">
             <p class="lead alert alert-danger">
               <b>Your order contains special order items that will take extra
               time to prepare.</b> We will email you with an esimated
@@ -163,20 +163,14 @@
               as long as four to six weeks.)
             </p>
           </check>
-          <check if="{{ in_array('hazmat', @special_conditions) }}">
-            <p class="lead alert alert-warning">
-              Your order contains items that are considered hazarous materials,
-              additional shipping charges have been applied.
-            </p>
-          </check>
-          <check if="{{ @shipping_rate == 'truck' && (@CAN_SHIP || @CAN_DROPSHIP) }}">
+          <check if="{{ array_key_exists('oversized', @stock_status) && (@CAN_SHIP || @CAN_DROPSHIP) }}">
             <p class="lead alert alert-danger">
               Your order contains items that will require truck delivery.
               You can submit your order for manual review, and we'll contact
               you with the cost and instructions on how to complete the order.
             </p>
           </check>
-          <check if="{{ @shipping_rate == 'unknown' && (@CAN_SHIP || @CAN_DROPSHIP) }}">
+          <check if="{{ array_key_exists('unknown', @stock_status) && (@CAN_SHIP || @CAN_DROPSHIP) }}">
             <p class="lead alert alert-warning">
               <b>Need this to be shipped?</b>
               Sorry, our system is unable to calculate the shipping costs
@@ -199,16 +193,14 @@
                   </a>
                 </check>
               </div>
-              <check if="@shipping_status != 'below_minimum'">
-                <check if="{{ @shipping_status != 'closed' }}">
-                  <div class="col-sm-4">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">
-                      <i class="fa fa-sign-in"></i>
-                      Check out
-                    </button>
-                  </div>
-                </check>
-                <check if="{{ @shipping_status != 'closed' && !in_array(@shipping_rate, [ 'truck', 'unknown' ]) }}">
+              <check if="!@below_minimum && @CAN_ORDER">
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <i class="fa fa-sign-in"></i>
+                    Check out
+                  </button>
+                </div>
+                <check if="{{ !array_key_exists('oversized', @stock_status) && !array_key_exists('unknown', @stock_status) }}">
                   <div class="col-sm-4">
                     <div id="AmazonPayButton"></div>
                   </div>
