@@ -334,7 +334,7 @@ gtag('event', 'view_item', {
                         <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
                       </check>
                     </td>
-                    <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable))">
+                    <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable && !@item.no_backorder))">
                       <true>
                         <td>
                           <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
@@ -558,7 +558,7 @@ gtag('event', 'view_item', {
               </p>
             </div>
 
-            <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@featured_item.stock || !@featured_item.no_backorder)) || (@CAN_DROPSHIP && @featured_item.is_dropshippable))">
+            <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@featured_item.stock || !@featured_item.no_backorder)) || (@CAN_DROPSHIP && @featured_item.is_dropshippable && !@featured_item.no_backorder))">
               <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@featured_item.code}}', 'quantity': '{{@featured_item.purchase_quantity}}', 'price': '{{@featured_item.sale_price}}' } ] })"
                     action="/cart/add-item" method="POST">
                 <input type="hidden"
