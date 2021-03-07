@@ -162,6 +162,9 @@ class Catalog {
     $product->brand_name= '(SELECT name
                               FROM brand
                              WHERE brand = brand.id)';
+    $product->brand_warning= '(SELECT warning
+                              FROM brand
+                             WHERE brand = brand.id)';
     $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
                                                         "uuid", image.uuid,
                                                         "name", image.name,
@@ -293,6 +296,9 @@ class Catalog {
     $product->brand_name = '(SELECT name
                                FROM brand
                               WHERE brand = brand.id)';
+    $product->brand_warning= '(SELECT warning
+                              FROM brand
+                             WHERE brand = brand.id)';
     $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
                                                         "uuid", image.uuid,
                                                         "name", image.name,
@@ -513,6 +519,9 @@ class Catalog {
     $product->brand_name = '(SELECT name
                                FROM brand
                               WHERE brand = brand.id)';
+    $product->brand_warning= '(SELECT warning
+                              FROM brand
+                             WHERE brand = brand.id)';
     $product->load(array('slug=?', $f3->get('PARAMS.product')));
     $f3->set('product', $product);
 
@@ -644,7 +653,8 @@ class Catalog {
                      FROM department
                     WHERE subdept.parent = department.id) AS dept,
                   subdept.slug AS subdept, product.slug,
-                  brand.name brand_name, active
+                  brand.name brand_name, brand.warning brand_warning,
+                  active
              FROM product
              LEFT JOIN brand ON product.brand = brand.id
              JOIN department subdept ON product.department = subdept.id

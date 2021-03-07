@@ -18,6 +18,12 @@
       </h1>
     </div>
 
+    <check if="{{ @product.brand_warning }}">
+      <div class="alert alert-danger">
+        {{ @product.brand_warning }}
+      </div>
+    </check>
+
     <div class="row">
       <div class="col-sm-6">
         {{ @markdown(@product.description) | raw }}
