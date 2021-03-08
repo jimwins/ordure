@@ -485,6 +485,7 @@ class Catalog {
       $f3->set('PARAMS.subdept', $m[2]);
       $f3->set('PARAMS.product', $m[3]);
     } else {
+      error_log("base: $base, cat: $cat, url: $url\n");
       $f3->error(500, "Couldn't figure out product for link.");
     }
 
