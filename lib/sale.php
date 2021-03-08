@@ -478,6 +478,10 @@ class Sale {
       }
     }
 
+    if ($status['unknown']) {
+      return [];
+    }
+
     $options= [];
 
     if (self::can_deliver($f3)) {
