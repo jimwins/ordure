@@ -1162,6 +1162,7 @@ class Sale {
     } else {
       $item->npurchase_quantity= "IFNULL((SELECT scat_item.is_dropshippable FROM scat_item WHERE scat_item.code = item.code), purchase_quantity)";
     }
+    $item->stock= "(SELECT stock FROM scat_item WHERE scat_item.code = item.code)";
     $item->load(array('code = ?', $item_code))
       or $f3->error(404);
 
@@ -1177,6 +1178,9 @@ class Sale {
 
     if ($existing) {
       $existing[0]->quantity+= max($quantity, $item->npurchase_quantity);
+      if ($item->no_backorder && $line->quantity > $item->stock) {
+        $existing[0]->quantity= $item->stock;
+      }
       $existing[0]->save();
 
       /* Was this a kit? Need to adjust quantities of kit items */
@@ -1194,6 +1198,9 @@ class Sale {
       $line->sale_id= $sale->id;
       $line->item_id= $item->id;
       $line->quantity= max($quantity, $item->npurchase_quantity);
+      if ($item->no_backorder && $line->quantity > $item->stock) {
+        $line->quantity= $item->stock;
+      }
       $line->retail_price= $item->nretail_price;
       $line->discount_type= $item->discount_type;
       $line->discount= $item->discount;
