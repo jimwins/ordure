@@ -580,12 +580,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jimwins/php-laff.git",
-                "reference": "8bf525b15ec9ba8bfce3612359442df4067f5bb4"
+                "reference": "0db4f4498110109bd93408b3f30d432a819f0d86"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jimwins/php-laff/zipball/8bf525b15ec9ba8bfce3612359442df4067f5bb4",
-                "reference": "8bf525b15ec9ba8bfce3612359442df4067f5bb4",
+                "url": "https://api.github.com/repos/jimwins/php-laff/zipball/0db4f4498110109bd93408b3f30d432a819f0d86",
+                "reference": "0db4f4498110109bd93408b3f30d432a819f0d86",
                 "shasum": ""
             },
             "require-dev": {
@@ -624,7 +624,7 @@
                 "issues": "https://github.com/Cloudstek/php-laff/issues",
                 "source": "https://github.com/Cloudstek/php-laff"
             },
-            "time": "2021-02-12T03:02:46+00:00"
+            "time": "2021-03-11T00:02:37+00:00"
         },
         {
             "name": "clue/stream-filter",
