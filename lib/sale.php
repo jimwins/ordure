@@ -507,11 +507,11 @@ class Sale {
 
     if (self::can_truck($f3) && self::in_truck_area($address)) {
       $truck_sizes= [
-        'sm' => [ 30, 25, 16 ],
-        'md' => [ 46, 38, 36 ],
-        'lg' => [ 74, 42, 36 ],
-        'xl' => [ 85, 56, 36 ],
-        'xxl' => [ 133, 60, 60 ],
+        'sm' => [ [ 30, 25, 16 ], [ 108, 4, 4 ] ],
+        'md' => [ [ 46, 38, 36 ] ],
+        'lg' => [ [ 74, 42, 36 ], [ 108, 8, 8 ] ],
+        'xl' => [ [ 85, 56, 36 ] ],
+        'xxl' => [ [ 133, 60, 60 ] ],
       ];
 
       $base= [
@@ -524,8 +524,8 @@ class Sale {
 
       $best= null;
       // figure out cargo size
-      foreach ($truck_sizes as $name => $size) {
-        if ($this->fits_in_box([ $size ], $item_dim)) {
+      foreach ($truck_sizes as $name => $sizes) {
+        if ($this->fits_in_box($sizes, $item_dim)) {
           $best= $name;
           break;
         }
