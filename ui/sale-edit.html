@@ -61,7 +61,12 @@
           <tr>
             <th colspan="5" class="text-right">
               Shipping &amp; handling:
-              <br><small>Rate: {{ @shipping_rate }}</small>
+              <br>
+              <small>
+                Rate:
+                <span class="editable">
+                  <span data-key="shipping_rate" data-bind="text: sale.shipping_method() || 'none'"></span>
+              </small>
             </th>
             <td class="editable text-right">
               <span data-key="shipping"
@@ -320,6 +325,13 @@ afterLoad(function() {
       $.ajax({ dataType: 'json', method: 'POST',
                url: 'set-shipping',
                data: { shipping: value } })
+       .done(function (data) {
+         viewModel.load(data);
+       });
+    } else if (key == 'shipping_rate') {
+      $.ajax({ dataType: 'json', method: 'POST',
+               url: 'set-shipping-method',
+               data: { method: value } })
        .done(function (data) {
          viewModel.load(data);
        });

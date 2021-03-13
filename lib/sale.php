@@ -58,6 +58,8 @@ class Sale {
                'Sale->remove_address');
     $f3->route("POST /sale/@sale/set-in-store-pickup [ajax]",
                'Sale->set_in_store_pickup');
+    $f3->route("POST /sale/@sale/set-shipping-method",
+               'Sale->set_shipping_method');
     $f3->route("POST /sale/@sale/set-shipping [ajax]", 'Sale->set_shipping');
     $f3->route("POST /sale/@sale/ship-to-billing [ajax]",
                'Sale->ship_to_billing_address');
@@ -688,7 +690,7 @@ class Sale {
             }
 
             if ($address->verified) {
-              if ($address->id != 1 && !$sale->shipping_method)
+              if ($address->id != 1 && !$sale->shipping_method && $stage != 'review')
               {
                 $shipping_options=
                   $this->get_shipping_options($f3, $sale, $address);
@@ -1829,7 +1831,7 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    if ($sale->status != 'new' && $sale->status != 'cart')
+    if ($sale->status != 'new' && $sale->status != 'cart' && $sale->status != 'unpaid')
       $f3->error(500);
 
     $method= $f3->get('REQUEST.method');
