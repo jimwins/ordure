@@ -27,6 +27,21 @@
     <div class="row">
       <div class="col-sm-6">
         {{ @markdown(@product.description) | raw }}
+
+        <check if="count(@variations) > 1">
+          <h4>Jump to:</h4>
+          <ul>
+            <repeat group="{{ @variations }}"
+                    key="{{ @variation }}"
+                    value="{{ @num }}"
+                    counter="{{ @ctr }}">
+              <li class="{{ @ctr == 1 ? 'active' : '' }}">
+                <a href="#v{{ @ctr }}">{{ @variation }}</a>
+              </li>
+            </repeat>
+          </ul>
+        </check>
+
       </div>
 
       <div class="col-sm-6">
@@ -53,19 +68,6 @@ gtag('event', 'view_item', {
         in the warehouse. Your payment will be refunded for any items we are
         unable to have shipped.
       </div>
-    </check>
-
-    <check if="0">
-      <ul class="nav nav-tabs">
-        <repeat group="{{ @variations }}"
-                key="{{ @variation }}"
-                value="{{ @num }}"
-                counter="{{ @ctr }}">
-          <li class="{{ @ctr == 1 ? 'active' : '' }}">
-            <a href="#v{{ @ctr }}" data-toggle="tab">{{ @variation }}</a>
-          </li>
-        </repeat>
-      </ul>
     </check>
 
     <div>
