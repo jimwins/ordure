@@ -97,8 +97,15 @@
               </check>
 	    </h4>
             <p>{{ @first_paragraph(@markdown(@product.description)) | raw}}
-	  </div>
-	</div>
+            <div class="pull-right">
+              <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}"
+                 class="btn btn-default">
+                Shop Now
+              </a>
+            </div>
+          </div>
+        </div>
+        <hr>
       </repeat>
       <script>
 gtag('event', 'view_item_list', {
