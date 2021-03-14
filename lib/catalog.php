@@ -356,10 +356,16 @@ class Catalog {
 
     $variations= array();
     foreach ($items as $item) {
-      @$variations[$item['variation']]++;
+      @$variations[$item['variation']]+= $item['stocked'];
     }
 
-    uksort($variations, 'strnatcasecmp');
+    /* Put variations in stock on top */
+    uksort($variations, fn ($x, $y) =>
+      strnatcasecmp(
+        ($variations[$x] ? 'A-' : 'B-') . $x,
+        ($variations[$y] ? 'A-' : 'B-') . $y
+      )
+    );
 
     $f3->set('items', $items);
     $f3->set('variations', $variations);
