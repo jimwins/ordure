@@ -81,10 +81,10 @@ gtag('event', 'view_item', {
           <table class="table table-condensed table-striped">
             <thead>
               <tr>
-                <th class="col-xs-2">Item No.</th>
-                <th class="col-xs-3">Description</th>
-                <th class="col-xs-1">List</th>
-                <th class="col-xs-1">Sale</th>
+                <th class="col-sm-2 hidden-xs">Item No.</th>
+                <th class="col-sm-3 col-xs-5">Description</th>
+                <th class="col-sm-1 hidden-xs">List</th>
+                <th class="col-sm-1 col-xs-2">Sale</th>
               <exclude>
                 <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in available for pick up, shipping, special order, or drop-ship.">Availability</th>
               </exclude>
@@ -98,29 +98,33 @@ gtag('event', 'view_item', {
               <repeat group="{{ @items }}" value="{{ @item }}">
                 <check if="{{ htmlspecialchars(@variation) == @item.variation }}">
                   <tr data-item="{{ @item.id }}">
-                    <td nowrap>
-                      <check if="@item.description || @item.media">
-                        <true>
-                          <a href="{{ (@featured_item ? '' : @product.slug . '/') . urlencode(@item.code) }}">{{ @item.code }}</a>
-                        </true>
-                        <false>
-                          {{ @item.code }}
-                        </false>
-                      </check>
+                    <td nowrap class="hidden-xs">
+                      <a href="{{ (@featured_item ? '' : @product.slug . '/') . urlencode(@item.code) }}">{{ @item.code }}</a>
                     </td>
                     <td style="{{ @item_style_color(@item.thumbnail) }}">
                       {{ strlen(@item.short_name) ? @item.short_name : @item.name }}
+                      <small class="visible-xs">
+                        <a href="{{ (@featured_item ? '' : @product.slug . '/') . urlencode(@item.code) }}">{{ @item.code }}</a>
+                      </small>
                     </td>
-                    <td>
+                    <td class="hidden-xs">
                       {{ Catalog::amount(@item.retail_price * max(@item.purchase_quantity,1)) }}
                       <check if="{{ @item.purchase_quantity > 1 }}">
                         <br><small>({{ @item.purchase_quantity }} pieces)</small>
                       </check>
                     </td>
-                    <td class="text-primary">
-                      <strong>
+                    <td>
+                      <strong class="text-primary">
                         {{ @item.sale_price ? Catalog::amount(@item.sale_price * max(@item.purchase_quantity,1)) : '' }}
                       </strong>
+                      <check if="{{ @item.sale_price != @item.retail_price }}">
+                        <small class="visible-xs">
+                          <s>{{ Catalog::amount(@item.retail_price * max(@item.purchase_quantity,1)) }}</s>
+                          <check if="{{ @item.purchase_quantity > 1 }}">
+                            <br><small>({{ @item.purchase_quantity }} pieces)</small>
+                          </check>
+                        </small>
+                      </check>
                     </td>
                   <exclude>
                     <td class="text-center">

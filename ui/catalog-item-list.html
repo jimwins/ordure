@@ -1,8 +1,8 @@
 <table class="table table-condensed table-striped">
   <thead>
     <tr>
-      <th class="col-xs-2">Item No.</th>
-      <th class="col-xs-3">Description</th>
+      <th class="col-sm-2 hidden-xs">Item No.</th>
+      <th class="col-xs-5 col-sm-3">Description</th>
       <th class="col-xs-1">List</th>
       <th class="col-xs-1">Sale</th>
       <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in stock at the store.">In Stock</th>
@@ -15,11 +15,14 @@
     <repeat group="{{ @items }}" value="{{ @item }}">
 
         <tr data-item="{{ @item.id }}">
-          <td nowrap>
+          <td nowrap class="hidden-xs">
             <a href="/{{ @item.code | rawurlencode }}">{{ @item.code }}</a>
           </td>
           <td style="{{ @item_style_color(@item.thumbnail) }}">
             {{ @item.name }}
+            <small class="visible-xs">
+              <br><a href="/{{ @item.code | rawurlencode }}">{{ @item.code }}</a>
+            </small>
           </td>
           <td>
             {{ Catalog::amount(@item.retail_price * max(@item.purchase_quantity,1)) }}
