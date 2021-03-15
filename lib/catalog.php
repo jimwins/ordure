@@ -7,8 +7,9 @@ class Catalog {
     $f3->route("GET|HEAD /$CATALOG", 'Catalog->top');
     $f3->route("GET|HEAD /$CATALOG/@dept", 'Catalog->dept');
     $f3->route("GET|HEAD /$CATALOG/@dept/@subdept", 'Catalog->subdept');
-    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product", 'Catalog->product');
-    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product/*", 'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product",
+                'Catalog->product');
+    $f3->route("GET|HEAD /$CATALOG/@dept/@subdept/@product/*", 'Catalog->item');
     $f3->route("GET|HEAD /$CATALOG/brand", 'Catalog->brands');
     $f3->route("GET|HEAD /$CATALOG/brand/@brand", 'Catalog->brand');
 
@@ -410,6 +411,109 @@ class Catalog {
              array('title' => "$product[name] by $product[brand_name] - Raw Materials Art Supplies"));
 
     echo Template::instance()->render('catalog-product.html');
+  }
+
+  function item($f3, $args) {
+    $db= $f3->get('DBH');
+
+    $dept= new DB\SQL\Mapper($db, 'department');
+    $dept->products= '(SELECT COUNT(*)
+                         FROM product
+                        WHERE department = department.id)';
+
+    $dept->load(array('slug = ? AND parent = 0', $f3->get('PARAMS.dept')))
+      or $f3->error(404);
+
+    $f3->set('dept', $dept->cast());
+
+    $departments= $dept->find(array('parent=?', $dept->id),
+                              array('order' => 'name'));
+
+    $f3->set('departments', $departments);
+
+    $dept->load(array('slug = ? AND parent = ?',
+                      $f3->get('PARAMS.subdept'),
+                      $dept->id))
+      or $f3->error(404);
+
+    $f3->set('subdept', $dept);
+
+    $product= new DB\SQL\Mapper($db, 'product');
+    $product->brand_name = '(SELECT name
+                               FROM brand
+                              WHERE brand = brand.id)';
+    $product->brand_warning= '(SELECT warning
+                              FROM brand
+                             WHERE brand = brand.id)';
+    $product->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
+                                                        "uuid", image.uuid,
+                                                        "name", image.name,
+                                                        "alt_text", image.alt_text,
+                                                        "width", image.width,
+                                                        "height", image.height,
+                                                        "ext", image.ext))
+                        FROM product_to_image
+                        LEFT JOIN image ON image.id = product_to_image.image_id
+                       WHERE product_to_image.product_id = product.id
+                       GROUP BY product.id)';
+    $product->load(array('slug = ? AND department = ?',
+                         $f3->get('PARAMS.product'),
+                         $dept->id));
+    $product->media= json_decode($product->media, true);
+    if (!$product->media && $product->image) {
+      $product->media= [ [ 'src' => $product->image,
+                           'alt_text' => $product->name ] ];
+    }
+    $f3->set('product', $product);
+
+    $active= "";
+
+    if (!$product->active) {
+      $f3->error(404);
+    }
+    $active= " AND active";
+
+    // sometimes 'product' arg leaks into '*'?
+    $code= preg_replace("!^{$args['product']}/!", '', $args['*']);
+
+    $item= new DB\SQL\Mapper($db, 'item');
+    $item->description= '""';
+    $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
+                         scat_item.discount_type,
+                         scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
+    $item->retail_price= "(SELECT scat_item.retail_price FROM scat_item WHERE scat_item.code = item.code)";
+    $item->discount= "(SELECT scat_item.discount FROM scat_item WHERE scat_item.code = item.code)";
+    $item->discount_type= "(SELECT scat_item.discount_type FROM scat_item WHERE scat_item.code = item.code)";
+    $item->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
+                                                        "uuid", image.uuid,
+                                                        "name", image.name,
+                                                        "alt_text", image.alt_text,
+                                                        "width", image.width,
+                                                        "height", image.height,
+                                                        "ext", image.ext))
+                        FROM item_to_image
+                        LEFT JOIN image ON image.id = item_to_image.image_id
+                       WHERE item_to_image.item_id = item.id
+                       GROUP BY item.id)';
+    $item->minimum_quantity= '(SELECT minimum_quantity
+                           FROM scat_item WHERE item.code = scat_item.code)';
+    $item->stock= '(SELECT IF(stock > 0, stock, 0)
+                           FROM scat_item WHERE item.code = scat_item.code)';
+    $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
+                           FROM scat_item WHERE item.code = scat_item.code)';
+    $item->is_dropshippable= '(SELECT is_dropshippable
+                           FROM scat_item WHERE item.code = scat_item.code)';
+    $item->load(array('code = ?', $code))
+      or $f3->error(404, "Item not found.");
+    $item->media= json_decode($item->media, true);
+    $f3->set('item', $item);
+
+    $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');
+
+    $f3->set('PAGE',
+             array('title' => "$item[name] by $product[brand_name] - Raw Materials Art Supplies"));
+
+    echo Template::instance()->render('catalog-item.html');
   }
 
   function brands($f3, $args) {

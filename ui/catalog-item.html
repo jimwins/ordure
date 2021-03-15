@@ -1,0 +1,176 @@
+<include href="header.html" />
+<include href="catalog-header.html" />
+<div class="row">
+  <div class="col-sm-9 col-sm-push-3">
+    <ol class="breadcrumb">
+      <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug }}">{{ @dept.name }}</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug }}">{{ @subdept.name }}</a></li>
+      <li><a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}">{{ @product.name }}</a></li>
+    </ol>
+
+    <include href="searchform.html" />
+
+    <h4>
+      <a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}"><i class="fa fa-arrow-left"></i> Back to {{ @product.name }}</a>
+    </h4>
+
+    <div class="page-header" data-product="{{ @product.id }}" data-item="{{ @item.id }}">
+      <h1>
+        {{ @item.name }}
+        <small>{{ @product.brand_name }}</small>
+      </h1>
+    </div>
+
+    <check if="{{ @product.brand_warning }}">
+      <div class="alert alert-danger">
+        {{ @product.brand_warning }}
+      </div>
+    </check>
+
+    <script>
+gtag('event', 'view_item', {
+  "items": [
+    {
+      'id': "p{{ @product.id }}",
+      'name': "{{ @product.name }}",
+      'brand': "{{ @product.brand_name }}"
+    }
+  ]
+});
+    </script>
+
+    <div class="col-sm-4">
+      <check if="@item.media">
+        <include
+          href="carousel.html"
+          with="media = @item.media, name = @item.name" />
+      </check>
+    </div>
+
+    <div class="col-sm-8">
+      <div class="row">
+        <div class="col-xs-6">
+          <h3>
+            {{ @amount(@item.sale_price) }}
+            <check if="@item.sale_price != @item.retail_price">
+              <small style="white-space: nowrap;">List Price {{ @amount(@item.retail_price) }}</small>
+            </check>
+          </h3>
+          <check if="@item.sale_price != @item.retail_price">
+            <h4 class="text-danger">Save {{ sprintf('%.0f', (@item.retail_price - @item.sale_price) / @item.retail_price * 100) }}% off list</h4>
+          </check>
+          <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
+            <true>
+              <check if="@item.stocked > 0">
+                <true>
+                  <span class="text-success">In stock</span>
+                </true>
+                <false>
+                  <check if="@item.minimum_quantity > 0">
+                    <true>
+                      <span class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</span>
+                    </true>
+                    <false>
+                      <check if="@item.no_backorder">
+                        <true>
+                          <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                        </true>
+                        <false>
+                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                        </false>
+                      </check>
+                    </false>
+                  </check>
+                </false>
+              </check>
+            </true>
+            <false>
+              <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
+                <true>
+                  <span class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</span>
+                </true>
+                <false>
+                      <check if="@item.no_backorder">
+                        <true>
+                          <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                        </true>
+                        <false>
+                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                        </false>
+                      </check>
+                </false>
+              </check>
+            </false>
+          </check>
+        </div>
+        <div class="col-xs-6">
+          <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable && !@item.no_backorder))">
+            <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+                  action="/cart/add-item" method="POST">
+              <input type="hidden" name="item" value="{{ @item.code }}">
+              <p>
+                <div class="input-group" style="width: 100%">
+                  <span class="input-group-addon" id="quantity-addon1">
+                    Quantity
+                  </span>
+                  <input type="text" class="form-control" name="quantity"
+                         value="{{ @item.purchase_quantity }}">
+                </div>
+                <check if="{{ @item.purchase_quantity > 1 }}">
+                  <span class="help-block">
+                    Must be multiple of {{ @item.purchase_quantity }}.
+                  </span>
+                </check>
+              </p>
+              <p>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  <i class="fa fa-plus-square"></i> Add to Cart
+                </button>
+              </p>
+            </form>
+          </check>
+        </div>
+      </div>
+
+      <hr>
+
+      {{ @markdown(@item.description ?: @product.description) | raw }}
+
+      <check if="@item.prop65">
+        <a class="pull-right" href="/proposition-65-warning" data-toggle="tooltip" title="WARNING: This product can expose you to chemicals which are known to the state of California to cause cancer and/or to cause birth defects or other reproductive harm. Click for more details."><img src="{{ @STATIC }}/msds/warning.svg" width="20" alt="WARNING"></a>
+      </check>
+      <check if="@item.hazmat">
+        <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+      </check>
+      <check if="@item.oversized">
+        <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+      </check>
+
+    </div>
+  </div>
+  <div class="col-sm-3 col-sm-pull-9">
+    <include href="catalog-sidebar.html" />
+  </div>
+</div>
+<include href="footer.html" />
+<script>
+  afterLoad(function() {
+    $('.modal').modal('show');
+  });
+  gtag('event', 'page_view', {
+    'send_to': 'AW-1037436901',
+    'ecomm_prodid': '{{ @item.code }}'
+  });
+</script>
+<check if="{{ ! @NO_PINTEREST }}">
+<script type="text/javascript">
+(function(d){
+    var f = d.getElementsByTagName('SCRIPT')[0], p = d.createElement('SCRIPT');
+    p.type = 'text/javascript';
+    p.async = true;
+    p.src = '//assets.pinterest.com/js/pinit.js';
+    f.parentNode.insertBefore(p, f);
+}(document));
+</script>
+</check>
