@@ -579,7 +579,7 @@ class Sale {
         [ 19, 25, 8 ],
       ];
 
-      if ($weight < 20 && $this->fits_in_box($extra_small_boxes, $item_dim)) {
+      if ($weight < 10 && $this->fits_in_box($extra_small_boxes, $item_dim)) {
         $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
       } elseif ($weight < 10 && $this->fits_in_box($small_boxes, $item_dim)) {
         $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
