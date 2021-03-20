@@ -1046,6 +1046,7 @@ class Sale {
             $f3->get('log')->error("Payment {$pay->id} declined!");
           }
           else {
+            error_log("Response: " . json_encode($res->toArray()));
             $f3->get('log')->error("Didn't understand Amazon response for {$pay->id}!");
           }
 
