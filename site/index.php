@@ -296,6 +296,8 @@ require '../lib/auth.php';
 Auth::addRoutes($f3);
 Auth::addFunctions($f3);
 
+require '../lib/shipping.php';
+
 /* Handle catalog URLs */
 require '../lib/catalog.php';
 Catalog::addRoutes($f3);

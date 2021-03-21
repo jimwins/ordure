@@ -508,6 +508,40 @@ class Catalog {
     $item->media= json_decode($item->media, true);
     $f3->set('item', $item);
 
+    // figure out shipping possibilities
+    $shipping_options= [];
+
+    // bike
+    if ($item->oversized) {
+      $shipping_options['bike']= 14.99;
+    } else {
+      $shipping_options['bike']= 4.99;
+    }
+
+    if ($item->width && $item->height && $item->length && $item->weight) {
+      $item_dim= [ [ $item->width, $item->height, $item->length ] ];
+
+      // vehicle
+      $local= Shipping::get_base_local_delivery_rate($item_dim, $item->weight);
+      if ($local) {
+        // assume 2-mile minimum delivery
+        $shipping_options['local']= ($local + 3) * 1.05;
+      }
+
+      // shipping
+      $shipping= Shipping::get_shipping_rate(
+        $item_dim,
+        $item->weight,
+        $item->hazmat,
+        $item->sale_price
+      );
+      if ($shipping) {
+        $shipping_options['shipping']= $shipping;
+      }
+    }
+
+    $f3->set("shipping_options", $shipping_options);
+
     $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');
 
     $f3->set('PAGE',

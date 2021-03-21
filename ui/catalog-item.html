@@ -64,20 +64,20 @@ gtag('event', 'view_item', {
             <true>
               <check if="@item.stocked > 0">
                 <true>
-                  <span class="text-success">In stock</span>
+                  <p class="text-success">In stock</p>
                 </true>
                 <false>
                   <check if="@item.minimum_quantity > 0">
                     <true>
-                      <span class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</span>
+                      <p class="text-danger" data-toggle="tooltip" title="We normally stock this, but are out right now. We should have more soon!">Out of stock</p>
                     </true>
                     <false>
                       <check if="@item.no_backorder">
                         <true>
-                          <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                          <p data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</p>
                         </true>
                         <false>
-                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                          <p data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</p>
                         </false>
                       </check>
                     </false>
@@ -88,21 +88,57 @@ gtag('event', 'view_item', {
             <false>
               <check if="!(@CAN_SHIP || @CAN_PICKUP) && @CAN_DROPSHIP && @item.is_dropshippable">
                 <true>
-                  <span class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</span>
+                  <p class="text-warning" data-toggle="tooltip" title="Sorry, we don't have live stock information for items that are drop-shipped.">Maybe</p>
                 </true>
                 <false>
                       <check if="@item.no_backorder">
                         <true>
-                          <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
+                          <p data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</p>
                         </true>
                         <false>
-                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                          <p data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</p>
                         </false>
                       </check>
                 </false>
               </check>
             </false>
           </check>
+          <p>
+            <b>FREE</b> curbside pickup
+            <check if="@shipping_options.bike">
+              <check if="@shipping_options.bike === 0">
+                <true>
+                  <b>FREE</b> bike delivery
+                </true>
+                <false>
+                  <br>
+                  Bike delivery starting at {{ @amount(@shipping_options.bike) }}
+                </false>
+              </check>
+            </check>
+            <check if="@shipping_options.local">
+              <check if="@shipping_options.local === 0">
+                <true>
+                  <b>FREE</b> local delivery
+                </true>
+                <false>
+                  <br>
+                  Local delivery starting at {{ @amount(@shipping_options.local) }}
+                </false>
+              </check>
+            </check>
+            <check if="@shipping_options.shipping">
+              <check if="@shipping_options.shipping === 0">
+                <true>
+                  <b>FREE</b> nationwide shipping
+                </true>
+                <false>
+                  <br>
+                  Nationwide shipping starting at {{ @amount(@shipping_options.shipping) }}
+                </false>
+              </check>
+            </check>
+          </p>
         </div>
         <div class="col-xs-6">
           <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable && !@item.no_backorder))">
