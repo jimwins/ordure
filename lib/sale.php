@@ -1832,7 +1832,7 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    if ($sale->status != 'new' && $sale->status != 'cart' && $sale->status != 'unpaid')
+    if (!in_array($sale->status, [ 'new', 'review', 'cart', 'unpaid' ]))
       $f3->error(500);
 
     $method= $f3->get('REQUEST.method');
