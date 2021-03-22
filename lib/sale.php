@@ -205,6 +205,8 @@ class Sale {
 
     $q= "SELECT item.code, item.name,
                 item.width, item.length, item.height, item.weight,
+                (SELECT COUNT(*) FROM item_to_image WHERE item_id = item.id)
+                  media,
                 (SELECT stock FROM scat_item WHERE scat_item.code = item.code)
                   AS stock,
                 SUM(quantity) total

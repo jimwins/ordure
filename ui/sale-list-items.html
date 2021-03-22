@@ -46,6 +46,11 @@
                 <a href="/{{ @item.code }}" class="{{ !(@item.length > 0 && @item.weight > 0) ? 'text-danger' : '' }}">
                   {{ @item.code }}
                 </a>
+                <check if="!@item.media">
+                  <span class="pull-right text-danger">
+                    <i class="fa fa-file-image-o"></i>
+                  <span>
+                </check>
               </td>
               <td>
                 <a href="/{{ @item.code }}">
