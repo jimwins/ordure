@@ -59,6 +59,48 @@
       </div>
     </div>
 
+    <check if="@internal_ads">
+      <div class="row">
+        <repeat group="{{ @internal_ads }}" value="{{ @ad }}">
+          <div class="col-sm-3">
+            <div class="well">
+              <check if="@ad.tag">
+                <h5 class="text-danger" style="margin-top: 0">
+                  <a href="{{ @ad.href }}">{{ @ad.tag }}</a>
+                </h5>
+              </check>
+              <h4>
+                <a href="{{ @ad.href }}">{{ @ad.headline }}</a>
+              </h4>
+              <img class="img-rounded img-responsive" src="https://media.publit.io/file/w_384,h_384,c_fit/604e7bcf0065c26b3ca14478f7.jpg" alt="Pebeo Acrylic Mat Pub">
+              <check if="@ad.caption">
+                <p>{{ @ad.caption }}</p>
+              </check>
+              <a class="btn btn-danger btn-block" href="{{ @ad.href }}">
+                {{ @ad.button_label }}
+              </a>
+            </div>
+          </div>
+        </repeat>
+      </div>
+    </check>
+
+    <check if="!isset(@subdept)">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <p class="panel-title">Sections</p>
+        </div>
+        <ul class="list-group">
+          <repeat group="{{ @departments }}" value="{{ @item }}">
+            <a class="list-group-item {{ (isset(@subdept) && @subdept.slug == @item.slug) ? 'active' : '' }}"
+               href="{{ @BASE . '/' . @CATALOG . '/' . (isset(@dept) ? (@dept.slug . '/') : '') . @item.slug }}">
+              {{ @item.name }}
+            </a>
+          </repeat>
+        </ul>
+      </div>
+    </check>
+
     <check if="isset(@products)">
       <repeat group="{{ @products }}" value="{{ @product }}">
 	<div class="row">
@@ -125,7 +167,7 @@ gtag('event', 'view_item_list', {
       </script>
     </check>
   </div>
-  <div class="col-sm-3 col-sm-pull-9">
+  <div class="col-sm-3 col-sm-pull-9 hidden-xs">
     <include href="catalog-sidebar.html" />
   </div>
 </div>
