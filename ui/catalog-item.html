@@ -190,15 +190,6 @@ gtag('event', 'view_item', {
   </div>
 </div>
 <include href="footer.html" />
-<script>
-  afterLoad(function() {
-    $('.modal').modal('show');
-  });
-  gtag('event', 'page_view', {
-    'send_to': 'AW-1037436901',
-    'ecomm_prodid': '{{ @item.code }}'
-  });
-</script>
 <check if="{{ ! @NO_PINTEREST }}">
 <script type="text/javascript">
 (function(d){
