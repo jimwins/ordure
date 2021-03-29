@@ -78,10 +78,18 @@
           <check if="@FEATURE_cart && @CAN_ORDER && ((@CAN_PICKUP || @CAN_SHIP) || (@CAN_DROPSHIP && @item.is_dropshippable)) ">
             <true>
               <td>
-                <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+                <form class="form-inline add-item"
                       action="/cart/add-item" method="POST">
                   <input type="hidden"
                          name="item" value="{{ @item.code }}">
+                  <input type="hidden"
+                         name="name" value="{{ @item.name }}">
+                  <input type="hidden"
+                         name="sale_price"
+                         value="{{ @item.sale_price }}">
+                  <input type="hidden"
+                         name="quantity"
+                         value="{{ @item.purchase_quantity }}">
                   <button type="submit" class="btn btn-primary btn-xs">
                     <i class="fa fa-plus-square"></i> Add to Cart
                   </button>
@@ -97,3 +105,46 @@
     </repeat>
   </tbody>
 </table>
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    // TODO need a name for list so we can track impressions by list
+    dataLayer.push({
+      'ecommerce':  {
+        'impressions': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+            {
+              'name': '{{ addslashes(@item.name) }}',
+              'id': 'P{{ @product.id }}',
+              'price': '{{ @item.sale_price }}',
+              'brand': '{{ addslashes(@product.brand_name) }}',
+              'variant': '{{ @item.code }}',
+            },
+          </repeat>
+        ]
+      }
+    });
+
+    let recordAddToCart= (ev) => {
+      dataLayer.push({
+        'event': 'addToCart',
+        'ecommerce': {
+          'add': {
+            'products': [{
+              'name': ev.target['name'].value,
+              'id': '{{ @product.id }}',
+              'price': ev.target['sale_price'].value,
+              'brand': '{{ addslashes(@product.brand_name) }}',
+              'variant': ev.target['item'].value,
+              'quantity': ev.target['quantity'].value
+            }]
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('form.add-item').forEach((form) => {
+      form.addEventListener('submit', recordAddToCart)
+    })
+
+  </script>
+</check>

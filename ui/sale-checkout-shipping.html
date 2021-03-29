@@ -1,20 +1,28 @@
-<script>
-gtag('event', 'checkout_progress', {
-  "items": [
-<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-<check if="{{ @index > 1 }}">,</check>
-{
-  'id': "p{{ @item.product_id }}",
-  'name': "{{ @item.product_name }}",
-  'brand': "{{ @item.brand_name }}",
-  'variant': "{{ @item.code }}",
-  'quantity': "{{ @item.quantity }}",
-  'price': "{{ @item.sale_price }}",
-}
-</repeat>
-  ]
-});
-</script>
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    dataLayer.push({
+      'event': 'checkout',
+      'ecommerce': {
+        'checkout': {
+          'actionField': { 'step' : 2, 'option': '' },
+          'products': [
+            <repeat group="{{ @items }}" value="{{ @item }}">
+            {
+              'id': "p{{ @item.product_id }}",
+              'name': "{{ addslashes(@item.product_name) }}",
+              'brand': "{{ addslashes(@item.brand_name) }}",
+              'variant': "{{ @item.code }}",
+              'quantity': "{{ @item.quantity }}",
+              'price': "{{ @item.sale_price }}"
+            },
+            </repeat>
+          ]
+        }
+      }
+    });
+  </script>
+</check>
+
   <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">

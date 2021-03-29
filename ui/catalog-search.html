@@ -94,31 +94,8 @@
             </div>
           </div>
         </repeat>
-        <script>
-gtag('event', 'view_item_list', {
-  "items": [
-<repeat group="{{ @products }}" value="{{ @product }}" counter="{{ @index }}">
-<check if="{{ @index > 1 }}">,</check>
-{
-  'list_name': "Search Results",
-  'id': "{{ @product.id }}",
-  'name': "{{ @product.name }}",
-  'brand': "{{ @product.brand_name }}",
-  'list_position': {{ @index }}
-}
-</repeat>
-  ]
-});
-        </script>
       </true>
       <false>
-        <script>
-gtag('event', 'search', {
-  event_category: 'search',
-  event_action: 'no_results',
-  event_label: '{{ @REQUEST.q }}'
-});
-        </script>
         <p class="alert alert-warning">
           <strong>Sorry</strong>, but we didn't find anything for your search
           parameters. Please try again.
@@ -130,4 +107,56 @@ gtag('event', 'search', {
     <include href="catalog-sidebar.html" />
   </div>
 </div>
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    <check if="isset(@products) && count(@products)">
+      <true>
+        dataLayer.push({
+          'ecommerce':  {
+            'impressions': [
+              <repeat group="{{ @products }}" value="{{ @product }}">
+                {
+                  'name': '{{ addslashes(@product.name) }}',
+                  'id': 'P{{ @product.id }}',
+                  'brand': '{{ addslashes(@product.brand_name) }}',
+                  'list': 'Search Results',
+                },
+              </repeat>
+            ]
+          }
+        });
+      </true>
+      <false>
+        dataLayer.push({
+          'event': 'search',
+          'event_action': 'no_results',
+          'event_label': '{{ addslashes(@REQUEST.q) }}'
+        });
+      </false>
+    </check>
+
+    let recordAddToCart= (ev) => {
+      dataLayer.push({
+        'event': 'addToCart',
+        'ecommerce': {
+          'add': {
+            'products': [{
+              'name': ev.target['name'].value,
+              'id': '{{ @product.id }}',
+              'price': ev.target['sale_price'].value,
+              'brand': '{{ @product.brand_name }}',
+              'variant': ev.target['item'].value,
+              'quantity': ev.target['quantity'].value
+            }]
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('form.add-item').forEach((form) => {
+      form.addEventListener('submit', recordAddToCart)
+    })
+
+  </script>
+</check>
 <include href="footer.html" />

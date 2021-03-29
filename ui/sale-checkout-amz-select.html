@@ -1,22 +1,3 @@
-<include href="amazon-pay.html" />
-<script>
-gtag('event', 'begin_checkout', {
-  "items": [
-<repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-<check if="{{ @index > 1 }}">,</check>
-{
-  'id': "p{{ @item.product_id }}",
-  'name': "{{ @item.product_name }}",
-  'brand': "{{ @item.brand_name }}",
-  'variant': "{{ @item.code }}",
-  'quantity': "{{ @item.quantity }}",
-  'price': "{{ @item.sale_price }}",
-}
-</repeat>
-  ]
-});
-</script>
-
 <style>
 #addressBookWidgetDiv {
   min-width: 300px;
@@ -216,31 +197,65 @@ $form.addEventListener('submit', (ev) => {
            url: $form.action,
            data: $($form).serialize() })
    .done(function (data) {
-    gtag('event', 'purchase', {
-       "transaction_id": "{{ @sale.uuid }}",
-       "affiliation": "Online Store",
-       "value": {{ @sale.total }},
-       "currency": "USD",
-       "tax": {{ @sale.tax }},
-       "shipping": {{ @sale.shipping }},
-       "items": [
-    <repeat group="{{ @items }}" value="{{ @item }}" counter="{{ @index }}">
-    <check if="{{ @index > 1 }}">,</check>
-    {
-      'id': "p{{ @item.product_id }}",
-      'name': "{{ @item.product_name }}",
-      'brand': "{{ @item.brand_name }}",
-      'variant': "{{ @item.code }}",
-      'quantity': "{{ @item.quantity }}",
-      'price': "{{ @item.sale_price }}",
-    }
-    </repeat>
-      ]
-    });
-    window.location.href= "/sale/{{ @sale.uuid }}/thanks";
+     if (tagPurchase) tagPurchase(data);
+     window.location.href= "/sale/{{ @sale.uuid }}/thanks";
   })
   .fail(function (data) {
     alert(data.responseJSON.text)
   })
 })
+
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  dataLayer.push({
+    'event': 'checkout',
+    'ecommerce': {
+      'checkout': {
+        'actionField': { 'step' : 4, 'option': '' },
+        'products': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+          {
+            'id': "p{{ @item.product_id }}",
+            'name': "{{ addslashes(@item.product_name) }}",
+            'brand': "{{ addslashes(@item.brand_name) }}",
+            'variant': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}",
+            'price': "{{ @item.sale_price }}"
+          },
+          </repeat>
+        ]
+      }
+    }
+  });
+
+  let tagPurchase= (data) => {
+    dataLayer.push({
+      'ecommerce': {
+        'purchase': {
+          'actionField': {
+            'id': data.sale.uuid,
+            'affiliation': 'Online Store',
+            'revenue': data.sale.total,
+            'tax': data.sale.tax,
+            'shipping': data.sale.shipping
+          },
+          'products': [
+            <repeat group="{{ @items }}" value="{{ @item }}">
+            {
+              'id': "p{{ @item.product_id }}",
+              'name': "{{ addslashes(@item.product_name) }}",
+              'brand': "{{ addslashes(@item.brand_name) }}",
+              'variant': "{{ @item.code }}",
+              'quantity': "{{ @item.quantity }}",
+              'price': "{{ @item.sale_price }}",
+            },
+            </repeat>
+          ]
+        }
+      }
+    });
+  }
+</check>
+
 </script>
+
+<include href="amazon-pay.html" />

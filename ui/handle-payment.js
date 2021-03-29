@@ -291,28 +291,31 @@ if (document.getElementById('other-use')) {
 
 function reportPurchase() {
   try {
-    <check if="{{ @sale }}">
-      gtag('event', 'purchase', {
-        "transaction_id": "{{ @sale.uuid }}",
-        "affiliation": "Online Store",
-        "value": {{ @sale.total }},
-        "currency": "USD",
-        "tax": {{ @sale.tax }},
-        "shipping": {{ @sale.shipping }},
-        "items": [
-          <repeat group="{{ @items }}"
-                  value="{{ @item }}" counter="{{ @index }}">
-            <check if="{{ @index > 1 }}">,</check>
-            {
-              'id': "p{{ @item.product_id }}",
-              'name': "{{ @item.product_name }}",
-              'brand': "{{ @item.brand_name }}",
-              'variant': "{{ @item.code }}",
-              'quantity': "{{ @item.quantity }}",
-              'price': "{{ @item.sale_price }}",
-            }
-          </repeat>
-        ]
+    <check if="@sale">
+      dataLayer.push({
+        'ecommerce': {
+          'purchase': {
+            'actionField': {
+              'id': '{{ @sale.uuid }}',
+              'affiliation': 'Online Store',
+              'revenue': '{{ @sale.total }}',
+              'tax': '{{ @sale.tax }}',
+              'shipping': '{{ @sale.shipping }}'
+            },
+            'products': [
+              <repeat group="{{ @items }}" value="{{ @item }}">
+              {
+                'id': "p{{ @item.product_id }}",
+                'name': "{{ addslashes(@item.product_name) }}",
+                'brand': "{{ addslashes(@item.brand_name) }}",
+                'variant': "{{ @item.code }}",
+                'quantity': "{{ @item.quantity }}",
+                'price': "{{ @item.sale_price }}",
+              },
+              </repeat>
+            ]
+          }
+        }
       });
     </check>
     <check if="{{ @MICROSOFT_UET_ID }}">

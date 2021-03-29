@@ -1,5 +1,47 @@
 <include href="header.html" />
 <include href="catalog-header.html" />
+
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    dataLayer.push({
+      'ecommerce':  {
+        'detail': {
+          'products': [{
+            'name': '{{ addslashes(@item.name) }}',
+            'id': 'P{{ @product.id }}',
+            'price': '{{ @item.sale_price }}',
+            'brand': '{{ addslashes(@product.brand_name) }}',
+            'variant': '{{ @item.code }}',
+          }]
+        }
+      }
+    });
+
+    let recordAddToCart= (ev) => {
+      dataLayer.push({
+        'event': 'addToCart',
+        'ecommerce': {
+          'add': {
+            'products': [{
+              'name': ev.target['name'].value,
+              'id': '{{ @product.id }}',
+              'price': ev.target['sale_price'].value,
+              'brand': '{{ addslashes(@product.brand_name) }}',
+              'variant': ev.target['item'].value,
+              'quantity': ev.target['quantity'].value
+            }]
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('form.add-item').forEach((form) => {
+      form.addEventListener('submit', recordAddToCart)
+    })
+
+  </script>
+</check>
+
 <div class="row">
   <div class="col-sm-9 col-sm-push-3">
     <ol class="breadcrumb">
@@ -27,18 +69,6 @@
         {{ @product.brand_warning }}
       </div>
     </check>
-
-    <script>
-gtag('event', 'view_item', {
-  "items": [
-    {
-      'id': "p{{ @product.id }}",
-      'name': "{{ @product.name }}",
-      'brand': "{{ @product.brand_name }}"
-    }
-  ]
-});
-    </script>
 
     <div class="col-sm-4">
       <check if="@item.media">
@@ -142,9 +172,12 @@ gtag('event', 'view_item', {
         </div>
         <div class="col-xs-6">
           <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable && !@item.no_backorder))">
-            <form class="form-inline" onsubmit="gtag('event', 'add_to_cart', { 'items': [ { 'id': 'P{{@product.id}}', 'name': '{{@product.name}}', 'brand': '{{@product.brand_name}}', 'variant': '{{@item.code}}', 'quantity': '{{@item.purchase_quantity}}', 'price': '{{@item.sale_price}}' } ] })"
+            <form class="form-inline add-item"
                   action="/cart/add-item" method="POST">
               <input type="hidden" name="item" value="{{ @item.code }}">
+              <input type="hidden" name="name" value="{{ @item.name }}">
+              <input type="hidden" name="sale_price"
+                     value="{{ @item.sale_price }}">
               <p>
                 <div class="input-group" style="width: 100%">
                   <span class="input-group-addon" id="quantity-addon1">

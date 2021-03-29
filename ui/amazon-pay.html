@@ -3,7 +3,7 @@
     amazon.Login.setClientId('{{ @AMZ_CLIENT_ID }}');
   };
   window.onAmazonPaymentsReady= function() {
-    if (showButton) showButton();
+    afterLoad(() => { if (showButton) showButton(); });
   };
 </script>
 <script async="async" src='https://static-na.payments-amazon.com/OffAmazonPayments/us/{{ @DEBUG ? 'sandbox/' : '' }}js/Widgets.js'>

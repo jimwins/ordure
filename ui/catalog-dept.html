@@ -149,26 +149,32 @@
         </div>
         <hr>
       </repeat>
-      <script>
-gtag('event', 'view_item_list', {
-  "items": [
-<repeat group="{{ @products }}" value="{{ @product }}" counter="{{ @index }}">
-<check if="{{ @index > 1 }}">,</check>
-{
-  'list_name': "Department",
-  'id': "p{{ @product.id }}",
-  'name': "{{ @product.name }}",
-  'brand': "{{ @product.brand_name }}",
-  'list_position': {{ @index }}
-}
-</repeat>
-  ]
-});
-      </script>
     </check>
   </div>
   <div class="col-sm-3 col-sm-pull-9 hidden-xs">
     <include href="catalog-sidebar.html" />
   </div>
 </div>
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    <check if="isset(@products) && count(@products)">
+      <true>
+        dataLayer.push({
+          'ecommerce':  {
+            'impressions': [
+              <repeat group="{{ @products }}" value="{{ @product }}">
+                {
+                  'name': '{{ addslashes(@product.name) }}',
+                  'id': 'P{{ @product.id }}',
+                  'brand': '{{ addslashes(@product.brand_name) }}',
+                  'list': 'Department',
+                },
+              </repeat>
+            ]
+          }
+        });
+      </true>
+    </check>
+  </script>
+</check>
 <include href="footer.html" />
