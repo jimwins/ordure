@@ -113,6 +113,9 @@
                             <br><small>({{ @item.purchase_quantity }} pieces)</small>
                           </check>
                         </small>
+                        <div><small>
+                          {{ sprintf('%.0f', (@item.retail_price - @item.sale_price) / @item.retail_price * 100) }}% off
+                        </small></div>
                       </check>
                     </td>
                   <exclude>
