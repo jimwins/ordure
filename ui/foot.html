@@ -145,9 +145,10 @@ loadScript('{{ @STATIC }}/code/combined-2020-03-13.js', function() {
     }
   }
 
-  var account= Cookies.get('loggedIn')
-  if (account) {
-    document.getElementById('account-button').style.display= 'inline-block'
+  let account= Cookies.get('loggedIn')
+  let button= document.getElementById('account-button')
+  if (account && button) {
+    button.style.display= 'inline-block'
   }
 });
 </script>
