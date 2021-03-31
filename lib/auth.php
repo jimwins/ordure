@@ -302,6 +302,10 @@ class Auth {
       return false;
     }
 
+    return self::user_details($f3, $person_id);
+  }
+
+  static function user_details($f3, $person_id) {
     $client= new GuzzleHttp\Client();
 
     $backend= $f3->get('GIFT_BACKEND');

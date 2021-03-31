@@ -33,6 +33,8 @@ class Sale {
                'Sale->calculate_sales_tax');
     $f3->route("POST /sale/@sale/add-exemption [ajax]",
                'Sale->add_exemption');
+    $f3->route("GET|POST /sale/@sale/apply-tax-exemption",
+               'Sale->apply_tax_exemption');
     $f3->route("POST /sale/@sale/get-giftcard-balance [ajax]",
                'Sale->get_giftcard_balance');
     $f3->route("POST /sale/@sale/process-giftcard-payment",
@@ -2036,10 +2038,10 @@ class Sale {
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
 
-    if ($sale->status != 'new' && $sale->status != 'cart')
+    if (!in_array($sale->status, [ 'new', 'cart', 'review' ]))
       $f3->error(500);
 
-    $person= \Auth::authenticated_user_details($f3);
+    $person= \Auth::user_details($f3, $sale->person_id);
     error_log(json_encode($person));
     if (!$person['exemption_certificate_id']) {
       $f3->error(500, "No exemption available.");
