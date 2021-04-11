@@ -326,6 +326,10 @@ Rewards::addRoutes($f3);
 require '../lib/events.php';
 Events::addRoutes($f3);
 
+/* Handle uploader URLs */
+require '../lib/uploader.php';
+Uploader::addRoutes($f3);
+
 $f3->route('GET|POST /~webhook/paypal', function ($f3) {
   $body= $f3->get('BODY');
 
