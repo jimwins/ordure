@@ -62,7 +62,7 @@
       </div>
       <div id="pay-rewards" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="pay-rewards-heading">
         <div class="panel-body">
-          <check if="{{ @rewards.points_available > 0 }}">
+          <check if="{{ @rewards.points_available > 50 }}">
             <true>
               <p><b>You have {{ @rewards.points_available }} points
               available.</b>
@@ -89,10 +89,15 @@
               </check>
             </true>
             <false>
-              <p><b>You don't have enough points for a reward yet</b>, but
-              don't forget that you earn one point for every $1 you spend (tax
-              not included). You'll earn your first reward when you have 50
-              points!</p>
+              <p>
+                <b>You don't have enough points for a reward yet</b>, but
+                don't forget that you earn one point for every $1 you spend
+                (tax not included). You'll earn your first reward when you
+                have 50 points!
+                <check if="{{ @rewards.points_available > 0 }}">
+                  You have {{ @rewards.points_available }} points now.
+                </check>
+              </p>
             </false>
           </check>
         </div>
