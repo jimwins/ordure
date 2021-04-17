@@ -17,28 +17,6 @@
       }
     });
 
-    let recordAddToCart= (ev) => {
-      dataLayer.push({
-        'event': 'addToCart',
-        'ecommerce': {
-          'add': {
-            'products': [{
-              'name': ev.target['name'].value,
-              'id': '{{ @product.id }}',
-              'price': ev.target['sale_price'].value,
-              'brand': '{{ addslashes(@product.brand_name) }}',
-              'variant': ev.target['item'].value,
-              'quantity': ev.target['quantity'].value
-            }]
-          }
-        }
-      });
-    }
-
-    document.querySelectorAll('form.add-item').forEach((form) => {
-      form.addEventListener('submit', recordAddToCart)
-    })
-
   </script>
 </check>
 
@@ -223,6 +201,30 @@
   </div>
 </div>
 <include href="footer.html" />
+<script>
+    let recordAddToCart= (ev) => {
+      dataLayer.push({
+        'event': 'addToCart',
+        'ecommerce': {
+          'add': {
+            'products': [{
+              'name': ev.target['name'].value,
+              'id': '{{ @product.id }}',
+              'price': ev.target['sale_price'].value,
+              'brand': '{{ addslashes(@product.brand_name) }}',
+              'variant': ev.target['item'].value,
+              'quantity': ev.target['quantity'].value
+            }]
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('form.add-item').forEach((form) => {
+      form.addEventListener('submit', recordAddToCart)
+    })
+
+</script>
 <check if="{{ ! @NO_PINTEREST }}">
 <script type="text/javascript">
 (function(d){
