@@ -4,6 +4,7 @@
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
     dataLayer.push({
+      'event': 'eec.detail',
       'ecommerce':  {
         'detail': {
           'products': [{
@@ -204,7 +205,7 @@
 <script>
     let recordAddToCart= (ev) => {
       dataLayer.push({
-        'event': 'addToCart',
+        'event': 'eec.add',
         'ecommerce': {
           'add': {
             'products': [{

@@ -241,6 +241,7 @@
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
     dataLayer.push({
+      'event': 'eec.list',
       'ecommerce':  {
         'impressions': [
           <repeat group="{{ @items }}" value="{{ @item }}">
@@ -258,7 +259,7 @@
 
     let recordAddToCart= (ev) => {
       dataLayer.push({
-        'event': 'addToCart',
+        'event': 'eec.add',
         'ecommerce': {
           'add': {
             'products': [{

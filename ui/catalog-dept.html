@@ -160,6 +160,7 @@
     <check if="isset(@products) && count(@products)">
       <true>
         dataLayer.push({
+          'event': 'eec.list',
           'ecommerce':  {
             'impressions': [
               <repeat group="{{ @products }}" value="{{ @product }}">

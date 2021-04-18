@@ -293,6 +293,7 @@ function reportPurchase() {
   try {
     <check if="@sale">
       dataLayer.push({
+        'event': 'eec.purchase',
         'ecommerce': {
           'purchase': {
             'actionField': {

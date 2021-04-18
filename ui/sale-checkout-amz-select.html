@@ -207,7 +207,7 @@ $form.addEventListener('submit', (ev) => {
 
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   dataLayer.push({
-    'event': 'checkout',
+    'event': 'eec.checkout',
     'ecommerce': {
       'checkout': {
         'actionField': { 'step' : 4, 'option': '' },
@@ -229,6 +229,7 @@ $form.addEventListener('submit', (ev) => {
 
   let tagPurchase= (data) => {
     dataLayer.push({
+      'event': 'eec.purchase',
       'ecommerce': {
         'purchase': {
           'actionField': {

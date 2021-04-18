@@ -109,6 +109,7 @@
   <script>
     // TODO need a name for list so we can track impressions by list
     dataLayer.push({
+      'event': 'eec.list',
       'ecommerce':  {
         'impressions': [
           <repeat group="{{ @items }}" value="{{ @item }}">
@@ -126,7 +127,7 @@
 
     let recordAddToCart= (ev) => {
       dataLayer.push({
-        'event': 'addToCart',
+        'event': 'eec.add',
         'ecommerce': {
           'add': {
             'products': [{
