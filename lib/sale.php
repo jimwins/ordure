@@ -813,6 +813,7 @@ class Sale {
 
     if (!$sale->amz_order_reference_id) {
       // We don't have order_reference_id yet, so ignore this call
+      error_log("no order_reference_id yet, ignoring!\n");
       return $this->json($f3, $args, $uuid);
     }
 
@@ -3562,8 +3563,8 @@ Your order will be reviewed, and you will receive another email within one busin
   }
 
   static function in_truck_area($address) {
-    // 20 miles for now, see how it goes
-    return $address->distance < 20;
+    // 30 miles for now, see how it goes
+    return $address->distance < 30;
   }
 
   static function can_dropship($f3) {
