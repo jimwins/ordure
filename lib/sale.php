@@ -1191,6 +1191,8 @@ class Sale {
       }
       $existing[0]->save();
 
+      error_log("Updated to {$existing[0]->quantity} {$item_code} ({$existing[0]->id}) on {$sale->uuid}\n");
+
       /* Was this a kit? Need to adjust quantities of kit items */
       // XXX this assumes kit contents haven't changed
       if ($item->is_kit) {
@@ -1217,6 +1219,8 @@ class Sale {
       $line->tax= 0.00;
 
       $line->insert();
+
+      error_log("Added {$line->quantity} {$item_code} ({$line->id}) to {$sale->uuid}\n");
 
       /* Was this a kit? Need to ad the kit items */
       // XXX this assumes kit contents haven't changed
@@ -1434,6 +1438,8 @@ class Sale {
         $line->quantity= (int)$val;
         $line->save();
 
+        error_log("Updated to {$line->quantity} {$item->code} ({$line->id}) on {$sale->uuid}\n");
+
         if ($item->is_kit) {
           $q= "UPDATE sale_item, kit_item
                   SET sale_item.quantity = ? * kit_item.quantity
@@ -1447,6 +1453,7 @@ class Sale {
           $q= "DELETE FROM sale_item WHERE sale_id = ? AND kit_id = ?";
           $db->exec($q, [ $sale->id, $item->id ]);
         }
+        error_log("Removed {$item->code} ({$line->id}) from {$sale->uuid}\n");
         $line->erase();
       }
     }
