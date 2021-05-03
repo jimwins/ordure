@@ -1952,6 +1952,7 @@ class Sale {
       $sale->shipping_manual= 0;
     } else {
       $sale->shipping= $shipping;
+      $sale->shipping_method= 'default';
       $sale->shipping_manual= 1;
     }
 
