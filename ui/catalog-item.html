@@ -71,7 +71,7 @@
           </check>
           <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
             <true>
-              <check if="@item.stocked > 0">
+              <check if="@item.stock > 0">
                 <true>
                   <p class="text-success">In stock</p>
                 </true>
