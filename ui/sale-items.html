@@ -42,7 +42,7 @@
                 Must be multiple of {{ @data.purchase_quantity }}.<br>
               </true>
               <false>
-                <check if="{{ @CAN_DROPSHIP && (@data.is_dropshippable > 1) }}">
+                <check if="{{ @CAN_DROPSHIP && (@data.minimum_quantity == 0 && @data.is_dropshippable > 1) }}">
                   Must be multiple of {{ @data.is_dropshippable }} for shipping.<br>
                 </check>
               </false>
