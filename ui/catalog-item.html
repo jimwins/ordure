@@ -219,6 +219,15 @@
           }
         }
       });
+      <check if="{{ @FACEBOOK_PIXEL }}">
+        fbq('track', 'AddToCart', {
+          'content_type': 'product',
+          'contents': [{
+            'id' : ev.target['item'].value,
+            'quantity' : ev.target['item'].value
+          }]
+        });
+      </check>
     }
 
     document.querySelectorAll('form.add-item').forEach((form) => {

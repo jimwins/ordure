@@ -254,6 +254,20 @@ $form.addEventListener('submit', (ev) => {
         }
       }
     });
+    <check if="{{ @FACEBOOK_PIXEL }}">
+      fbq('track', 'Purchase', {
+        'value' : data.sale.total, 'currency' : 'USD',
+        'content_type': 'product',
+        'contents': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+          {
+            'id': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}"
+          },
+          </repeat>
+        ]
+      });
+    </check>
   }
 </check>
 

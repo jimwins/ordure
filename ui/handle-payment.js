@@ -319,6 +319,20 @@ function reportPurchase() {
         }
       });
     </check>
+    <check if="{{ @FACEBOOK_PIXEL }}">
+      fbq('track', 'Purchase', {
+        'value' : data.sale.total, 'currency' : 'USD',
+        'content_type': 'product',
+        'contents': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+          {
+            'id': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}"
+          },
+          </repeat>
+        ]
+      });
+    </check>
     <check if="{{ @MICROSOFT_UET_ID }}">
       window.uetq.push('event', 'purchase', { 'revenue_value': '{{ @sale.total }}', 'currency': 'USD' });
     </check>
