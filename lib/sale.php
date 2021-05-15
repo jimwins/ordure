@@ -3029,8 +3029,9 @@ class Sale {
     $sale= $this->load($f3, $f3->get('PARAMS.sale'), 'uuid');
 
     $amount= (float)$f3->get('REQUEST.amount');
-    if (!$amount || $amount > $sale->total - $sale->paid) {
-      $f3->error(500, "Invalid amount.");
+    $due= $sale->total - $sale->paid;
+    if (!$amount || $amount > $due) {
+      $f3->error(500, "Invalid amount {$amount} (due {$due}).");
     }
 
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
