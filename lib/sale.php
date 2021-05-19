@@ -484,6 +484,8 @@ class Sale {
       }
     }
 
+    error_log("calculated weight as $weight\n");
+
     if ($status['unknown']) {
       return [];
     }
