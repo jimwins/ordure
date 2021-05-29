@@ -271,7 +271,7 @@ $f3->route('GET /track/ups/@code', function ($f3, $args) {
   $f3->reroute('http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&track.x=38&track.y=9&InquiryNumber1=' . $f3->get('PARAMS.code'));
 });
 
-$f3->route('GET /track/upsdam/@code', function ($f3, $args) {
+$f3->route('GET /track/upsdap/@code', function ($f3, $args) {
   $f3->reroute('http://wwwapps.ups.com/WebTracking/processInputRequest?AgreeToTermsAndConditions=yes&track.x=38&track.y=9&InquiryNumber1=' . $f3->get('PARAMS.code'));
 });
 
