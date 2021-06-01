@@ -41,12 +41,12 @@
           <div class="panel-body">
             <p>
               If all of the items are in stock and the order is placed before
-              2:30pm on our delivery days (Tuesday - Saturday), your order will
+              3:00pm on our delivery days (Monday - Saturday), your order will
               be delivered the same day.
             </p>
             <p>
               You will be contacted before your order leaves the store and
-              someone must be able to receive the (contact-less) delivery. If
+              someone must be able to receive the delivery. If
               the courier is not able to deliver your order, it will be
               returned to the store and you will be charged for re-delivery.
             </p>
@@ -73,11 +73,12 @@
           <div class="panel-body">
             <p>
               If all of the items are in stock and the order is placed before
-              2:30pm, your order will be delivered the next business day.
+              3:00pm, your order will be delivered the same business day (Monday
+              through Saturday).
             </p>
             <p>
               You will be contacted before your order leaves the store and
-              someone must be able to receive the (contact-less) delivery. If
+              someone must be able to receive the delivery. If
               the courier is not able to deliver your order, it will be
               returned to the store and you will be charged for re-delivery.
             </p>
@@ -164,7 +165,7 @@
         </div>
       </check>
 
-      <check if="{{ @shipping_options.local && !@shipping_options.bike && !@shipping_options.cargo_bike }}">
+      <check if="{{ @CAN_DELIVER && @shipping_options.local && !@shipping_options.bike && !@shipping_options.cargo_bike }}">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h2 class="panel-title">Bike Delivery</h2>
@@ -185,11 +186,12 @@
           <div class="panel-body">
             <p>
               If all of the items are in stock and the order is placed before
-              2:30pm, your order will be delivered the next business day.
+              3:00pm, your order will be delivered the same business day
+              (Monday through Saturday).
             </p>
             <p>
               You will be contacted before your order leaves the store and
-              someone must be able to receive the (contact-less) delivery. If
+              someone must be able to receive the delivery. If
               the courier is not able to deliver your order, it will be
               returned to the store and you will be charged for re-delivery.
             </p>
