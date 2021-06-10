@@ -114,7 +114,7 @@
           </check>
           <p>
             <b>FREE</b> curbside pickup
-            <check if="@shipping_options.bike">
+            <check if="@CAN_DELIVER && @shipping_options.bike">
               <check if="@shipping_options.bike === 0">
                 <true>
                   <b>FREE</b> bike delivery
