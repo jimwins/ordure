@@ -3089,6 +3089,7 @@ class Sale {
     $payment->method= 'loyalty';
     $payment->amount= $amount;
     $payment->data= json_encode(array(
+      'cost' => $points,
       'points' => $points,
     ));
     $payment->save();
