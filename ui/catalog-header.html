@@ -5,7 +5,7 @@
       store. We will be back soon!
     </true>
     <false>
-      <b>Open online!</b>
+      <b>Open online and for in-store shopping!</b>
       <check if="@CAN_SHIP">
         <true>
           We offer <check if="@CAN_PICKUP"><a href="/curbside">curbside pickup</a>, </check>
@@ -14,7 +14,6 @@
           <a href="/shipping">nationwide shipping</a>.
         </true>
       </check>
-      <b>We are not yet open for in-store shopping.</b>
       <check if="@CAN_DROPSHIP && !@CAN_SHIP">
         <true>
           We are able to drop-ship a limited selection of products from
@@ -24,7 +23,7 @@
       </check>
       <check if="@CAN_PICKUP">
         <true>
-          Pickup times are Monday – Saturday, 10am to 6pm.
+          Store hours and pickup times are Monday – Saturday, 10am to 6pm.
         </true>
         <false>
           We are not offering curbside pickup at this time.
