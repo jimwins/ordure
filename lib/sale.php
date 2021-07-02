@@ -486,6 +486,10 @@ class Sale {
 
     error_log("calculated weight as $weight\n");
 
+    if ($weight >= 50) {
+      $status['oversized']++;
+    }
+
     if ($status['unknown']) {
       return [];
     }
@@ -675,7 +679,7 @@ class Sale {
                 0 /* session cookie */,
                 '/', $domain, true, false); // JavaScript accessible
 
-      $stages= [ 'login' => 1, 'shipping' => 2, 'shipping-method' => 3, 'payment' => 4, 'amz-select' => 4 ];
+      $stages= [ 'login' => 1, 'shipping' => 2, 'shipping-method' => 3, 'payment' => 4, 'amz-select' => 4, 'review' => 4 ];
       $stage= $f3->get('REQUEST.stage');
 
       if ($f3->get('REQUEST.access_token')) {

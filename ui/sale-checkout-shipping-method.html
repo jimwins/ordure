@@ -128,41 +128,56 @@
       </check>
 
       <check if="{{ @shipping_options.default }}">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h2 class="panel-title">Standard Shipping</h2>
-          </div>
-          <div class="panel-body">
-            <p>
-              Your order will ship within two business days (Tuesday
-              - Saturday) using USPS, UPS, FedEx, or GLS. Delivery time
-              generally ranges from one to five days once it has shipped.
-              (<b>Please note</b> that delivery times may be extended by
-              weather or service delays.)
-            </p>
-            <check if="{{ array_key_exists('hazmat', @stock_status) }}">
+        <true>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h2 class="panel-title">Standard Shipping</h2>
+            </div>
+            <div class="panel-body">
               <p>
-                A $10 surcharge has been added because this order includes
-                hazardous materials that require special handling.
+                Your order will ship within two business days (Tuesday
+                - Saturday) using USPS, UPS, FedEx, or GLS. Delivery time
+                generally ranges from one to five days once it has shipped.
+                (<b>Please note</b> that delivery times may be extended by
+                weather or service delays.)
               </p>
-            </check>
-            <p>
-              You will receive an email with tracking information once your
-              package is on its way.
-            </p>
+              <check if="{{ array_key_exists('hazmat', @stock_status) }}">
+                <p>
+                  A $10 surcharge has been added because this order includes
+                  hazardous materials that require special handling.
+                </p>
+              </check>
+              <p>
+                You will receive an email with tracking information once your
+                package is on its way.
+              </p>
+            </div>
+            <div class="panel-footer">
+              <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
+                <input type="hidden" name="method" value="default">
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                  {{ @shipping_options.default ? amount(@shipping_options.default) : 'FREE' }}
+                  &mdash;
+                  <i class="fa fa-plane"></i>
+                  Deliver by USPS, FedEx, GLS, UPS, etc.
+                </button>
+              </form>
+            </div>
           </div>
-          <div class="panel-footer">
-            <form method="POST" action="{{ @BASE }}/cart/set-shipping-method">
-              <input type="hidden" name="method" value="default">
-              <button type="submit" class="btn btn-primary btn-block btn-lg">
-                {{ @shipping_options.default ? amount(@shipping_options.default) : 'FREE' }}
-                &mdash;
-                <i class="fa fa-plane"></i>
-                Deliver by USPS, FedEx, GLS, UPS, etc.
-              </button>
-            </form>
+        </true>
+        <false>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h2 class="panel-title">Standard Shipping</h2>
+            </div>
+            <div class="panel-body">
+              Sorry, but this order isn't eligible to be shipped
+              outside of our local delivery area. If you believe this
+              is an error, you can <a href="./checkout?stage=review">submit
+              the order for review.</a>
+            </div>
           </div>
-        </div>
+        </false>
       </check>
 
       <check if="{{ @CAN_DELIVER && @shipping_options.local && !@shipping_options.bike && !@shipping_options.cargo_bike }}">
