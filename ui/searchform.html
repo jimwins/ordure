@@ -2,8 +2,10 @@
   <form class="form"
         method="get" action="{{ @BASE . '/'. @CATALOG }}/search">
     <div class="input-group">
-      <label class="sr-only" for="search">Search</label>
-      <input name="q" type="text" class="form-control"
+      <label class="sr-only" for="search">
+        Enter keywords or an item number
+      </label>
+      <input id="search" name="q" type="text" class="form-control"
              value="{{ isset(@REQUEST.q) ? @REQUEST.q : '' }}"
              placeholder="Enter keywords or an item number">
       <span class="input-group-btn">
