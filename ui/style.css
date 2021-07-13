@@ -23,3 +23,8 @@ footer {
 .carousel:hover .carousel-control {
   visibility: visible;
 }
+
+/* Higher contrast link color. */
+a {
+  color: #2C679B;
+}
