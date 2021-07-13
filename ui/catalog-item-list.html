@@ -7,7 +7,7 @@
       <th class="col-xs-1">Sale</th>
       <th class="col-xs-2 text-center" data-toggle="tooltip" data-container="body" data-placement="top" title="Whether this item is in stock at the store.">In Stock</th>
       <check if="{{ @FEATURE_cart && @CAN_ORDER }}">
-        <th class="col-xs-1"></th>
+        <th class="col-xs-1"><span class="sr-only">Add to Cart</span></th>
       </check>
     </tr>
   </thead>
