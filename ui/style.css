@@ -31,3 +31,9 @@ a {
 .h1 .small, .h1 small, .h2 .small, .h2 small, .h3 .small, .h3 small, .h4 .small, .h4 small, .h5 .small, .h5 small, .h6 .small, .h6 small, h1 .small, h1 small, h2 .small, h2 small, h3 .small, h3 small, h4 .small, h4 small, h5 .small, h5 small, h6 .small, h6 small {
   color: #707070;
 }
+.breadcrumb > .active {
+  color: #707070;
+}
+.text-primary {
+  color: #2C679B;
+}
