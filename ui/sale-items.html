@@ -25,8 +25,11 @@
           <false>
             <div style="width: 6em">
               <div class="input-group input-group-sm">
+                <label for="qty_{{ @data.id }}" class="sr-only">
+                  Quantity
+                </label>
                 <input type="text"
-                       class="form-control"
+                       class="form-control" id="qty_{{ @data.id }}"
                        name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
                 <span class="input-group-btn">
                   <a href="/cart/remove-item?item={{ @data.id}}"
