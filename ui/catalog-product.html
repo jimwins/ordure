@@ -64,7 +64,9 @@
               key="{{ @variation }}"
               value="{{ @num }}"
               counter="{{ @ctr }}">
-        <h4>{{ @variation }}</h4>
+        <check if="{{ @variation }}">
+          <h4>{{ @variation }}</h4>
+        </check>
         <div class="tab-pane {{ @ctr == 1 ? 'active' : '' }}"
              id="v{{ @ctr }}">
           <table class="table table-condensed table-striped">
