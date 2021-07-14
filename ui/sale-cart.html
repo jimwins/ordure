@@ -165,9 +165,11 @@
           </check>
           <check if="{{ array_key_exists('oversized', @stock_status) && (@CAN_SHIP || @CAN_DROPSHIP) }}">
             <p class="lead alert alert-danger">
-              Your order contains items that will require truck delivery.
-              You can submit your order for manual review, and we'll contact
-              you with the cost and instructions on how to complete the order.
+              Your order contains items that will require truck delivery.  If
+              you are in the Los Angeles area, the cost will be calculated
+              during checkout. If you are not, you can submit your order for
+              manual review, and we'll contact you with the cost and
+              instructions on how to complete the order.
             </p>
           </check>
           <check if="{{ array_key_exists('unknown', @stock_status) && (@CAN_SHIP || @CAN_DROPSHIP) }}">
