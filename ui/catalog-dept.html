@@ -110,7 +110,7 @@
                 <check if="{{ @product.media }}">
 		  <img class="media-object"
 		       src="{{ @product.media[0].src ? @STATIC . @product.media[0].src : @MEDIA . '/file/c_fit,w_256,h_256/' . @product.media[0].uuid . '.jpg' }}"
-		       alt="{{ @product.media[0].alt_text }}">
+		       alt="{{ @product.media[0].alt_text ?: @product.name }}">
                 </check>
 	      </a>
 	    </div>
