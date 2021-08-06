@@ -37,3 +37,7 @@ a {
 .text-primary {
   color: #2C679B;
 }
+
+.navbar-default .navbar-nav > li > a {
+    color: #666;
+}
