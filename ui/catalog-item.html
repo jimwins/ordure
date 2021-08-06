@@ -159,10 +159,11 @@
                      value="{{ @item.sale_price }}">
               <p>
                 <div class="input-group" style="width: 100%">
-                  <span class="input-group-addon" id="quantity-addon1">
+                  <label class="input-group-addon" for="quantity">
                     Quantity
-                  </span>
-                  <input type="text" class="form-control" name="quantity"
+                  </label >
+                  <input type="text" class="form-control"
+                         id="quantity" name="quantity"
                          value="{{ @item.purchase_quantity }}">
                 </div>
                 <check if="{{ @item.purchase_quantity > 1 }}">
