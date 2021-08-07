@@ -187,6 +187,9 @@ var BASE= '{{ @BASE }}/';
     });
   </script>
 </check>
+<check if="{{ @USERWAY_ACCOUNT }}">
+  <script>(function(d){var s = d.createElement("script");s.setAttribute("data-account", "{{ @USERWAY_ACCOUNT }}");s.setAttribute("src", "https://accessibilityserver.org/widget.js");(d.body || d.head).appendChild(s);})(document)</script><noscript>Please ensure Javascript is enabled for purposes of <a href="https://accessibilityserver.org">website accessibility</a></noscript>
+</check>
 <check if="{{ @ADMIN }}">
   <script>
     afterLoad(function() { loadScript('{{ @BASE }}/admin/admin.js') });
