@@ -58,7 +58,7 @@
         <check if="{{ @data.stock }}">
           <true>
             <check if="{{ @data.stock < @data.quantity }}">
-              {{ @data.stock }} currently available.
+              {{ max(@data.stock,0) }} currently available.
             </check>
           </true>
           <false>
