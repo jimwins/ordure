@@ -105,15 +105,15 @@
       <repeat group="{{ @products }}" value="{{ @product }}">
 	<div class="row">
 	  <div class="col-sm-2">
-	    <div class="thumbnail product-thumbnail">
-	      <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
-                <check if="{{ @product.media }}">
+            <check if="{{ @product.media }}">
+              <div class="thumbnail product-thumbnail">
+                <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
 		  <img class="media-object"
 		       src="{{ @product.media[0].src ? @STATIC . @product.media[0].src : @MEDIA . '/file/c_fit,w_256,h_256/' . @product.media[0].uuid . '.jpg' }}"
 		       alt="{{ @product.media[0].alt_text ?: @product.name }}">
-                </check>
-	      </a>
-	    </div>
+                </a>
+              </div>
+            </check>
 	  </div>
 	  <div class="col-sm-10">
 	    <h4 class="media-heading">
