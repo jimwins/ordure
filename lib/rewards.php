@@ -39,7 +39,7 @@ class Rewards {
 
     $key= $f3->get('CLEANTALK_ACCESS_KEY');
     if ($key && $email) {
-      $req= new \lib\CleantalkRequest();
+      $req= new \Cleantalk\CleantalkRequest();
       $req->auth_key= $key;
       $req->agent= 'php-api';
       $req->sender_email= $email;
@@ -51,7 +51,7 @@ class Rewards {
       $now= $f3->get('TIME');
       $req->submit_time= (int)($now - $when);
 
-      $ct= new \lib\Cleantalk();
+      $ct= new \Cleantalk\Cleantalk();
       $ct->server_url= 'http://moderate.cleantalk.org/api2.0/';
 
       $res= $ct->isAllowUser($req);
