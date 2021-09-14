@@ -59,10 +59,6 @@ class Catalog {
       $items[]= $item;
     }
 
-    if (!$item->active) {
-      $f3->error(404, "Item is no longer available.");
-    }
-
     $f3->set('items', $items);
 
     echo Template::instance()->render("catalog-item-list.html");
@@ -511,6 +507,10 @@ class Catalog {
       or $f3->error(404, "Item not found.");
     $item->media= json_decode($item->media, true);
     $f3->set('item', $item);
+
+    if (!$item->active) {
+      $f3->error(404, "Item is no longer available.");
+    }
 
     // figure out shipping possibilities
     $shipping_options= [];
