@@ -59,6 +59,10 @@ class Catalog {
       $items[]= $item;
     }
 
+    if (!$item->active) {
+      $f3->error(404, "Item is no longer available.");
+    }
+
     $f3->set('items', $items);
 
     echo Template::instance()->render("catalog-item-list.html");
