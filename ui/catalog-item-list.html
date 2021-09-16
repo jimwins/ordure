@@ -38,7 +38,7 @@
           <td class="text-center">
             <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
               <true>
-                <check if="@item.stocked > 0">
+                <check if="@item.stock > 0">
                   <true>
                     <small class="text-success">In stock</small>
                   </true>

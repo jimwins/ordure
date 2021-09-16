@@ -51,6 +51,8 @@ class Catalog {
       $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
                            scat_item.discount_type,
                            scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
+      $item->stock= '(SELECT IF(stock > 0, stock, 0)
+                          FROM scat_item WHERE item.code = scat_item.code)';
       $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
                           FROM scat_item WHERE item.code = scat_item.code)';
       $item->is_dropshippable= '(SELECT is_dropshippable
