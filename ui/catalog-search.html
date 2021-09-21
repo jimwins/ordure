@@ -161,7 +161,7 @@
 		'currency': 'USD',
 		'items': [
 		    {
-		      'id': '{{ @ item.id }}',
+		      'id': ev.target['item'].value,
 		      'quantity': ev.target['quantity'].value,
 		      'price': ev.target['sale_price'].value,
 		    }
