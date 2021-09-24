@@ -127,7 +127,7 @@
         </div>
       </check>
 
-      <check if="{{ @shipping_options.default }}">
+      <check if="{{ isset(@shipping_options.default) }}">
         <true>
           <div class="panel panel-default">
             <div class="panel-heading">
