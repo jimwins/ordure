@@ -31,6 +31,13 @@ class Uploader {
     $file= $response->getBody();
     $name= basename(parse_url($url, PHP_URL_PATH));
 
+    if ($response->hasHeader('Content-Type')) {
+      $content_type= $response->getHeader('Content-Type')[0];
+      if (!preg_match('/^image/', $content_type)) {
+        $f3->error(500, "URL was not an image, it was a '$content_type'");
+      }
+    }
+
     $uuid= sprintf("%08x%02x%s", time(), 1, bin2hex(random_bytes(8)));
 
     // No extension? Probably a JPEG
