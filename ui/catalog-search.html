@@ -154,7 +154,7 @@
       });
       <check if="{{ @MICROSOFT_UET_ID }}">
 	window.uetq.push('event', 'add_to_cart', {
-		'ecomm_prodid': [ '{{ product.id }}' ],
+		'ecomm_prodid': [ '{{ @product.id }}' ],
 		'ecomm_pagetype': 'search',
 		'ecomm_totalvalue': ev.target['sale_price'].value * ev.target['quantity'].value,
 		'revenue_value': ev.target['sale_price'].value * ev.target['quantity'].value,
