@@ -53,6 +53,7 @@ class Uploader {
 
     echo json_encode([
       'path' => $path,
+      'ext' => $ext,
       'uuid' => $uuid,
       'name' => $name,
       'id' => $b2_file->getId()
