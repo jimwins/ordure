@@ -64,7 +64,7 @@
   <ol class="carousel-content">
     <repeat group="{{ @media }}" value="{{ @image }}" counter="{{ @index }}">
       <li>
-        <img src="{{ @image.src ? @STATIC . @image.src : @MEDIA . '/file/c_fit,w_768,h_768/' . @image.uuid . '.jpg' }}" alt="{{ @image.alt_text ?: @name }}">
+        <img src="{{ @image.src ? @STATIC . @image.src : @GUMLET . '/i/o/' . @product.media[0].uuid . '.' .  @product.media[0].ext . '?w=768&h=768&mode=fit&fm=auto' }}" alt="{{ @image.alt_text ?: @name }}">
         <!--
         <check if="{{ ! @NO_PINTEREST }}">
           <div class="caption text-center">

@@ -62,7 +62,7 @@
 	      <a href="{{ @BASE . '/' . @CATALOG . '/' . @product.slug }}">
                 <check if="{{ @product.media }}">
 		  <img class="media-object"
-		       src="{{ @product.media[0].src ? @STATIC . @product.media[0].src : @MEDIA . '/file/c_fit,w_256,h_256/' . @product.media[0].uuid . '.jpg' }}"
+		       src="{{ @product.media[0].src ? @STATIC . @product.media[0].src : @GUMLET . '/i/o/' . @product.media[0].uuid . '.' .  @product.media[0].ext . '?w=256&h=256&mode=fit&fm=auto' }}"
 		       alt="{{ @product.media[0].alt_text ?: @product.name }}">
                 </check>
 	      </a>
