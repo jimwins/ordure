@@ -2534,13 +2534,18 @@ class Sale {
       $stripe->customers->update($payment_intent->customer, $customer_details);
 
       if ($payment_intent->amount != $amount) {
-        $stripe->paymentIntents->update($sale->stripe_payment_intent_id, [
+        $intent_options= [
           'amount' => $amount,
-        ]);
+          'shipping' => $customer_details['shipping'],
+        ];
+        $stripe->paymentIntents->update(
+          $sale->stripe_payment_intent_id,
+          $intent_options
+        );
       }
     } else {
       $customer= $stripe->customers->create($customer_details);
-      $payment_intent= $stripe->paymentIntents->create([
+      $intent_options= [
         'customer' => $customer->id,
         'amount' => $amount,
         'currency' => 'usd',
@@ -2548,7 +2553,12 @@ class Sale {
           "sale_id" => $sale->id,
           "sale_uuid" => $sale->uuid,
         ],
-      ]);
+      ];
+      if ($customer_details['shipping']) {
+        $intent_options['shipping']= $customer_details['shipping'];
+      }
+
+      $payment_intent= $stripe->paymentIntents->create($intent_options);
 
       $sale->stripe_payment_intent_id= $payment_intent->id;
       $sale->save();
