@@ -2503,7 +2503,7 @@ class Sale {
       ],
     ];
 
-    if ($sale->shipping_address_id > 0) {
+    if ($sale->shipping_address_id > 1) {
       $address= new DB\SQL\Mapper($db, 'sale_address');
       $address->load(array('id = ?', $sale->shipping_address_id))
         or $f3->error(404);
