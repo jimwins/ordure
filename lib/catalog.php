@@ -888,7 +888,7 @@ retry:
             FROM $index
            WHERE match(?)
            LIMIT 100
-          OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)')";
+          OPTION ranker=expr('sum(lcs*user_weight)*1000+bm25+if(items, 4000, 0)+(importance * 1000)')";
       
       $res= $sph->exec($q, $query);
 
