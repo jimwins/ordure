@@ -1,7 +1,7 @@
 <include href="header.html" />
 <include href="catalog-header.html" />
 
-<div class="row">
+<div class="row" data-product="{{ @product.id }}" data-brand="{{ @product.brand_name }}">
   <div class="col-sm-9 col-sm-push-3">
     <ol class="breadcrumb">
       <li><a href="{{ @BASE . '/' . @CATALOG }}">Art Supplies</a></li>
@@ -12,7 +12,7 @@
 
     <include href="searchform.html" />
 
-    <div class="page-header" data-product="{{ @product.id }}">
+    <div class="page-header">
       <h1>
         {{ @product.name }}
         <small>{{ @product.brand_name }}</small>
@@ -258,53 +258,6 @@
         ]
       }
     });
-
-    let recordAddToCart= (ev) => {
-      dataLayer.push({
-        'event': 'eec.add',
-        'ecommerce': {
-          'add': {
-            'products': [{
-              'name': ev.target['name'].value,
-              'id': '{{ @product.id }}',
-              'price': ev.target['sale_price'].value,
-              'brand': '{{ addslashes(@product.brand_name) }}',
-              'variant': ev.target['item'].value,
-              'quantity': ev.target['quantity'].value
-            }]
-          }
-        }
-      });
-      <check if="{{ @FACEBOOK_PIXEL }}">
-        fbq('track', 'AddToCart', {
-          'content_type': 'product',
-          'contents': [{
-            'id' : ev.target['item'].value,
-            'quantity' : ev.target['quantity'].value
-          }]
-        });
-      </check>
-      <check if="{{ @MICROSOFT_UET_ID }}">
-	window.uetq.push('event', 'add_to_cart', {
-		'ecomm_prodid': [ '{{ @product.id }}' ],
-		'ecomm_pagetype': 'product',
-		'ecomm_totalvalue': ev.target['sale_price'].value * ev.target['quantity'].value,
-		'revenue_value': ev.target['sale_price'].value * ev.target['quantity'].value,
-		'currency': 'USD',
-		'items': [
-		    {
-		      'id': ev.target['item'].value,
-		      'quantity': ev.target['quantity'].value,
-		      'price': ev.target['sale_price'].value,
-		    }
-		  ]
-		})
-      </check>
-    }
-
-    document.querySelectorAll('form.add-item').forEach((form) => {
-      form.addEventListener('submit', recordAddToCart)
-    })
 
   </script>
 </check>
