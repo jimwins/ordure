@@ -234,6 +234,10 @@ class Auth {
   function viewRegisterForm($f3) {
     $db= $f3->get('DBH');
 
+    if (!$f3->get('DEBUG')) {
+      $f3->error(404);
+    }
+
     $name= (string)@$_REQUEST['name'];
     $email= (string)@$_REQUEST['email'];
     $password= (string)@$_REQUEST['password'];
