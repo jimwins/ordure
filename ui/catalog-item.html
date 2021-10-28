@@ -18,6 +18,21 @@
       }
     });
 
+    // GA4
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      'event': 'view_item',
+      'ecommerce': {
+        'items': [{
+          'item_name': '{{ addslashes(@item.name) }}',
+          'item_id': 'P{{ @product.id }}',
+          'price': '{{ @item.sale_price }}',
+          'item_brand': '{{ addslashes(@product.brand_name) }}',
+          'item_variant': '{{ @item.code }}'
+        }]
+      }
+    });
+
   </script>
 </check>
 
