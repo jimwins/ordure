@@ -247,7 +247,7 @@ $("#rewards-use").on("click", function (ev) {
      if (data.paid) {
        window.location.href= "/sale/{{ @sale.uuid }}/thanks";
      } else {
-       window.location.href= "/sale/{{ @sale.uuid }}/pay";
+       window.location.reload(true);
      }
    })
    .fail(function (jqXHR, textStatus, errorThrown) {

@@ -766,6 +766,8 @@ class Sale {
             $person['credit_available']= 2.00;
           }
           $f3->set('rewards', $person);
+          $f3->set('already_used_rewards',
+                    $this->already_used_rewards($db, $sale));
         }
       }
 
@@ -2056,6 +2058,8 @@ class Sale {
     if (!in_array($sale->status, [ 'new', 'cart', 'review' ]))
       $f3->error(500);
 
+    // TODO set person_id based on logged in user if not already set`
+
     $person= \Auth::user_details($f3, $sale->person_id);
     error_log(json_encode($person));
     if (!$person['exemption_certificate_id']) {
@@ -2584,11 +2588,15 @@ class Sale {
     // save comment now in case we bail out early
     $comment= $f3->get('REQUEST.comment');
     if ($comment) {
-      $note= new DB\SQL\Mapper($db, 'sale_note');
-      $note->sale_id= $sale->id;
-      $note->person_id= $sale->person_id;
-      $note->content= $comment;
-      $note->save();
+      try {
+        $note= new DB\SQL\Mapper($db, 'sale_note');
+        $note->sale_id= $sale->id;
+        $note->person_id= $sale->person_id;
+        $note->content= $comment;
+        $note->save();
+      } catch (\Exception $e) {
+        error_log("Problem saving comment for {$sale->id}: " . $comment . "\n");
+      }
     }
 
     $payment_intent_id= $sale->stripe_payment_intent_id;
@@ -2714,11 +2722,15 @@ class Sale {
     // save comment
     $comment= $f3->get('REQUEST.comment');
     if ($comment) {
-      $note= new DB\SQL\Mapper($db, 'sale_note');
-      $note->sale_id= $sale->id;
-      $note->person_id= $sale->person_id;
-      $note->content= $comment;
-      $note->save();
+      try {
+        $note= new DB\SQL\Mapper($db, 'sale_note');
+        $note->sale_id= $sale->id;
+        $note->person_id= $sale->person_id;
+        $note->content= $comment;
+        $note->save();
+      } catch (\Exception $e) {
+        error_log("Problem saving comment for {$sale->id}: " . $comment . "\n");
+      }
     }
 
     $sale->status= 'paid';
@@ -2903,18 +2915,22 @@ class Sale {
 
     self::capture_sales_tax($f3, $sale);
 
+    $sale->status= 'paid';
+    $sale->save();
+
     // save comment
     $comment= $f3->get('REQUEST.comment');
     if ($comment) {
-      $note= new DB\SQL\Mapper($db, 'sale_note');
-      $note->sale_id= $sale->id;
-      $note->person_id= $sale->person_id;
-      $note->content= $comment;
-      $note->save();
+      try {
+        $note= new DB\SQL\Mapper($db, 'sale_note');
+        $note->sale_id= $sale->id;
+        $note->person_id= $sale->person_id;
+        $note->content= $comment;
+        $note->save();
+      } catch (\Exception $e) {
+        error_log("Problem saving comment for {$sale->id}: " . $comment . "\n");
+      }
     }
-
-    $sale->status= 'paid';
-    $sale->save();
 
     echo json_encode(array('message' => 'Success!'));
 
@@ -3006,11 +3022,15 @@ class Sale {
     // save comment
     $comment= $f3->get('REQUEST.comment');
     if ($comment) {
-      $note= new DB\SQL\Mapper($db, 'sale_note');
-      $note->sale_id= $sale->id;
-      $note->person_id= $sale->person_id;
-      $note->content= $comment;
-      $note->save();
+      try {
+        $note= new DB\SQL\Mapper($db, 'sale_note');
+        $note->sale_id= $sale->id;
+        $note->person_id= $sale->person_id;
+        $note->content= $comment;
+        $note->save();
+      } catch (\Exception $e) {
+        error_log("Problem saving comment for {$sale->id}: " . $comment . "\n");
+      }
     }
 
     // $amount is negative so we use bcsub()
@@ -3074,6 +3094,14 @@ class Sale {
     $sale= $this->load($f3, $uuid, 'uuid');
   }
 
+  function already_used_rewards($db, $sale) {
+    $payment= new DB\SQL\Mapper($db, 'sale_payment');
+
+    $used= $payment->find([ 'sale_id = ? AND method = "loyalty"', $sale->id ]);
+
+    return count($used) > 0;
+  }
+
   function process_rewards_payment($f3, $args) {
     $db= $f3->get('DBH');
 
@@ -3098,6 +3126,10 @@ class Sale {
       $amount= 2.00;
     }
 
+    if ($this->already_used_rewards($db, $sale)) {
+      return $f3->error(500, "You already used rewards on this sale.");
+    }
+
     $payment= new DB\SQL\Mapper($db, 'sale_payment');
     $payment->sale_id= $sale->id;
     $payment->method= 'loyalty';
@@ -3109,9 +3141,6 @@ class Sale {
     $payment->save();
 
     if ($sale->total - ($sale->paid + $amount) > 0) {
-      $sale->status= 'unpaid';
-      $sale->save();
-
       echo json_encode(array('paid' => 0));
       return;
     }

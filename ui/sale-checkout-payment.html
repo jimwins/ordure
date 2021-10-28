@@ -47,7 +47,7 @@
 
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
-  <check if="{{ @rewards }}">
+  <check if="{{ @rewards && !@already_used_rewards }}">
     <!-- Loyalty -->
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="pay-rewards-heading">
