@@ -223,6 +223,28 @@
   </div>
 
 </div>
+<check if="{{ @GOOGLE_TAG_MANAGER }}">
+  <script>
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      'event': 'view_cart',
+      'ecommerce':  {
+        'items': [
+          <repeat group="{{ @items }}" value="{{ @product }}">
+            {
+              'item_name': '{{ addslashes(@item.product_name) }}',
+              'item_id': 'P{{ @item.product_id }}',
+              'item_brand': '{{ addslashes(@item.brand_name) }}',
+              'item_variant': '{{ @item.code }}',
+              'price': '{{ @item.sale_price }}',
+              'quantity': '{{ @item.quantity }}',
+            },
+          </repeat>
+        ]
+      }
+    });
+  </script>
+</check>
   </true>
 </check>
 
