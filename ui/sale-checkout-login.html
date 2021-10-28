@@ -20,6 +20,26 @@
         }
       }
     });
+
+    // GA4
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      'event': 'begin_checkout',
+      'ecommerce': {
+        'items': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+          {
+            'item_id': "p{{ @item.product_id }}",
+            'item_name': "{{ addslashes(@item.product_name) }}",
+            'item_brand': "{{ addslashes(@item.brand_name) }}",
+            'item_variant': "{{ @item.code }}",
+            'quantity': "{{ @item.quantity }}",
+            'price': "{{ @item.sale_price }}"
+          },
+          </repeat>
+        ]
+      }
+    });
   </script>
 </check>
 <div class="panel panel-default">
