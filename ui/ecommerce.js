@@ -68,6 +68,7 @@
       quantity= ev.target['quantity'].value;
     }
 
+    // UA
     dataLayer.push({
       'event': 'eec.add',
       'ecommerce': {
@@ -83,6 +84,23 @@
         }
       }
     });
+
+    // GA4
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      'event': 'add_to_cart',
+      'ecommerce': {
+        'items': [{
+          'item_name': name,
+          'item_id': 'P' + id,
+          'price': price,
+          'item_brand': brand,
+          'item_variant': variant,
+          'quantity': quantity,
+        }]
+      }
+    });
+
     <check if="{{ @FACEBOOK_PIXEL }}">
       fbq('track', 'AddToCart', {
         'content_type': 'product',
