@@ -3,21 +3,26 @@
   // push promotions into dataLayer
   let promos= document.querySelectorAll('[data-ec-promo-name]')
   if (promos.length) {
+    let items= [];
+
     promos.forEach((promo) => {
       let name= promo.getAttribute('data-ec-promo-name')
       let item= promo.getAttribute('data-ec-item-id')
       let location= promo.getAttribute('data-ec-location-id')
 
-      dataLayer.push({
-        'event': 'view_promotion',
-        'ecommerce': {
-          'items': [{
-            'item_id': item,
-            'promotion_name': name,
-            'location_id': location
-          }]
-        }
+      items.push({
+        'item_id': item,
+        'promotion_name': name,
+        'location_id': location
       })
+    })
+
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+      'event': 'view_promotion',
+      'ecommerce': {
+        'items': items
+      }
     })
   }
 
