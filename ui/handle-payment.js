@@ -328,7 +328,7 @@ function reportPurchase() {
           'affiliation': 'Online Store',
           'value': '{{ @sale.total }}',
           'tax': '{{ @sale.tax }}',
-          'shipping': '{{ @sale.shipping }}'
+          'shipping': '{{ @sale.shipping }}',
           'currency': 'USD',
           'items': [
             <repeat group="{{ @items }}" value="{{ @item }}">
