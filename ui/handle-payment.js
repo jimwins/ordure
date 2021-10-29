@@ -318,6 +318,32 @@ function reportPurchase() {
           }
         }
       });
+
+      // GA4
+      dataLayer.push({ ecommerce: null });
+      dataLayer.push({
+        'event': 'purchase',
+        'ecommerce': {
+          'transaction_id': '{{ @sale.uuid }}',
+          'affiliation': 'Online Store',
+          'value': '{{ @sale.total }}',
+          'tax': '{{ @sale.tax }}',
+          'shipping': '{{ @sale.shipping }}'
+          'currency': 'USD',
+          'items': [
+            <repeat group="{{ @items }}" value="{{ @item }}">
+            {
+              'item_id': "p{{ @item.product_id }}",
+              'item_name': "{{ addslashes(@item.product_name) }}",
+              'item_brand': "{{ addslashes(@item.brand_name) }}",
+              'item_variant': "{{ @item.code }}",
+              'quantity': "{{ @item.quantity }}",
+              'price': "{{ @item.sale_price }}",
+            },
+            </repeat>
+          ]
+        }
+      });
     </check>
     <check if="{{ @FACEBOOK_PIXEL }}">
       fbq('track', 'Purchase', {
