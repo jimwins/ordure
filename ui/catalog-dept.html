@@ -124,18 +124,9 @@
                 {{ @product.brand_name }}
               </small>
 	      <check if="! @product.stocked">
-                <check if="@product.is_dropshippable">
-                  <true>
-                    <small class="pull-right">
-                      <i class="fa fa-globe"></i> Drop Ship Only
-                    </small>
-                  </true>
-                  <false>
-                    <small class="pull-right">
-                      <i class="fa fa-globe"></i> Special Order Only
-                    </small>
-                  </false>
-                </check>
+                <small class="pull-right">
+                  <i class="fa fa-globe"></i> Special Order Only
+                </small>
               </check>
 	    </h4>
             <p>{{ @first_paragraph(@markdown(@product.description)) | raw}}
