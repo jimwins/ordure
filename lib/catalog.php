@@ -402,7 +402,7 @@ class Catalog {
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->load(array('code = ?', $code))
-        or $f3->error(404, "Item not found.");
+        or $f3->error(404, "{$code} not found.");
       $item->media= json_decode($item->media, true);
       $f3->set('featured_item', $item);
     }
@@ -506,7 +506,7 @@ class Catalog {
     $item->is_dropshippable= '(SELECT is_dropshippable
                            FROM scat_item WHERE item.code = scat_item.code)';
     $item->load(array('code = ?', $code))
-      or $f3->error(404, "Item not found.");
+      or $f3->error(404, "{$code} not found.");
     $item->media= json_decode($item->media, true);
     $f3->set('item', $item);
 
