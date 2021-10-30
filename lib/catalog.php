@@ -511,7 +511,7 @@ class Catalog {
     $f3->set('item', $item);
 
     if (!$item->active) {
-      $f3->error(404, "Item is no longer available.");
+      $f3->error(404, "{$item->code} is no longer available.");
     }
 
     // figure out shipping possibilities
