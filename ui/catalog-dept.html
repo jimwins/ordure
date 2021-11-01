@@ -148,6 +148,8 @@
 </div>
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
+    dataLayer.push('set', {'content_group1': '{{ isset(@subdept) ? addslashes(@subdept.name) : addslashes(@dept.name) }}' });
+
     <check if="isset(@products) && count(@products)">
       <true>
         dataLayer.push({

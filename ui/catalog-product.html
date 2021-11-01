@@ -242,6 +242,8 @@
 </div>
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
+    dataLayer.push('set', {'content_group2': '{{ addslashes(@product.name) }}' });
+
     dataLayer.push({
       'event': 'eec.list',
       'ecommerce':  {
@@ -269,7 +271,7 @@
             {
               'item_name': '{{ addslashes(@product.name) }}',
               'item_id': 'P{{ @product.id }}',
-              'price': price,
+              'price': '{{ @item.sale_price }}',
               'item_brand': '{{ addslashes(@product.brand_name) }}',
               'item_variant': '{{ addslashes(@item.code) }}',
             },
