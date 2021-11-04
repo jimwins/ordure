@@ -34,8 +34,6 @@
     let variant= "0";
     let quantity= 1;
 
-    debugger
-
     if (ev.target['name']) {
       name= ev.target['name'].value;
     } else if (ev.target.closest('[data-product-name]')) {
