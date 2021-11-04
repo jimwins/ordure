@@ -14,6 +14,7 @@
             'id': 'P{{ @product.id }}',
             'price': '{{ @item.sale_price }}',
             'brand': '{{ addslashes(@product.brand_name) }}',
+            'category': '{{ addslashes(@dept.name . " / " . @subdept.name) }}',
             'variant': '{{ @item.code }}',
           }]
         }
@@ -30,6 +31,8 @@
           'item_id': 'P{{ @product.id }}',
           'price': '{{ @item.sale_price }}',
           'item_brand': '{{ addslashes(@product.brand_name) }}',
+          'item_category1': '{{ addslashes(@dept.name) }}',
+          'item_category2': '{{ addslashes(@subdept.name) }}',
           'item_variant': '{{ @item.code }}'
         }]
       }

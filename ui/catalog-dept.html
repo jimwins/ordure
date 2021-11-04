@@ -161,6 +161,7 @@
                   'name': '{{ addslashes(@product.name) }}',
                   'id': 'P{{ @product.id }}',
                   'brand': '{{ addslashes(@product.brand_name) }}',
+                  'category': '{{ addslashes(@dept.name . " / " . @subdept.name) }}',
                   'list': 'Department',
                 },
               </repeat>
@@ -181,6 +182,8 @@
                   'item_brand': '{{ addslashes(@product.brand_name) }}',
                   'item_list_id': 'D{{ @subdept.id }}',
                   'item_list_name': '{{ @subdept.name }}',
+                  'item_category1': '{{ addslashes(@dept.name) }}',
+                  'item_category2': '{{ addslashes(@subdept.name) }}',
                 },
               </repeat>
             ]
