@@ -3,7 +3,7 @@
 
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
-    dataLayer.push('set', {'content_group3': '{{ addslashes(@item.name) }}' });
+    dataLayer.push({'itemGroup': '{{ addslashes(@item.name) }}' });
 
     dataLayer.push({
       'event': 'eec.detail',

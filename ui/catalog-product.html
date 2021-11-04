@@ -242,7 +242,7 @@
 </div>
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
-    dataLayer.push('set', {'content_group2': '{{ addslashes(@product.name) }}' });
+    dataLayer.push({'productGroup': '{{ addslashes(@product.name) }}' });
 
     dataLayer.push({
       'event': 'eec.list',
