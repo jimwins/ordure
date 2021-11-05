@@ -2540,8 +2540,10 @@ class Sale {
       if ($payment_intent->amount != $amount) {
         $intent_options= [
           'amount' => $amount,
-          'shipping' => $customer_details['shipping'],
         ];
+        if ($customer_details['shipping']) {
+          $intent_options['shipping']= $customer_details['shipping'];
+        }
         $stripe->paymentIntents->update(
           $sale->stripe_payment_intent_id,
           $intent_options
