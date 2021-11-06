@@ -458,6 +458,10 @@ class Catalog {
                         LEFT JOIN image ON image.id = product_to_image.image_id
                        WHERE product_to_image.product_id = product.id
                        GROUP BY product.id)';
+    $product->items= '(SELECT COUNT(*)
+                         FROM item
+                        WHERE item.product = product.id
+                          AND item.active)';
     $product->load(array('slug = ? AND department = ?',
                          $f3->get('PARAMS.product'),
                          $dept->id));

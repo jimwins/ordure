@@ -52,9 +52,11 @@
 
     <include href="searchform.html" />
 
-    <h4>
-      <a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}"><i class="fa fa-arrow-left"></i> Back to {{ @product.name }}</a>
-    </h4>
+    <check if="{{ @product.items > 1 }}">
+      <h4>
+        <a href="{{ @BASE . '/' . @CATALOG . '/' . @dept.slug . '/' . @subdept.slug . '/' . @product.slug }}"><i class="fa fa-arrow-left"></i> Back to {{ @product.name }}</a>
+      </h4>
+    </check>
 
     <div class="page-header">
       <h1>
