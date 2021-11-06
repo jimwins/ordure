@@ -373,40 +373,6 @@ class Catalog {
     $f3->set('items', $items);
     $f3->set('variations', $variations);
 
-    if ($args['*']) {
-      // sometimes 'product' arg leaks into '*'?
-      $code= preg_replace("!^{$args['product']}/!", '', $args['*']);
-
-      $item= new DB\SQL\Mapper($db, 'item');
-      $item->description= '""';
-      $item->sale_price= "(SELECT sale_price(scat_item.retail_price,
-                           scat_item.discount_type,
-                           scat_item.discount) FROM scat_item WHERE scat_item.code = item.code)";
-      $item->media= '(SELECT JSON_ARRAYAGG(JSON_OBJECT("id", image.id,
-                                                          "uuid", image.uuid,
-                                                          "name", image.name,
-                                                          "alt_text", image.alt_text,
-                                                          "width", image.width,
-                                                          "height", image.height,
-                                                          "ext", image.ext))
-                          FROM item_to_image
-                          LEFT JOIN image ON image.id = item_to_image.image_id
-                         WHERE item_to_image.item_id = item.id
-                         GROUP BY item.id)';
-      $item->minimum_quantity= '(SELECT minimum_quantity
-                             FROM scat_item WHERE item.code = scat_item.code)';
-      $item->stock= '(SELECT IF(stock > 0, stock, 0)
-                             FROM scat_item WHERE item.code = scat_item.code)';
-      $item->stocked= '(SELECT IF(stock > 0, stock, 0) + minimum_quantity
-                             FROM scat_item WHERE item.code = scat_item.code)';
-      $item->is_dropshippable= '(SELECT is_dropshippable
-                             FROM scat_item WHERE item.code = scat_item.code)';
-      $item->load(array('code = ?', $code))
-        or $f3->error(404, "{$code} not found.");
-      $item->media= json_decode($item->media, true);
-      $f3->set('featured_item', $item);
-    }
-
     $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');
 
     $f3->set('PAGE',
