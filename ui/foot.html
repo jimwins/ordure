@@ -194,6 +194,20 @@ var BASE= '{{ @BASE }}/';
 <check if="{{ @USERWAY_ACCOUNT }}">
   <script>(function(d){var s = d.createElement("script");s.setAttribute("data-account", "{{ @USERWAY_ACCOUNT }}");s.setAttribute("src", "https://accessibilityserver.org/widget.js");(d.body || d.head).appendChild(s);})(document)</script><noscript>Please ensure Javascript is enabled for purposes of <a href="https://accessibilityserver.org">website accessibility</a></noscript>
 </check>
+<check if="{{ @TAWK_ID }}">
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/{{ @TAWK_ID }}';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
 <check if="{{ @ADMIN }}">
   <script>
     afterLoad(function() { loadScript('{{ @BASE }}/admin/admin.js') });
