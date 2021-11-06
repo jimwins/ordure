@@ -357,6 +357,13 @@ class Catalog {
 
     $items= $db->exec($q, $product['id']);
 
+    if (count($items) == 1) {
+      $top_dept= $f3->get('dept');
+      $f3->reroute('/'. $f3->get('CATALOG') . '/' .
+                   $top_dept['slug'] . '/' . $dept->slug . '/' .
+                   $product->slug . '/' . $items[0]['code'], false);
+    }
+
     $variations= array();
     foreach ($items as $item) {
       @$variations[$item['variation']]+= $item['stocked'];
