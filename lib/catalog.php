@@ -527,7 +527,7 @@ class Catalog {
       }
     }
 
-    error_log("shipping_options: " . json_encode($shipping_options));
+    //error_log("shipping_options: " . json_encode($shipping_options));
     $f3->set("shipping_options", $shipping_options);
 
     $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');

@@ -64,7 +64,7 @@ class Shipping {
   static function get_shipping_rate($item_dim, $weight, $hazmat, $total) {
     $extra= 0; //$hazmat ? 10 : 0;
 
-    error_log("getting rate for " . json_encode($item_dim) . " weighing $weight\n");
+    //error_log("getting rate for " . json_encode($item_dim) . " weighing $weight\n");
 
     $economy_boxes= [
       [ 9, 5, 3 ],
