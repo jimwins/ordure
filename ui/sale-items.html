@@ -67,9 +67,14 @@
                 Out of stock.
               </true>
               <false>
-                <check if="{{ @data.purchase_quantity }}">
-                  Out of stock, special order item.
-                </check>
+                                      <check if="{{ @data.dropship_fee > 0 }}">
+                                        <true>
+                                          <span data-toggle="tooltip" title="This data will be shipped directly to you.">Shipped direct<br>(+ {{ amount(@data.dropship_fee) }}/order)</span>
+                                        </true>
+                                        <false>
+                                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                        </false>
+                                      </check>
                 <exclude>No purchase quantity means it doesn't have stock.</exclude>
               </false>
             </check>
@@ -86,6 +91,16 @@
       <td>
         <check if="{{ @data.hazmat }}">
           <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
+        </check>
+        <check if="@data.oversized">
+          <true>
+            <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized data: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+          </true>
+          <false>
+            <check if="{{ @data.no_free_shipping }}">
+              <a class="pull-right" href="/shipping" data-toggle="tooltip" title="This item is not eligible for free shipping."><i class="fa fa-truck text-success"></i></a>
+            </check>
+          </false>
         </check>
         <div class="visible-xs"><small>{{ @data.code }}</small></div>
         <span>{{ @data.name }}</span>

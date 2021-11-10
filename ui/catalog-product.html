@@ -185,7 +185,14 @@
                                       <span data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</span>
                                     </true>
                                     <false>
-                                      <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                      <check if="{{ @item.dropship_fee > 0 }}">
+                                        <true>
+                                          <span data-toggle="tooltip" title="This item will be shipped directly to you.">Shipped direct<br>({{ amount(@item.dropship_fee) }}/order)</span>
+                                        </true>
+                                        <false>
+                                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
+                                        </false>
+                                      </check>
                                     </false>
                                   </check>
                             </false>
@@ -199,7 +206,14 @@
                         <a class="pull-right" href="/shipping#hazmat" data-toggle="tooltip" title="Hazardous materials: special shipping is required, and there may be additional costs. Click for more details."><img src="{{ @STATIC }}/msds/dot-limited-quantity-surface.svg" width="20" alt="Hazardous Materials"></a>
                       </check>
                       <check if="@item.oversized">
-                        <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+                        <true>
+                          <a class="pull-right" href="/shipping#oversized" data-toggle="tooltip" title="Oversized item: special shipping is required, and there will be additional costs. Click for more details."><i class="fa fa-truck"></i></a>
+                        </true>
+                        <false>
+                          <check if="{{ @item.no_free_shipping }}">
+                            <a class="pull-right" href="/shipping" data-toggle="tooltip" title="This item is not eligible for free shipping."><i class="fa fa-truck text-success"></i></a>
+                          </check>
+                        </false>
                       </check>
                     </td>
                     <check if="@FEATURE_cart && @CAN_ORDER && (((@CAN_PICKUP || @CAN_SHIP) && (@item.stock || !@item.no_backorder)) || (@CAN_DROPSHIP && @item.is_dropshippable && !@item.no_backorder))">

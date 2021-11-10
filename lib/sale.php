@@ -312,6 +312,7 @@ class Sale {
     $item->hazmat= "(SELECT hazmat FROM item WHERE item_id = item.id)";
     $item->oversized= "(SELECT oversized FROM item WHERE item_id = item.id)";
     $item->no_backorder= "(SELECT no_backorder FROM item WHERE item_id = item.id)";
+    $item->dropship_fee= "(SELECT dropship_fee FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
 
@@ -319,7 +320,7 @@ class Sale {
                          array('order' => 'id'));
     $items_out= $stock_status= [];
     foreach ($items as $i) {
-      $items_out[]= $i->cast();
+      $item= $i->cast();
       if ($i->oversized) {
         $stock_status['oversized']++;
       }
@@ -337,6 +338,13 @@ class Sale {
       if ($i->stock < $i->quantity && $i->purchase_quantity) {
         $stock_status['stock_limited']++;
       }
+      // doesn't meet free shipping requirements?
+      $item['no_free_shipping']= !Shipping::item_can_ship_free($i) || $item['dropship_fee'];
+      if ($item['no_free_shipping']) {
+        $stock_status['no_free_shipping']++;
+      }
+
+      $items_out[]= $item;
     }
     $f3->set('items', $items_out);
     $f3->set('stock_status', $stock_status);
@@ -428,6 +436,7 @@ class Sale {
     $db= $f3->get('DBH');
     $status= $special= [];
     $weight= 0.0;
+    $dropship_fee= 0.0;
 
     if (!$address) {
       $address= new DB\SQL\Mapper($db, 'sale_address');
@@ -452,6 +461,12 @@ class Sale {
         $status['special']++;
         continue;
       }
+
+      if ($sale_item['dropship_fee'] > $dropship_fee) {
+        $dropship_fee= $sale_item['dropship_fee'];
+        error_log("adding dropship fee of $dropship_fee\n");
+      }
+
       // no stock and not stocked? special order.
       if (!$scat_item->stock && !$scat_item->minimum_quantity && $scat_item->purchase_quantity) {
         $status['special']++;
@@ -480,14 +495,17 @@ class Sale {
             'width' => $sale_item['width'],
             'height' => $sale_item['height'],
           ]));
-        $weight+= $sale_item['weight'] * $sale_item['quantity'];
+        $weight+= ($sale_item['weight'] * $sale_item['quantity']);
+        if (!Shipping::item_can_ship_free($sale_item)) {
+          $status['no_free_shipping']++;
+        }
       }
     }
 
     error_log("calculated weight as $weight\n");
 
     if ($weight >= 50) {
-      $status['oversized']++;
+      //$status['oversized']++;
     }
 
     if ($status['unknown']) {
@@ -560,49 +578,18 @@ class Sale {
     }
 
     if (self::can_ship($f3) && !$status['oversized']) {
-      $economy_boxes= [
-        [ 9, 5, 3 ],
-        [ 5, 5, 3.5 ],
-        [ 12.25, 3, 3 ],
-      ];
-
-      if ($weight < 0.9 && !$status['hazmat'] &&
-          $this->fits_in_box($economy_boxes, $item_dim))
-      {
-        $options['economy']= (($sale->subtotal > 69) ? 0.00 : 5.99);
-      }
-
-      $extra_small_boxes= array_merge($economy_boxes, [
-        [ 18.75, 3, 3 ],
-        [ 8.67, 5.37, 1.67 ],
-        [ 10, 7, 4.75 ],
-        [ 7, 7, 6 ],
-        [ 12.8, 10.9, 2.37 ],
-//        [ 14.37, 7.5, 5.12 ],
-      ]);
-
-      $small_boxes= [
-        [ 18, 15, 8 ],
-      ];
-
-      $medium_boxes= [
-        [ 19, 25, 8 ],
-      ];
-
-      if ($weight < 10 && $this->fits_in_box($extra_small_boxes, $item_dim)) {
-        $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
-      } elseif ($weight < 10 && $this->fits_in_box($small_boxes, $item_dim)) {
-        $options['default']= (($sale->subtotal > 99) ? 0.00 : 9.99);
-      } elseif ($weight < 20 && $this->fits_in_box($medium_boxes, $item_dim)) {
-        $options['default']= (($sale->subtotal > 199) ? 0.00 : 19.99);
-      } elseif ($weight < 30) {
-        $options['default']= (($sale->subtotal > 399) ? 0.00 : 29.99);
-      }
-
-      if (isset($options['default']) && $status['hazmat']) {
-        $options['default']+= 10;
+      list($rate, $method)=
+        Shipping::get_best_shipping_rate($f3, $address,
+                                          $item_dim, $weight,
+                                          $status['hazmat'],
+                                          $status['no_free_shipping'],
+                                          $sale->subtotal);
+      if ($method) {
+        $options[$method]= $rate + $dropship_fee;
       }
     }
+
+    error_log("shipping options: " . json_encode($options) . "\n");
 
     return $options;
   }
@@ -871,6 +858,8 @@ class Sale {
       $address->verified= 0;
 
       $address->save();
+
+      $this->easypost_verify_address($f3, $address);
 
       $sale->shipping_address_id= $address->id;
       // all amazon-paid orders forced to default shipping
@@ -1300,6 +1289,7 @@ class Sale {
     $line->erase();
     $db->commit();
 
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
     $this->update_shipping_and_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
@@ -1378,6 +1368,7 @@ class Sale {
 
     $line->save();
 
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
     $this->update_shipping_and_tax($f3, $sale);
 
     return $this->json($f3, $args);
@@ -1469,7 +1460,6 @@ class Sale {
     $db->commit();
 
     $sale= $this->load($f3, $sale_uuid, 'uuid');
-
     $this->update_shipping_and_tax($f3, $sale);
 
     if ($f3->get('AJAX')) {
@@ -1481,12 +1471,16 @@ class Sale {
                  ($added ? '&added=' . rawurlencode($added) : ''));
   }
 
+  function reset_shipping_cost($f3, $sale) {
+    $sale->shipping_tax= 0;
+    $sale->shipping= 0.00;
+  }
+
   function update_shipping($f3, $sale) {
     if ($sale->shipping_manual)
       return;
 
-    $sale->shipping_tax= 0; // reset the tax
-    $sale->shipping= 0.00;
+    $this->reset_shipping_cost($f3, $sale);
 
     // Calculate shipping if not in-store pick-up
     if ($sale->shipping_address_id != 1) {
@@ -1508,8 +1502,12 @@ class Sale {
           $sale->shipping_method= 'local_' . $size;
         }
 
-        $option= $shipping_options[$method];
-        $sale->shipping= is_array($option) ? $option['price'] : $option;
+        if (isset($shipping_options[$method])) {
+          $option= $shipping_options[$method];
+          $sale->shipping= is_array($option) ? $option['price'] : $option;
+        } else {
+          $sale->shipping_method= null;
+        }
       }
 
     }
@@ -1619,6 +1617,8 @@ class Sale {
     if ($type == 'shipping') {
       $sale->shipping_address_id= $address->id;
       $sale->shipping_method= null;
+      $sale->shipping= 0.0;
+      $sale->shipping_tax= null;
     } else {
       $sale->billing_address_id= $address->id;
     }

@@ -97,7 +97,7 @@
         </div>
       </check>
 
-      <check if="{{ @shipping_options.economy }}">
+      <check if="{{ isset(@shipping_options.economy) }}">
         <div class="panel panel-default">
           <div class="panel-heading">
             <h2 class="panel-title">First Class Mail</h2>
@@ -165,19 +165,20 @@
             </div>
           </div>
         </true>
-        <false>
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h2 class="panel-title">Standard Shipping</h2>
-            </div>
-            <div class="panel-body">
-              Sorry, but this order isn't eligible to be shipped
-              outside of our local delivery area. If you believe this
-              is an error, you can <a href="./checkout?stage=review">submit
-              the order for review.</a>
-            </div>
+      </check>
+
+      <check if="{{ !isset(@shipping_options.default) && !isset(@shipping_options.economy) }}">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 class="panel-title">Standard Shipping</h2>
           </div>
-        </false>
+          <div class="panel-body">
+            Sorry, but this order isn't eligible to be shipped
+            outside of our local delivery area. If you believe this
+            is an error, you can <a href="./checkout?stage=review">submit
+            the order for review.</a>
+          </div>
+        </div>
       </check>
 
       <check if="{{ @CAN_DELIVER && @shipping_options.local && !@shipping_options.bike && !@shipping_options.cargo_bike }}">

@@ -183,6 +183,35 @@
               <b>Don't worry, you won't have to wait for curbside pickup!</b>
             </p>
           </check>
+          <check if="{{ !array_key_exists('unknown', @stock_status) && !array_key_exists('oversized', @stock_status) }}">
+            <check if="{{ !array_key_exists('no_free_shipping', @stock_status) && (@CAN_SHIP || @CAN_DROPSHIP) }}">
+              <true>
+                <check if="{{ @sale.subtotal > 79 }}">
+                  <true>
+                    <p class="lead alert alert-success">
+                      <b>This order will ship for free to the continental US!</b>
+                    </p>
+                  </true>
+                  <false>
+                    <p class="lead alert alert-danger">
+                      <b>You're almost there for free shipping!</b>
+                      Just spend {{ amount(79 - @sale.subtotal) }} more on
+                      eligible items and your order will ship for free to
+                      the continental US. <a href="/art-supplies">Continue
+                      shopping &rarr;</a>
+                    </p>
+                  </false>
+                </check>
+              </true>
+              <false>
+                <p class="lead alert alert-info">
+                  <b>This order can't ship for free.</b>
+                  Sorry, but you're ordering items that don't qualify for
+                  free shipping. They are marked with a green truck (<i class="fa fa-truck text-success"></i>) in the cart. Shipping charges will be calculated during checkout.
+                </p>
+              </false>
+            </check>
+          </check>
 
           <div class="form-group">
             <div class="row">

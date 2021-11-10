@@ -58,6 +58,7 @@ class Catalog {
       $item->is_dropshippable= '(SELECT is_dropshippable
                              FROM scat_item WHERE item.code = scat_item.code)';
       $item->load(array('code = ?', $code));
+      $item->no_free_shipping= !Sales::item_can_ship_free($item);
       $items[]= $item;
     }
 
@@ -348,6 +349,7 @@ class Catalog {
                 minimum_quantity, is_dropshippable,
                 item.prop65, item.oversized, item.hazmat,
                 no_backorder,
+                dropship_fee,
                 thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code
@@ -365,7 +367,8 @@ class Catalog {
     }
 
     $variations= array();
-    foreach ($items as $item) {
+    foreach ($items as &$item) {
+      $item['no_free_shipping']= !Shipping::item_can_ship_free($item);
       @$variations[$item['variation']]+= $item['stocked'];
     }
 
@@ -485,6 +488,7 @@ class Catalog {
     $item->load(array('code = ?', $code))
       or $f3->error(404, "{$code} not found.");
     $item->media= json_decode($item->media, true);
+    $item->no_free_shipping= !Shipping::item_can_ship_free($item->cast());
     $f3->set('item', $item);
 
     if (!$item->active) {
@@ -518,11 +522,12 @@ class Catalog {
         $item->hazmat,
         $item->sale_price
       );
-      if ($shipping) {
+      if ($shipping !== false) {
         $shipping_options['shipping']= $shipping;
       }
     }
 
+    error_log("shipping_options: " . json_encode($shipping_options));
     $f3->set("shipping_options", $shipping_options);
 
     $f3->set('EXTRA_HEAD', '<link rel="alternate" type="application/json+oembed" href="http://' . $_SERVER['HTTP_HOST'] . $f3->get('BASE') . '/oembed?url=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $f3->get('URI') . '') . '&format=json" title="oEmbed Profile" />');

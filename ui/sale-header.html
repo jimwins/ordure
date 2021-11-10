@@ -31,12 +31,12 @@
     </check>
     <check if="@stage_number == 3">
       <true>
-        <li class="active">Method</li>
+        <li class="active">Shipping</li>
       </true>
       <false>
         <check if="@stage_number > 3 && @sale.shipping_address_id != 1">
           <true>
-            <li><a href="/cart/checkout?stage=shipping-method">Method</a></li>
+            <li><a href="/cart/checkout?stage=shipping-method">Shipping</a></li>
           </true>
           <false>
             <li>Method</li>
