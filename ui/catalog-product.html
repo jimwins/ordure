@@ -187,7 +187,7 @@
                                     <false>
                                       <check if="{{ @item.dropship_fee > 0 }}">
                                         <true>
-                                          <span data-toggle="tooltip" title="This item will be shipped directly to you.">Shipped direct<br>({{ amount(@item.dropship_fee) }}/order)</span>
+                                          <span data-toggle="tooltip" title="This item will be shipped directly to you.">Shipped direct<br>(+ {{ amount(@item.dropship_fee) }}/order)</span>
                                         </true>
                                         <false>
                                           <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
