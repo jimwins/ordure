@@ -505,7 +505,7 @@ class Catalog {
       $shipping_options['bike']= 4.99;
     }
 
-    if ($item->width && $item->height && $item->length && $item->weight && !$item->oversized) {
+    if ($item->width && $item->height && $item->length && $item->weight) {
       $item_dim= [ [ $item->width, $item->height, $item->length ] ];
 
       // vehicle
@@ -514,6 +514,10 @@ class Catalog {
         // assume 2-mile minimum delivery
         $shipping_options['local']= ($local + 3) * 1.05;
       }
+    }
+
+    if ($item->width && $item->height && $item->length && $item->weight && !$item->oversized) {
+      $item_dim= [ [ $item->width, $item->height, $item->length ] ];
 
       // shipping
       $shipping= Shipping::get_shipping_rate(

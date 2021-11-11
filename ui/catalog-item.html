@@ -165,7 +165,10 @@
                 </false>
               </check>
             </check>
-            <check if="@shipping_options.shipping !== false">
+            <check if="@item.oversized">
+              <br><span class="text-warning">Shipping not available</span>
+            </check>
+            <check if="isset(@shipping_options.shipping) && @shipping_options.shipping !== false">
               <check if="@shipping_options.shipping == 0">
                 <true>
                   <check if="@item.dropship_fee">
