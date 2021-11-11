@@ -171,7 +171,7 @@
             <check if="isset(@shipping_options.shipping) && @shipping_options.shipping !== false">
               <check if="@shipping_options.shipping == 0">
                 <true>
-                  <check if="@item.dropship_fee">
+                  <check if="{{ @item.dropship_fee > 0 }}">
                     <true>
                       <br>Shipped direct for {{ amount(@item.dropship_fee) }}/order
                     </true>
@@ -183,9 +183,9 @@
                 <false>
                   <br>
                   Nationwide shipping starting at {{ @amount(@shipping_options.shipping) }}
-                  <check if="@item.dropship_fee">
+                  <check if="{{ @item.dropship_fee > 0 }}">
                     plus a {{ amount(@item.dropship_fee) }}/order dropship fee.
-                  </chec>
+                  </check>
                   <br>
                   <check if="@item.no_free_shipping || @item.dropship_fee">
                     <true>
