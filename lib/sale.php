@@ -2507,6 +2507,8 @@ class Sale {
       ],
     ];
 
+    $payment_methods= [ 'card' ];
+
     if ($sale->shipping_address_id > 1) {
       $address= new DB\SQL\Mapper($db, 'sale_address');
       $address->load(array('id = ?', $sale->shipping_address_id))
@@ -2524,6 +2526,8 @@ class Sale {
           'country' => 'US',
         ],
       ];
+
+      $payment_methods[]= 'afterpay_clearpay';
     }
 
     if ($sale->stripe_payment_intent_id) {
@@ -2540,6 +2544,7 @@ class Sale {
       if ($payment_intent->amount != $amount) {
         $intent_options= [
           'amount' => $amount,
+          'payment_method_types' => $payment_methods,
         ];
         if ($customer_details['shipping']) {
           $intent_options['shipping']= $customer_details['shipping'];
@@ -2559,6 +2564,12 @@ class Sale {
           "sale_id" => $sale->id,
           "sale_uuid" => $sale->uuid,
         ],
+        'payment_method_types' => $payment_methods,
+        'payment_method_options' => [
+          'afterpay_clearpay' => [
+            'reference' => $sale->uuid,
+          ],
+        ],
       ];
       if ($customer_details['shipping']) {
         $intent_options['shipping']= $customer_details['shipping'];
@@ -2570,9 +2581,15 @@ class Sale {
       $sale->save();
     }
 
-    echo json_encode([
+    $response= [
       'secret' => $payment_intent->client_secret,
-    ]);
+    ];
+
+    if ($payment_intent->last_payment_error) {
+      $response['error']= $payment_intent->last_payment_error->message;
+    }
+
+    echo json_encode($response);
   }
 
   function handle_stripe_payment($f3, $uuid) {
@@ -2627,11 +2644,20 @@ class Sale {
       $payment->sale_id= $sale->id;
       $payment->method= 'credit';
       $payment->amount= $charge->amount / 100;
+
+      if ($charge->payment_method_details->type == 'afterpay_clearpay') {
+        $cc_brand= 'AfterPay';
+        $cc_last4= '';
+      } else {
+        $cc_brand= ucwords($charge->payment_method_details->card->brand);
+        $cc_last4= $charge->payment_method_details->card->last4;
+      }
+
       $payment->data= json_encode([
         'payment_intent_id' => $payment_intent_id,
         'charge_id' => $charge->id,
-        'cc_brand' => ucwords($charge->payment_method_details->card->brand),
-        'cc_last4' => $charge->payment_method_details->card->last4,
+        'cc_brand' => $cc_brand,
+        'cc_last4' => $cc_last4,
       ]);
       $payment->save();
     }

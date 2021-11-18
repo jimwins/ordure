@@ -231,7 +231,9 @@
         <td colspan="3" class="text-right">
           <check if="{{ @data.method == 'credit' }}">
             Paid by {{ @data.data.cc_brand }}
-            ending in {{ @data.data.cc_last4 }}
+            <check if="{{ @data.data.cc_last4 }}">
+              ending in {{ @data.data.cc_last4 }}
+            </check>
           </check>
           <check if="{{ @data.method == 'paypal' }}">
             Paid by PayPal

@@ -1,111 +1,109 @@
 loadScript('https://js.stripe.com/v3/',
            function() {
   var stripe= Stripe('{{ @STRIPE_KEY }}');
-  var elements= stripe.elements();
-  var button= document.getElementById('stripe-button');
-  var error= document.getElementById('stripe-error');
 
-  var card= elements.create("card");
-  // Stripe injects an iframe into the DOM
-  card.mount("#card-element");
-
-  card.on("change", function (event) {
-    // Disable the Pay button if there are no card details in the Element
-    button.disabled= event.empty;
-    error.textContent= event.error ? event.error.message : ''
-    if (event.error) error.classList.remove('hidden')
-  });
+  <check if="{{ @sale.uuid }}">
+    <true>
+      var getPaymentIntent= function(form) {
+        return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
+          // fake AJAX header so we get JSON errors
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(res) {
+          if (!res.ok) {
+            return res.json().then((data) => {
+              if (data.text == 'Payment already completed.') {
+                window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+              } else {
+                return Promise.reject(new Error(data.text))
+              }
+            })
+          }
+          return res.json()
+        })
+      }
+    </true>
+    <false>
+      var getPaymentIntent= function(form) {
+        let formData= new FormData(form)
+        return fetch('/gift-card/get-stripe-payment-intent', {
+          // fake AJAX header so we get JSON errors
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          method: 'POST',
+          body: formData,
+        }).then(function(res) {
+          if (!res.ok) {
+            return res.json().then((data) => {
+              if (data.text == 'Payment already completed.') {
+                window.location.href= "/gift-card/thanks"
+              } else {
+                return Promise.reject(new Error(data.text))
+              }
+            })
+          }
+          return res.json()
+        })
+      }
+    </false>
+  </check>
 
   var form= document.getElementById("payment-form");
-  form.addEventListener("submit", function(event) {
+  var button= document.getElementById('stripe-button');
+  var error= document.getElementById('stripe-error');
+  var elements;
+
+  getPaymentIntent(form).then((data) => {
+    elements= stripe.elements({ clientSecret: data.secret });
+    var paymentElement= elements.create("payment");
+    // Stripe injects an iframe into the DOM
+    paymentElement.mount("#payment-element");
+
+    paymentElement.on("change", function (event) {
+      // Disable the Pay button if there are no card details in the Element
+      button.disabled= !event.complete;
+      error.textContent= event.error ? event.error.message : ''
+      if (event.error) error.classList.remove('hidden')
+    });
+
+    if (data.error) {
+      showError(data.error);
+    }
+
+  })
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    return getPaymentIntent(form).then(function(data) {
-      payWithCard(stripe, card, data.secret);
-    })
-  });
-
-<check if="{{ @sale.uuid }}">
-  <true>
-    var getPaymentIntent= function(form) {
-      return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
-        // fake AJAX header so we get JSON errors
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(function(res) {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            if (data.text == 'Payment already completed.') {
-              window.location.href= "/sale/{{ @sale.uuid }}/thanks"
-            } else {
-              return Promise.reject(new Error(data.text))
-            }
-          })
-        }
-        return res.json()
-      })
-    }
-
-    var orderComplete= function(paymentIntentId) {
-      let formData= new FormData(form)
-      return fetch('/sale/{{ @sale.uuid }}/process-stripe-payment', {
-        method: 'POST',
-        body: formData
-      }).then(function (data) {
-        if (data.ok) {
-          reportPurchase()
-          window.location.href= "/sale/{{ @sale.uuid }}/thanks"
-        }
-      });
-    };
-
-  </true>
-  <false>
-    var getPaymentIntent= function(form) {
-      let formData= new FormData(form)
-      return fetch('/gift-card/get-stripe-payment-intent', {
-        // fake AJAX header so we get JSON errors
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        method: 'POST',
-        body: formData,
-      }).then(function(res) {
-        return res.json()
-      })
-    }
-
-    var orderComplete= function(paymentIntentId) {
-      let formData= new FormData(form)
-      formData.set('payment_intent_id', paymentIntentId)
-      return fetch('/gift-card/process-stripe-payment', {
-        method: 'POST',
-        body: formData
-      }).then(function (data) {
-        if (data.ok) {
-          window.location.href= "/gift-card/thanks"
-        }
-      });
-    };
-
-  </false>
-</check>
-
-  var payWithCard= function(stripe, card, clientSecret) {
     loading(true);
-    stripe
-      .confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: card
-        }
-      })
-      .then(function(result) {
-        if (result.error) {
-          // Show error to your customer
-          showError(result.error.message);
+
+    stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: "{{ @SCHEME . '://' . @HOST . @URI }}",
+      },
+      redirect: 'if_required'
+    }).then((res) => {
+      if (res.error) {
+        if (res.error.type === "card_error" ||
+            res.error.type === "validation_error")
+        {
+          showError(res.error.message);
         } else {
-          // The payment succeeded!
-          orderComplete(result.paymentIntent.id);
+          showError("An unexpected error occured.");
         }
-      });
-  };
+      } else {
+        <check if="{{ @sale.uuid }}">
+          <true>
+            window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+          </true>
+          <false>
+            window.location.href= "/gift-card/thanks"
+          </false>
+        </check>
+      }
+    })
+  }
+
+  form.addEventListener("submit", handleSubmit);
 
   // Show the customer the error from Stripe if their card fails to charge
   var showError= function(errorMsgText) {
