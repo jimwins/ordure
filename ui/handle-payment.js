@@ -2,50 +2,24 @@ loadScript('https://js.stripe.com/v3/',
            function() {
   var stripe= Stripe('{{ @STRIPE_KEY }}');
 
-  <check if="{{ @sale.uuid }}">
-    <true>
-      var getPaymentIntent= function(form) {
-        return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
-          // fake AJAX header so we get JSON errors
-          headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(function(res) {
-          if (!res.ok) {
-            return res.json().then((data) => {
-              if (data.text == 'Payment already completed.') {
-                window.location.href= "/sale/{{ @sale.uuid }}/thanks"
-              } else {
-                return Promise.reject(new Error(data.text))
-              }
-            })
+  var getPaymentIntent= function(form) {
+    return fetch('/sale/{{ @sale.uuid }}/get-stripe-payment-intent', {
+      // fake AJAX header so we get JSON errors
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().then((data) => {
+          if (data.text == 'Payment already completed.') {
+            window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+          } else {
+            return Promise.reject(new Error(data.text))
           }
-          return res.json()
         })
       }
-    </true>
-    <false>
-      var getPaymentIntent= function(form) {
-        let formData= new FormData(form)
-        return fetch('/gift-card/get-stripe-payment-intent', {
-          // fake AJAX header so we get JSON errors
-          headers: { 'X-Requested-With': 'XMLHttpRequest' },
-          method: 'POST',
-          body: formData,
-        }).then(function(res) {
-          if (!res.ok) {
-            return res.json().then((data) => {
-              if (data.text == 'Payment already completed.') {
-                window.location.href= "/gift-card/thanks"
-              } else {
-                return Promise.reject(new Error(data.text))
-              }
-            })
-          }
-          return res.json()
-        })
-      }
-    </false>
-  </check>
+      return res.json()
+    })
+  }
 
   var form= document.getElementById("payment-form");
   var button= document.getElementById('stripe-button');
@@ -91,14 +65,8 @@ loadScript('https://js.stripe.com/v3/',
           showError("An unexpected error occured.");
         }
       } else {
-        <check if="{{ @sale.uuid }}">
-          <true>
-            window.location.href= "/sale/{{ @sale.uuid }}/thanks"
-          </true>
-          <false>
-            window.location.href= "/gift-card/thanks"
-          </false>
-        </check>
+        reportPurchase()
+        window.location.href= "/sale/{{ @sale.uuid }}/thanks"
       }
     })
   }
