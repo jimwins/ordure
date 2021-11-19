@@ -82,15 +82,16 @@
     <div class="col-sm-8">
       <div class="row">
         <div class="col-xs-6">
+          <check if="@item.sale_price != @item.retail_price">
+            <h4 class="text-danger" style="margin: 0px">Save {{ sprintf('%.0f', (@item.retail_price - @item.sale_price) / @item.retail_price * 100) }}% off list</h4>
+          </check>
           <h3>
             {{ @amount(@item.sale_price) }}
             <check if="@item.sale_price != @item.retail_price">
               <small style="white-space: nowrap;">List Price {{ @amount(@item.retail_price) }}</small>
             </check>
           </h3>
-          <check if="@item.sale_price != @item.retail_price">
-            <h4 class="text-danger">Save {{ sprintf('%.0f', (@item.retail_price - @item.sale_price) / @item.retail_price * 100) }}% off list</h4>
-          </check>
+          <div id="afterpay-clearpay-message"></div>
           <check if="(@CAN_SHIP || @CAN_PICKUP) && (@item.minimum_quantity || @item.stocked)">
             <true>
               <check if="@item.stock > 0">
@@ -256,6 +257,23 @@
   </div>
 </div>
 <include href="footer.html" />
+<script>
+  loadScript('https://js.stripe.com/v3/', function() {
+    const stripe= Stripe('{{ @STRIPE_KEY }}');
+
+    const elements= stripe.elements();
+
+    const options= {
+      amount: {{ (int)(@item.sale_price * 100) }},
+      currency: 'USD'
+    };
+
+    const afterpayClearpayMessageElement=
+      elements.create('afterpayClearpayMessage', options);
+
+    afterpayClearpayMessageElement.mount('#afterpay-clearpay-message');
+  })
+</script>
 <check if="{{ ! @NO_PINTEREST }}">
 <script type="text/javascript">
 (function(d){
