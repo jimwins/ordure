@@ -45,6 +45,14 @@
   </check>
 </check>
 
+<check if="{{ @is_po_box }}">
+  <div class="alert alert-danger">
+    Your address appears to be a PO Box, so your order will be sent via USPS.
+    <a href="/cart/checkout/?stage=shipping">Go back and change your address
+    if that's not what you want.</a>
+  </div>
+</check>
+
 <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 
   <check if="{{ @rewards && !@already_used_rewards }}">
