@@ -17,7 +17,7 @@
       })
     })
 
-    dataLayer.push({ ecommerce: null });
+    //dataLayer.push({ ecommerce: null });
     dataLayer.push({
       'event': 'view_promotion',
       'ecommerce': {
@@ -84,7 +84,7 @@
     });
 
     // GA4
-    dataLayer.push({ ecommerce: null });
+    //dataLayer.push({ ecommerce: null });
     dataLayer.push({
       'event': 'add_to_cart',
       'ecommerce': {

@@ -286,7 +286,7 @@ function reportPurchase() {
       });
 
       // GA4
-      dataLayer.push({ ecommerce: null });
+      //dataLayer.push({ ecommerce: null });
       dataLayer.push({
         'event': 'purchase',
         'ecommerce': {
