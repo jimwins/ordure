@@ -756,6 +756,13 @@ class Sale {
           $f3->set('already_used_rewards',
                     $this->already_used_rewards($db, $sale));
         }
+
+        if ($sale->shipping_address_id > 1) {
+          $address= new DB\SQL\Mapper($db, 'sale_address');
+          $address->load(array('id = ?', $sale->shipping_address_id))
+            or $f3->error(404);
+          $f3->set('is_po_box', preg_match('/po box/i', "{$address->address1} {$address->address2}"));
+        }
       }
 
       $f3->set('stage', $stage);
