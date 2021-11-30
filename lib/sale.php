@@ -1865,6 +1865,11 @@ class Sale {
     $method= $f3->get('REQUEST.method');
     $size= $f3->get('REQUEST.size');
 
+    if (preg_match('!(.*)_(.*)!', $method, $m)) {
+      $method= $m[1];
+      $size= $m[2];
+    }
+
     $shipping_options= $this->get_shipping_options($f3, $sale);
 
     if (!isset($shipping_options[$method])) {
