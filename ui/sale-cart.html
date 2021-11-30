@@ -23,6 +23,12 @@
 
 <check if="@items && count(@items)">
   <false>
+    <check if="{{ @REQUEST.removed }}">
+      <div class="alert alert-danger">
+        Item removed from cart.
+      </div>
+    </check>
+
     <p class="lead">
       You don't have anything in your cart.
     </p>
@@ -83,7 +89,7 @@
 
 <div class="row">
   <div class="col-md-12">
-    <check if="@REQUEST.removed">
+    <check if="{{ @REQUEST.removed }}">
       <div class="alert alert-danger">
         Item removed from cart.
       </div>
@@ -278,6 +284,45 @@
 </check>
 
 <script type="text/javascript">
+  function removeFromCart(item) {
+    debugger
+    let id= item.closest('[data-product-id]').getAttribute('data-product-id')
+    let quantity= item.closest('[data-quantity]').getAttribute('data-quantity')
+
+    <check if="{{ @GOOGLE_TAG_MANAGER }}">
+      // UA
+      dataLayer.push({
+        'event': 'eec.remove',
+        'ecommerce': {
+          'remove': {
+            'products': [{
+              'id': id,
+              'quantity': quantity
+            }]
+          }
+        }
+      });
+
+      // GA4
+      //dataLayer.push({ ecommerce: null });
+      dataLayer.push({
+        event: 'remove_from_cart',
+        ecommerce: {
+          items: [{
+            item_id: id,
+            item_quantity: quantity
+          }]
+        }
+      })
+    </check>
+  }
+
+  document.querySelectorAll('.remove-item').forEach((item) => {
+    document.addEventListener('click', (ev) => {
+      return removeFromCart(ev.target)
+    })
+  })
+
   function showButton() {
     var authRequest;
     OffAmazonPayments.Button("AmazonPayButton", "{{ @AMZ_MERCHANT_ID }}", {

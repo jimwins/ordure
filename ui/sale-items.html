@@ -11,7 +11,7 @@
   </thead>
   <tbody>
   <repeat group="{{ @items }}" value="{{ @data }}">
-    <tr valign="top">
+    <tr valign="top" data-product-id="P{{ @data.product_id }}" data-quantity="{{ @data.quantity }}">
       <td></td>
 <check if="{{ @FEATURE_cart && @sale.status == 'cart' && !@stage}}">
   <true>
@@ -33,7 +33,7 @@
                        name="qty[{{ @data.id }}]" value="{{ @data.quantity }}">
                 <span class="input-group-btn">
                   <a href="/cart/remove-item?item={{ @data.id}}"
-                     class="btn btn-default">
+                     class="btn btn-default remove-item">
                     <i class="fa fa-remove"></i>
                   </a>
                 </span>
