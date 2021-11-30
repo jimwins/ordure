@@ -325,6 +325,9 @@
 
   function showButton() {
     var authRequest;
+
+    if (!document.getElementById('AmazonPayButton')) return;
+
     OffAmazonPayments.Button("AmazonPayButton", "{{ @AMZ_MERCHANT_ID }}", {
       type:  "PwA",
       color: "Gold",
