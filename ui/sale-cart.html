@@ -259,7 +259,7 @@
       'event': 'view_cart',
       'ecommerce':  {
         'items': [
-          <repeat group="{{ @items }}" value="{{ @product }}">
+          <repeat group="{{ @items }}" value="{{ @item }}">
             {
               'item_name': '{{ addslashes(@item.product_name) }}',
               'item_id': 'P{{ @item.product_id }}',
