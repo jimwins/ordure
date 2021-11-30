@@ -1293,6 +1293,7 @@ class Sale {
       $q= "DELETE FROM sale_item WHERE sale_id = ? AND kit_id = ?";
       $db->exec($q, [ $sale->id, $item->id ]);
     }
+    $quantity= $line->quantity;
     $line->erase();
     $db->commit();
 
@@ -1304,7 +1305,8 @@ class Sale {
     }
 
     $f3->reroute('/cart?uuid=' . $sale->uuid .
-                 '&removed=1');
+                 '&removed=' . rawurlencode($item->code) .
+                 '&quantity=' . $quantity);
   }
 
   function update_item($f3, $args) {

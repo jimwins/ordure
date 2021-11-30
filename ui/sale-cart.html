@@ -23,9 +23,17 @@
 
 <check if="@items && count(@items)">
   <false>
-    <check if="{{ @REQUEST.removed }}">
+    <check if="{{ isset(@REQUEST.removed) }}">
       <div class="alert alert-danger">
         Item removed from cart.
+        <form class="form-inline add-item" style="display: inline-block"
+              action="/cart/add-item" method="POST">
+          <input type="hidden" name="item" value="{{ @REQUEST.removed }}">
+          <input type="hidden" name="quantity" value="{{ @REQUEST.quantity }}">
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-undo"></i> Undo
+          </button>
+        </form>
       </div>
     </check>
 
@@ -92,6 +100,14 @@
     <check if="{{ @REQUEST.removed }}">
       <div class="alert alert-danger">
         Item removed from cart.
+        <form class="form-inline add-item" style="display: inline-block"
+              action="/cart/add-item" method="POST">
+          <input type="hidden" name="item" value="{{ @REQUEST.removed }}">
+          <input type="hidden" name="quantity" value="{{ @REQUEST.quantity }}">
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-undo"></i> Undo
+          </button>
+        </form>
       </div>
     </check>
     <div class="panel panel-default">
