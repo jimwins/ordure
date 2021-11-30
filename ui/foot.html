@@ -154,33 +154,6 @@ loadScript('{{ @STATIC }}/code/combined-2021-09-01.js', function() {
   <include href="ecommerce.js" />
 });
 </script>
-<check if="{{ isset(@GA_UA) }}">
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', '{{ @GA_UA }}', '{{ @HOST }}');
-  ga('send', 'pageview');
-</script>
-</check>
-<check if="{{ isset(@PIWIK_ROOT) }}">
-<script type="text/javascript">
-  var _paq = _paq || [];
-  _paq.push(['trackPageView']);
-  _paq.push(['enableLinkTracking']);
-  (function() {
-    var u=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@PIWIK_ROOT}}/";
-    var st=(("https:" == document.location.protocol) ? "https" : "http") + ":{{@STATIC}}/piwik/";
-    _paq.push(['setTrackerUrl', u+'piwik.php']);
-    _paq.push(['setSiteId', {{ @PIWIK_SITE }}]);
-    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.type='text/javascript';
-    g.defer=true; g.async=true; g.src=st+'piwik.js'; s.parentNode.insertBefore(g,s);
-  })();
-</script>
-<noscript><p><img src="{{ @PIWIK_ROOT }}/piwik.php?idsite={{ @PIWIK_SITE }}" style="border:0;" alt="" /></p></noscript>
-</check>
 <script>
 var BASE= '{{ @BASE }}/';
 </script>
@@ -191,23 +164,6 @@ var BASE= '{{ @BASE }}/';
     });
   </script>
 </check>
-<check if="{{ @USERWAY_ACCOUNT }}">
-  <script>(function(d){var s = d.createElement("script");s.setAttribute("data-account", "{{ @USERWAY_ACCOUNT }}");s.setAttribute("src", "https://accessibilityserver.org/widget.js");(d.body || d.head).appendChild(s);})(document)</script><noscript>Please ensure Javascript is enabled for purposes of <a href="https://accessibilityserver.org">website accessibility</a></noscript>
-</check>
-<check if="{{ @TAWK_ID }}">
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/{{ @TAWK_ID }}';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
 <check if="{{ @ADMIN }}">
   <script>
     afterLoad(function() { loadScript('{{ @BASE }}/admin/admin.js') });
