@@ -106,7 +106,7 @@
                     <false>
                       <check if="@item.no_backorder">
                         <true>
-                          <p data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</p>
+                          <p class="text-danger" data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</p>
                         </true>
                         <false>
                           <p data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</p>
@@ -125,7 +125,7 @@
                 <false>
                       <check if="@item.no_backorder">
                         <true>
-                          <p data-toggle="tooltip" title="This item is currently unavailable.">Unavailable</p>
+                          <p data-toggle="tooltip" class="text-danger" title="This item is currently unavailable.">Unavailable</p>
                         </true>
                         <false>
                                       <check if="{{ @item.dropship_fee > 0 }}">
