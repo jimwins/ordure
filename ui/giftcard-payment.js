@@ -12,9 +12,10 @@ loadScript('https://js.stripe.com/v3/',
   var form= document.getElementById("payment-form");
 
   function enoughDetails(form) {
+    let amount= form.elements['amount'].value.replace(/^\$/, '')
     if (form.elements['name'].value != '' &&
         form.elements['email'].value != '' &&
-        parseFloat(form.elements['amount'].value))
+        parseFloat(amount))
     {
       return true;
     }
@@ -24,6 +25,7 @@ loadScript('https://js.stripe.com/v3/',
   card.on("change", function (event) {
     // Disable the Pay button if there are info not complete
     button.disabled= !event.complete || !enoughDetails(form);
+    button.querySelector('.text-label').textContent= button.disabled ? 'Complete Details Above' : 'Buy Gift Card'
     error.textContent= event.error ? event.error.message : ''
     if (event.error) error.classList.remove('hidden')
   });
