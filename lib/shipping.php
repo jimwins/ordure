@@ -144,14 +144,6 @@ class Shipping {
 
       error_log("total: $order_total, using box: " . json_encode($box));
 
-      // Free over $79 and in continental US and all items eligible
-      if (!$no_free_shipping &&
-          $order_total > 79 &&
-          self::state_in_continental_us($address->state))
-      {
-        return [ 0.00, 'default' ];
-      }
-
       $options= [];
       if ($hazmat) {
         $options['hazmat']= 'LIMITED_QUANTITY';
@@ -213,6 +205,14 @@ class Shipping {
             $best_rate= $rate->rate;
           }
         }
+      }
+
+      // Free over $79 and in continental US and all items eligible
+      if (!$no_free_shipping &&
+          $order_total > 79 &&
+          self::state_in_continental_us($address->state))
+      {
+        return [ 0.00, 'default' ];
       }
     }
 
