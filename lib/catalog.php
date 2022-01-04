@@ -488,6 +488,9 @@ class Catalog {
     $item->load(array('code = ?', $code))
       or $f3->error(404, "{$code} not found.");
     $item->media= json_decode($item->media, true);
+    if (!$item->media) {
+      $item->media= $product->media;
+    }
     $item->no_free_shipping= !Shipping::item_can_ship_free($item->cast());
     $f3->set('item', $item);
 
