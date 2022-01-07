@@ -176,7 +176,9 @@ class Shipping {
         error_log("rate: {$rate->carrier} / {$rate->service}: {$rate->rate}\n");
         if ($hazmat) {
           if (in_array($rate->carrier, [ 'USPS' ]) &&
-              $rate->service == 'ParcelSelect')
+              $rate->service == 'ParcelSelect' &&
+              self::state_in_continental_us($address->state) &&
+              self::address_is_po_box($address))
           {
             if (!$best_rate || $rate->rate < $best_rate) {
               $method= 'default';
@@ -218,6 +220,10 @@ class Shipping {
 
     error_log("got best rate: $best_rate for $method\n");
     return [ $best_rate, $method ];
+  }
+
+  static function address_is_po_box($address) {
+    return preg_match('/po box/i', $address->address1 . $address->address2);
   }
 
   static function state_in_continental_us($state) {
