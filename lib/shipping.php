@@ -140,6 +140,9 @@ class Shipping {
     $method= null;
     $best_rate= null;
 
+    /* We always try to check shipping rates, even for orders that qualify for
+     * free shipping. */
+
     if (($box= Shipping::fits_in_box($all_boxes, $item_dim))) {
 
       error_log("total: $order_total, using box: " . json_encode($box));
@@ -208,17 +211,21 @@ class Shipping {
           }
         }
       }
-
-      // Free over $79 and in continental US and all items eligible
-      if (!$no_free_shipping &&
-          $order_total > 79 &&
-          self::state_in_continental_us($address->state))
-      {
-        return [ 0.00, 'default' ];
-      }
     }
 
-    error_log("got best rate: $best_rate for $method\n");
+    if ($best_rate) {
+      error_log("got best rate: $best_rate for $method\n");
+    }
+
+    // Free over $79 and in continental US and all items eligible
+    if (!$no_free_shipping &&
+        $order_total > 79 &&
+        self::state_in_continental_us($address->state))
+    {
+      error_log("qualified for free shipping");
+      return [ 0.00, 'default' ];
+    }
+
     return [ $best_rate, $method ];
   }
 
