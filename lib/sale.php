@@ -156,6 +156,7 @@ class Sale {
              ($f3->get('REQUEST.carts') ?
               'status = "cart"' :
               'status != "cancelled" AND
+               status != "processing" AND
                status != "shipped" AND
                status != "cart"'));
     $status= $f3->get('REQUEST.status');
