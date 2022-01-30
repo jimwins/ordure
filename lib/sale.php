@@ -69,6 +69,8 @@ class Sale {
                'Sale->bill_to_shipping_address');
     $f3->route("POST /sale/@sale/set-person [ajax]", 'Sale->set_person');
     $f3->route("POST /sale/@sale/set-status [ajax]", 'Sale->set_status');
+    $f3->route("POST /sale/@sale/set-abandoned-level [ajax]",
+                'Sale->set_abandoned_level');
     $f3->route("POST /sale/@sale/verify-address [ajax]",
                'Sale->verify_address');
     $f3->route("POST /sale/@sale/confirm-order [ajax]", 'Sale->confirm_order');
@@ -2267,6 +2269,28 @@ class Sale {
     }
 
     $sale->status= $status;
+
+    $sale->save();
+
+    return $this->json($f3, $args);
+  }
+
+  function set_abandoned_level($f3, $args) {
+    if (\Auth::authenticated_user($f3) != $f3->get('ADMIN_USER')) {
+      if ($f3->get('UPLOAD_KEY') != $_REQUEST['key']) {
+        $f3->error(403);
+      }
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale_uuid= $f3->get('PARAMS.sale');
+
+    $sale= $this->load($f3, $sale_uuid, 'uuid');
+
+    $abandoned_level= (int)$f3->get('REQUEST.abandoned_level');
+
+    $sale->abandoned_level= $abandoned_level;
 
     $sale->save();
 
