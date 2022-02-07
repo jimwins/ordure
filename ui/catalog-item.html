@@ -11,11 +11,10 @@
         'detail': {
           'products': [{
             'name': '{{ addslashes(@item.name) }}',
-            'id': 'P{{ @product.id }}',
+            'id': '{{ @item.code }}',
             'price': '{{ @item.sale_price }}',
             'brand': '{{ addslashes(@product.brand_name) }}',
             'category': '{{ addslashes(@dept.name . " / " . @subdept.name) }}',
-            'variant': '{{ @item.code }}',
           }]
         }
       }
@@ -28,12 +27,11 @@
       'ecommerce': {
         'items': [{
           'item_name': '{{ addslashes(@item.name) }}',
-          'item_id': 'P{{ @product.id }}',
+          'item_id': '{{ @item.code }}',
           'price': '{{ @item.sale_price }}',
           'item_brand': '{{ addslashes(@product.brand_name) }}',
           'item_category1': '{{ addslashes(@dept.name) }}',
           'item_category2': '{{ addslashes(@subdept.name) }}',
-          'item_variant': '{{ @item.code }}'
         }]
       }
     });

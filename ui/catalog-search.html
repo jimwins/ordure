@@ -100,7 +100,8 @@
 </div>
 <check if="{{ @GOOGLE_TAG_MANAGER }}">
   <script>
-    <check if="isset(@products) && count(@products)">
+    <!-- XXX fix this -->
+    <check if="0 && isset(@products) && count(@products)">
       <true>
         dataLayer.push({
           'event': 'eec.list',

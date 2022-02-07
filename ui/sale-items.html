@@ -11,7 +11,7 @@
   </thead>
   <tbody>
   <repeat group="{{ @items }}" value="{{ @data }}">
-    <tr valign="top" data-product-id="P{{ @data.product_id }}" data-quantity="{{ @data.quantity }}">
+    <tr valign="top" data-item-code="{{ @data.code }}" data-quantity="{{ @data.quantity }}">
       <td></td>
 <check if="{{ @FEATURE_cart && @sale.status == 'cart' && !@stage}}">
   <true>

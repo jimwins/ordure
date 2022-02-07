@@ -73,10 +73,9 @@
         'add': {
           'products': [{
             'name': name,
-            'id': 'P' + id,
+            'id': variant,
             'price': price,
             'brand': brand,
-            'variant': variant,
             'quantity': quantity,
           }]
         }
@@ -90,10 +89,9 @@
       'ecommerce': {
         'items': [{
           'item_name': name,
-          'item_id': 'P' + id,
+          'item_id': variant,
           'price': price,
           'item_brand': brand,
-          'item_variant': variant,
           'quantity': quantity,
         }]
       }
@@ -110,7 +108,7 @@
     </check>
     <check if="{{ @MICROSOFT_UET_ID }}">
       window.uetq.push('event', 'add_to_cart', {
-              'ecomm_prodid': 'P' + id,
+              'ecomm_prodid': variant,
               'ecomm_pagetype': 'product',
               'ecomm_totalvalue': price * quantity,
               'revenue_value': price * quantity,

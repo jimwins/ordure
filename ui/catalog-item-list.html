@@ -115,10 +115,9 @@
           <repeat group="{{ @items }}" value="{{ @item }}">
             {
               'name': '{{ addslashes(@item.name) }}',
-              'id': 'P{{ @product.id }}',
+              'id': '{{ @item.code }}',
               'price': '{{ @item.sale_price }}',
               'brand': '{{ addslashes(@product.brand_name) }}',
-              'variant': '{{ @item.code }}',
             },
           </repeat>
         ]

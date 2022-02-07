@@ -301,7 +301,7 @@
 
 <script type="text/javascript">
   function removeFromCart(item) {
-    let id= item.closest('[data-product-id]').getAttribute('data-product-id')
+    let id= item.closest('[data-item-code]').getAttribute('data-item-code')
     let quantity= item.closest('[data-quantity]').getAttribute('data-quantity')
 
     <check if="{{ @GOOGLE_TAG_MANAGER }}">
@@ -311,7 +311,7 @@
         'ecommerce': {
           'remove': {
             'products': [{
-              'id': 'P' + id,
+              'id': id,
               'quantity': quantity
             }]
           }

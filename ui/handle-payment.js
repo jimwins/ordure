@@ -272,10 +272,9 @@ function reportPurchase() {
             'products': [
               <repeat group="{{ @items }}" value="{{ @item }}">
               {
-                'id': "P{{ @item.product_id }}",
-                'name': "{{ addslashes(@item.product_name) }}",
+                'id': "{{ @item.code }}",
+                'name': "{{ addslashes(@item.name) }}",
                 'brand': "{{ addslashes(@item.brand_name) }}",
-                'variant': "{{ @item.code }}",
                 'quantity': "{{ @item.quantity }}",
                 'price': "{{ @item.sale_price }}",
               },
@@ -299,10 +298,9 @@ function reportPurchase() {
           'items': [
             <repeat group="{{ @items }}" value="{{ @item }}">
             {
-              'item_id': "P{{ @item.product_id }}",
-              'item_name': "{{ addslashes(@item.product_name) }}",
+              'item_id': "{{ @item.code }}",
+              'item_name': "{{ addslashes(@item.name) }}",
               'item_brand': "{{ addslashes(@item.brand_name) }}",
-              'item_variant': "{{ @item.code }}",
               'quantity': "{{ @item.quantity }}",
               'price': "{{ @item.sale_price }}",
             },
