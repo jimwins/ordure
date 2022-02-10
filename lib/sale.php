@@ -167,9 +167,14 @@ class Sale {
       $which= "status = '$status'";
     }
 
+    $limit= (int)$f3->get('REQEUST.limit');
+
     if ($f3->get('REQUEST.yesterday')) {
       $which.= " AND DATE(created) = DATE(NOW() - INTERVAL 1 DAY)";
+      if (!$limit) $limit= 10000;
     }
+
+    if (!$limit) $limit= 100;
 
     $f3->set('which', ($f3->get('REQUEST.all') ?
                        'all' :
@@ -177,7 +182,7 @@ class Sale {
                         'carts' : 'default')));
 
     $sales= $sale->find($which,
-                        array('order' => 'id DESC', 'limit' => 100));
+                        array('order' => 'id DESC', 'limit' => $limit));
 
     $sales_out= array();
     foreach ($sales as $i) {
