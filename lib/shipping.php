@@ -119,22 +119,23 @@ class Shipping {
   {
     \EasyPost\EasyPost::setApiKey($f3->get('EASYPOST_KEY'));
 
+    # width, height, depth, weight (lb), cost
     $all_boxes= [
-      [ 5, 5, 3.5 ],
-      [ 9, 5, 3 ],
-      [ 9, 8, 8 ],
-      [ 12.25, 3, 3 ],
-      [ 10, 7, 5 ],
-      [ 12, 9.5, 4 ],
-      [ 12, 9, 9 ],
-      [ 15, 12, 4 ],
-      [ 15, 12, 8 ],
-      [ 18, 16, 4 ],
-      [ 18.75, 3, 3 ],
-      [ 20.25, 13.25, 10.25 ],
-      [ 22, 18, 6 ],
-      [ 33, 19, 4.5 ],
-      [ 54, 4, 4 ],
+      [  5,     5,     3.5,  0.13, 0.39 ],
+      [  9,     5,     3,    0.21, 0.53 ],
+      [  9,     8,     8,    0.48, 0.86 ],
+      [ 12.25,  3,     3,    0.19, 1.03 ],
+      [ 10,     7,     5,    0.32, 0.82 ],
+      [ 12,     9.5,   4,    0.44, 1.01 ],
+      [ 12,     9,     9,    0.65, 0.98 ],
+      [ 15,    12,     4,    0.81, 1.28 ],
+      [ 15,    12,     8,    0.91, 1.59 ],
+      [ 18,    16,     4,    1.16, 1.77 ],
+      [ 18.75,  3,     3,    0.24, 1.24 ],
+      [ 20.25, 13.25, 10.25, 1.21, 2.17 ],
+      [ 22,    18,     6,    1.54, 2.32 ],
+      [ 33,    19,     4.5,  2.09, 4.08 ],
+      [ 54,     4,     4,    0.88, 0.00 ],
     ];
 
     $method= null;
@@ -166,7 +167,7 @@ class Shipping {
           'length' => $box[0],
           'width' => $box[1],
           'height' => $box[2],
-          'weight' => ceil($weight * 16) + 2,
+          'weight' => ceil(($weight + $box[3]) * 16),
         ],
         'options' => $options,
       ];
@@ -214,7 +215,7 @@ class Shipping {
     }
 
     if ($best_rate) {
-      error_log("got best rate: $best_rate for $method\n");
+      error_log("got best rate: $best_rate + $box[4] for $method\n");
     }
 
     // Free over $79 and in continental US and all items eligible
@@ -226,7 +227,7 @@ class Shipping {
       return [ 0.00, 'default' ];
     }
 
-    return [ $best_rate, $method ];
+    return [ $best_rate + $box[4], $method ];
   }
 
   static function address_is_po_box($address) {
