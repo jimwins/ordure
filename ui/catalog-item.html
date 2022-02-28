@@ -38,6 +38,15 @@
 
   </script>
 </check>
+<check if="{{ @FACEBOOK_PIXEL }}">
+  <script>
+      fbq('track', 'ViewContent', {
+        'content_type': 'product',
+        'content_name': '{{ addslashes(@item.name) }}',
+        'content_ids': [ '{{ @item.code }}' ]
+      });
+    </script>
+</check>
 
 <div class="row" data-product="{{ @product.id }}" data-brand="{{ @product.brand_name }}" data-item="{{ @item.id }}">
   <div class="col-sm-9 col-sm-push-3">
