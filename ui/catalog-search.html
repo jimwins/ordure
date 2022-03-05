@@ -91,6 +91,15 @@
           <strong>Sorry</strong>, but we didn't find anything for your search
           parameters. Please try again.
         </p>
+        <check if="{{ @GOOGLE_TAG_MANAGER }}">
+          <script>
+            dataLayer.push({
+              'event': 'search',
+              'event_action': 'no_results',
+              'event_label': '{{ addslashes(@REQUEST.q) }}'
+            });
+          </script>
+        </check>
       </false>
     </check>
   </div>
@@ -98,55 +107,4 @@
     <include href="catalog-sidebar.html" />
   </div>
 </div>
-<check if="{{ @GOOGLE_TAG_MANAGER }}">
-  <script>
-    <!-- XXX fix this -->
-    <check if="0 && isset(@products) && count(@products)">
-      <true>
-        dataLayer.push({
-          'event': 'eec.list',
-          'ecommerce':  {
-            'impressions': [
-              <repeat group="{{ @products }}" value="{{ @product }}">
-                {
-                  'name': '{{ addslashes(@product.name) }}',
-                  'id': 'P{{ @product.id }}',
-                  'brand': '{{ addslashes(@product.brand_name) }}',
-                  'list': 'Search Results',
-                },
-              </repeat>
-            ]
-          }
-        });
-
-        // GA4
-        //dataLayer.push({ ecommerce: null });
-        dataLayer.push({
-          'event': 'view_item_list',
-          'ecommerce':  {
-            'items': [
-              <repeat group="{{ @products }}" value="{{ @product }}">
-                {
-                  'item_name': '{{ addslashes(@product.name) }}',
-                  'item_id': 'P{{ @product.id }}',
-                  'item_brand': '{{ addslashes(@product.brand_name) }}',
-                  'item_list_id': 'search_results',
-                  'item_list_name': 'Search Results',
-                },
-              </repeat>
-            ]
-          }
-        });
-      </true>
-      <false>
-        dataLayer.push({
-          'event': 'search',
-          'event_action': 'no_results',
-          'event_label': '{{ addslashes(@REQUEST.q) }}'
-        });
-      </false>
-    </check>
-
-  </script>
-</check>
 <include href="footer.html" />
