@@ -64,7 +64,9 @@ class Catalog {
 
     $f3->set('items', $items);
 
-    echo Template::instance()->render("catalog-item-list.html");
+    // squash spaces to avoid Markdown mischief
+    $html= Template::instance()->render("catalog-item-list.html");
+    echo preg_replace('/\s+/', ' ', $html);
   }
 
   static function kit($f3, $code) {
@@ -93,7 +95,9 @@ class Catalog {
 
     $f3->set('items', $items);
 
-    echo Template::instance()->render("catalog-kit.html");
+    // squash spaces to avoid Markdown mischief
+    $html= Template::instance()->render("catalog-kit.html");
+    echo preg_replace('/\s+/', ' ', $html);
   }
 
   static function amount($d) {
