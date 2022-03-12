@@ -36,6 +36,11 @@
       }
     });
 
+    // Pinterest via GTM
+    dataLayer.push({
+      'event': 'pintrk.pageview',
+      'product_id': '{{ @item.code }}'
+    });
   </script>
 </check>
 <check if="{{ @FACEBOOK_PIXEL }}">

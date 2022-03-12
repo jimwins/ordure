@@ -122,6 +122,20 @@
                 ]
               })
     </check>
+
+    // Pinterest
+    if (window.pintrk) {
+      pintrk('track', 'addtocart', {
+        'currency': 'USD',
+        'line_items':  [
+          {
+            'product_id': variant,
+            'product_quantity': quantity,
+            'product_price': price
+          }
+        ]
+      });
+    }
   }
 
   document.querySelectorAll('form.add-item').forEach((form) => {

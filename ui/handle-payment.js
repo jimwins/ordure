@@ -326,6 +326,23 @@ function reportPurchase() {
     <check if="{{ @MICROSOFT_UET_ID }}">
       window.uetq.push('event', 'purchase', { 'revenue_value': '{{ @sale.total }}', 'currency': 'USD' });
     </check>
+
+    // Pinterest
+    if (window.pintrk) {
+      pintrk('track', 'checkout', {
+        'value' : data.sale.total,
+        'currency' : 'USD',
+        'line_items': [
+          <repeat group="{{ @items }}" value="{{ @item }}">
+          {
+            'product_id': "{{ @item.code }}",
+            'product_quantity': "{{ @item.quantity }}"
+            'product_price': "{{ @item.sale_price }}"
+          },
+          </repeat>
+        ]
+      });
+    }
   } catch (error) {
     console.error(error)
   }
