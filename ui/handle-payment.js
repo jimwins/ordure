@@ -336,7 +336,7 @@ function reportPurchase() {
           <repeat group="{{ @items }}" value="{{ @item }}">
           {
             'product_id': "{{ @item.code }}",
-            'product_quantity': "{{ @item.quantity }}"
+            'product_quantity': "{{ @item.quantity }}",
             'product_price': "{{ @item.sale_price }}"
           },
           </repeat>
