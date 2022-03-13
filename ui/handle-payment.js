@@ -311,7 +311,7 @@ function reportPurchase() {
     </check>
     <check if="{{ @FACEBOOK_PIXEL }}">
       fbq('track', 'Purchase', {
-        'value' : data.sale.total, 'currency' : 'USD',
+        'value' : '{{ @sale.total }}', 'currency' : 'USD',
         'content_type': 'product',
         'contents': [
           <repeat group="{{ @items }}" value="{{ @item }}">
@@ -330,7 +330,7 @@ function reportPurchase() {
     // Pinterest
     if (window.pintrk) {
       pintrk('track', 'checkout', {
-        'value' : data.sale.total,
+        'value' : '{{ @sale.total }}',
         'currency' : 'USD',
         'line_items': [
           <repeat group="{{ @items }}" value="{{ @item }}">
