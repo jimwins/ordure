@@ -8,6 +8,5 @@ Address:
 {{ @REQUEST.address2 }}
 {{ @REQUEST.city }}, {{ @REQUEST.state }} {{ @REQUEST.zip }}
 
-Time: {{ date('F d, Y \a\t g:i a') }} 
 IP Address:  {{ @IP }} 
 
