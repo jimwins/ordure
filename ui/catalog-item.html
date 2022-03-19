@@ -52,6 +52,14 @@
       });
     </script>
 </check>
+<check if="{{ @MICROSOFT_UET_ID }}">
+  <script>
+    window.uetq.push('event', '', {
+      'ecomm_prodid': '{{ @item.code }}',
+      'ecomm_pagetype': 'product'
+    });
+  </script>
+</check>
 
 <div class="row" data-product="{{ @product.id }}" data-brand="{{ @product.brand_name }}" data-item="{{ @item.id }}">
   <div class="col-sm-9 col-sm-push-3">
