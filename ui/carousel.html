@@ -64,23 +64,18 @@
   <ol class="carousel-content">
     <repeat group="{{ @media }}" value="{{ @image }}" counter="{{ @index }}">
       <li>
-        <img src="{{ @image.src ? @STATIC . @image.src : @GUMLET . '/i/o/' . @media[0].uuid . '.' .  @media[0].ext . '?w=768&h=768&mode=fit&fm=auto' }}" alt="{{ @image.alt_text ?: @name }}">
-        <!--
-        <check if="{{ ! @NO_PINTEREST }}">
-          <div class="caption text-center">
-            <a href="//www.pinterest.com/pin/create/button/?url={{ urlencode('https://' . $_SERVER['HTTP_HOST'] . @URI) }}&media={{ urlencode('https:' . @STATIC . (@image.src ?: ('/i/st/' . @image.uuid . '.jpg'))) }}&description={{ urlencode(@name) }}" data-pin-do="buttonPin" data-pin-config="beside" data-pin-color="white"><img src="//assets.pinterest.com/images/pidgets/pinit_fg_en_rect_white_20.png" /></a>
-          </div>
-        </check>
-        -->
+        <img src="{{ @image.src ? @STATIC . @image.src : @GUMLET . '/i/o/' . @media[@index-1].uuid . '.' .  @media[@index-1].ext . '?w=768&h=768&mode=fit&fm=auto' }}" alt="{{ @image.alt_text ?: @name }}">
       </li>
     </repeat>
   </ol>
   <div class="buttons">
     <button class="prev btn btn-default btn-xs">
-       ◀ <span class="sr-only">Previous</span>
+      <i class="fa fa-fw fa-chevron-left"></i>
+      <span class="sr-only">Previous</span>
     </button>
     <button class="next btn btn-default btn-xs">
-      <span class="sr-only">Next</span> ▶
+      <span class="sr-only">Next</span>
+      <i class="fa fa-fw fa-chevron-right"></i>
     </button>
   </div>
   <script>
