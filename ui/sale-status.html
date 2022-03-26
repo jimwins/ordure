@@ -26,6 +26,31 @@
             <strong>Thanks for your order!</strong> We will let you know when
             your order <check if="{{ @sale.shipping_address_id == 1 }}"><true>is ready for pickup</true><false>has shipped</false></check>, or contact you if there are any troubles.
           </p>
+          <check if="{{ @GOOGLE_MERCHANT_CENTER_ID && @eta }}">
+            <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
+
+            <script>
+              window.renderOptIn = function() {
+                window.gapi.load('surveyoptin', function() {
+                  window.gapi.surveyoptin.render(
+                    {
+                      "merchant_id": "{{ @GOOGLE_MERCHANT_CENTER_ID }}",
+                      "order_id": "{{ @sale.uuid }}",
+                      "email": "{{ @sale.email }}",
+                      "delivery_country": "US",
+                      "estimated_delivery_date": "{{ @eta }}",
+                      "products": [
+                        <repeat group="{{ @items }}" value="{{ @data }}">
+                          <check if="{{ @data.barcode }}">
+                            { "gtin" : "{{ @data.barcode }}" },
+                          </check>
+                        </repeat>
+                      ]
+                    });
+                });
+              }
+            </script>
+          </check>
         </check>
         <check if="{{ @sale.status == 'cancelled' }}">
           <p class="text-danger">

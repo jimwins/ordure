@@ -323,6 +323,7 @@ class Sale {
     $item->dropship_fee= "(SELECT dropship_fee FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
+    $item->barcode= "(SELECT code FROM barcode WHERE id = item_id LIMIT 1)";
 
     $items= $item->find(array('sale_id = ?', $sale->id),
                          array('order' => 'id'));
@@ -385,6 +386,28 @@ class Sale {
       $notes_out[]= $i->cast();
     }
     $f3->set('notes', $notes_out);
+
+    if (in_array($sale->status, [ 'paid', 'processing '])) {
+      $start= strtotime($sale->modified);
+      $eta= $start;
+      if ($sale->shipping_address_id == 1) {
+        // on Sunday, pickup is ready Monday (ignoring holidays)
+        if (date('w', $start) == 6) {
+          $eta= strtotime('next Monday', $start);
+        }
+      } else {
+        $eta= strtotime("+1 week", $eta);
+      }
+      // Add extra week for out of stock items
+      if ($stock_status['unknown'] ||
+          $stock_status['stock_limited'] ||
+          $stock_status['special'])
+      {
+        $eta= strtotime("+1 week", $eta);
+      }
+
+      $f3->set('eta', date("Y-m-d", $eta));
+    }
 
     return $sale;
   }
