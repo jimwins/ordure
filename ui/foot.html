@@ -23,7 +23,9 @@
           Monday - Saturday, 10am to 6pm<br>
           Closed Sundays
         </address>
-        <div id="googleRatingBadge"></div>
+        <check if="{{ @GOOGLE_MERCHANT_CENTER_ID }}">
+          <g:ratingbadge merchant_id="{{ @GOOGLE_MERCHANT_CENTER_ID }}"></g:ratingbadge>
+        </check>
       </div>
     </div>
     <div class="panel-footer">
@@ -156,7 +158,7 @@ loadScript('{{ @STATIC }}/code/combined-2021-09-01.js', function() {
 });
 </script>
 <check if="{{ @GOOGLE_MERCHANT_CENTER_ID }}">
-  <include href="google-reviews-badge.html" />
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 </check>
 <script>
 var BASE= '{{ @BASE }}/';
