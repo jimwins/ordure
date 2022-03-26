@@ -23,6 +23,7 @@
           Monday - Saturday, 10am to 6pm<br>
           Closed Sundays
         </address>
+        <div id="googleRatingBadge"></div>
       </div>
     </div>
     <div class="panel-footer">
@@ -154,6 +155,9 @@ loadScript('{{ @STATIC }}/code/combined-2021-09-01.js', function() {
   <include href="ecommerce.js" />
 });
 </script>
+<check if="{{ @GOOGLE_MERCHANT_CENTER_ID }}">
+  <include href="google-reviews-badge.html" />
+</check>
 <script>
 var BASE= '{{ @BASE }}/';
 </script>
