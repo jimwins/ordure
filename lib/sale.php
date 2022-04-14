@@ -97,6 +97,7 @@ class Sale {
       $f3->route("POST /cart/place-order", 'Sale->place_order');
       $f3->route("POST /cart/amz-get-details", 'Sale->amz_get_details');
       $f3->route("POST /cart/amz-process-order", 'Sale->amz_process_order');
+      $f3->route("GET /cart/paypal-login", 'Sale->paypal_login');
       $f3->route("GET|POST /cart/retrieve", 'Sale->retrieve_cart');
       $f3->route("GET /cart/combine-carts", 'Sale->combine_carts');
       $f3->route("GET /cart/forget", 'Sale->forget_cart_and_redir');
@@ -643,6 +644,8 @@ class Sale {
           $result['rows'][0]['elements'][0]['distance']['value'] / 1609.34,
           $result['rows'][0]['elements'][0]['duration']['value'] / 60,
         ];
+      } else {
+        error_log("Not OK: " . json_encode($result));
       }
     } catch (\Exception $e) {
       error_log("Google exception: {$e->getMessage()}\n");
@@ -669,6 +672,9 @@ class Sale {
 
       $domain= ($_SERVER['HTTP_HOST'] != 'localhost' ?
                 $_SERVER['HTTP_HOST'] : false);
+      if ($f3->get('DEBUG')) {
+        $domain= preg_replace('/^\w+\./', '', $domain);
+      }
       SetCookie('cartDetails',
                 json_encode(array('items' => count($f3->get('items')),
                                   'total' => $sale->total)),
@@ -1033,6 +1039,93 @@ class Sale {
     $this->forget_cart($f3, $args);
 
     $f3->reroute("/sale/" . $sale->uuid);
+  }
+
+  function paypal_login($f3, $args) {
+    $uuid= $f3->get('COOKIE.cartID');
+
+    /* XXX check $f3->get('PARAMS.uuid') to detect cookie failure? */
+
+    if (!$uuid) {
+      $f3->error(500, "Unable to retrieve shopping cart.");
+    }
+
+    $db= $f3->get('DBH');
+
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    $code= $f3->get('REQUEST.code');
+
+    $client= new \GuzzleHttp\Client();
+
+    if ($f3->get('DEBUG')) {
+      $api_url= 'https://api-m.sandbox.paypal.com/v1/oauth2/token';
+    } else {
+      $api_url= 'https://api-m.paypal.com/v1/oauth2/token';
+    }
+
+    $key= base64_encode($f3->get('PAYPAL_CLIENT_ID') . ":" .
+                        $f3->get('PAYPAL_SECRET'));
+
+    $params= [ 'grant_type' => 'authorization_code', 'code' => $code ];
+    $res= $client->request('POST', $api_url, [
+                             'form_params' => $params,
+                             'headers' => [
+                               'Authorization' => 'Basic ' . $key,
+                             ],
+                           ]);
+
+    $data= $res->getBody();
+
+    $token= json_decode($data);
+
+    if ($f3->get('DEBUG')) {
+      $api_url= 'https://api-m.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1';
+    } else {
+      $api_url= 'https://api-m.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1';
+    }
+
+    $res= $client->request('GET', $api_url, [
+                             'headers' => [
+                               'Authorization' => 'Bearer ' .
+                                                  $token->access_token,
+                             ],
+                           ]);
+
+    $data= $res->getBody();
+
+    $user= json_decode($data);
+
+    /* Save details */
+    $sale->name= $user->name;
+    $sale->email= $user->emails[0]->value;
+
+    $pp_address= $user->address;
+
+    /* We always just create new address records */
+    $address= new DB\SQL\Mapper($db, 'sale_address');
+
+    $address->name= $user->name;
+    $address->address1= $pp_address->street_address;
+    $address->city= $pp_address->locality;
+    $address->state= $pp_address->region;
+    $zip5= $pp_address->postal_code;
+    if (preg_match('/^(\d{5})-(\d{4})$/', $zip5, $m)) {
+      $zip5= $m[1];
+      $address->zip4= $m[2];
+    }
+    $address->zip5= $zip5;
+    $address->verified= 1;
+
+    $address->save();
+
+    $this->easypost_verify_address($f3, $address);
+
+    $sale->shipping_address_id= $address->id;
+
+    $sale->save();
+
+    $f3->reroute('/cart/checkout');
   }
 
   function capture_payments($f3, $sale) {
