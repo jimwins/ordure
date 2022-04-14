@@ -568,12 +568,13 @@ class Sale {
     }
 
     if (self::can_truck($f3) && self::in_truck_area($address)) {
+      error_log("calculating truck delivery charge");
       $truck_sizes= [
         'sm' => [ [ 30, 25, 16 ], [ 45, 25, 10 ], [ 108, 4, 4 ] ],
         'md' => [ [ 46, 38, 36 ] ],
         'lg' => [ [ 74, 42, 36 ], [ 108, 8, 8 ] ],
         'xl' => [ [ 85, 56, 36 ] ],
-        'xxl' => [ [ 133, 60, 60 ] ],
+        'xxl' => [ [ 150, 60, 60 ] ],
       ];
 
       $base= [
