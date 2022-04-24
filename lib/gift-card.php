@@ -28,6 +28,9 @@ class GiftCard {
       'customer' => $customer->id,
       'amount' => $amount,
       'currency' => 'usd',
+      'metadata' => [
+        'gift_card' => 1,
+      ],
     ]);
 
     echo json_encode([
