@@ -448,6 +448,10 @@ $f3->route('GET|POST /~webhook/stripe', function ($f3) {
       }
       $sale->handle_stripe_payment($f3, $uuid);
       break;
+    case 'payment_intent.payment_failed':
+      /* Don't do anything with these yet. */
+      echo json_encode(array('message' => 'Success!'));
+      break;
   }
 });
 
