@@ -66,7 +66,14 @@ loadScript('https://js.stripe.com/v3/',
         }
       } else {
         reportPurchase()
-        window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+
+        let formData= new FormData(document.getElementById('payment-form'))
+        return fetch('/sale/{{ @sale.uuid }}/add-comment', {
+          method: 'post',
+          body: formData
+        }).then(function (data) {
+          window.location.href= "/sale/{{ @sale.uuid }}/thanks"
+        })
       }
     })
   }

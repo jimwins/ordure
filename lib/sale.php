@@ -75,6 +75,7 @@ class Sale {
                'Sale->verify_address');
     $f3->route("POST /sale/@sale/confirm-order [ajax]", 'Sale->confirm_order');
     $f3->route("POST /sale/@sale/send-note [ajax]", 'Sale->send_note');
+    $f3->route("POST /sale/@sale/add-comment", 'Sale->add_comment');
 
     if ($f3->get('FEATURE_cart')) {
       $f3->route("GET|HEAD /cart", 'Sale->cart');
@@ -2647,6 +2648,25 @@ class Sale {
     }
 
     return $this->json($f3, $args);
+  }
+
+  function add_comment($f3, $uuid) {
+    $db= $f3->get('DBH');
+
+    $uuid= $f3->get('PARAMS.sale');
+    $sale= $this->load($f3, $uuid, 'uuid');
+
+    // save comment now in case we bail out early
+    $comment= trim($f3->get('REQUEST.comment'));
+    if ($comment) {
+      $note= new DB\SQL\Mapper($db, 'sale_note');
+      $note->sale_id= $sale->id;
+      $note->person_id= $sale->person_id;
+      $note->content= $comment;
+      $note->save();
+    }
+
+    echo json_encode(array('message' => 'Success!'));
   }
 
   function get_stripe_payment_intent($f3, $args) {
