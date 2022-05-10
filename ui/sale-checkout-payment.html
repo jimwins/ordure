@@ -200,6 +200,10 @@
           <div class="form-group">
             <label for="comment">Any special requests?</label>
             <textarea class="form-control" rows="6" name="comment" id="comment"></textarea>
+            <small class="help-block">
+              Please note that we are unable to pass along detailed delivery
+              instructions on orders being shipped.
+            </small>
           </div>
 
           <div id="stripe-error" class="alert alert-danger hidden" role="alert">
@@ -241,6 +245,10 @@
             <div class="form-group">
               <label for="paypal-comment">Any special requests?</label>
               <textarea class="form-control" rows="6" name="comment" id="paypal-comment"></textarea>
+              <small class="help-block">
+                Please note that we are unable to pass along detailed delivery
+                instructions on orders being shipped.
+              </small>
             </div>
 
             <div id="paypal-button"></div>
@@ -301,6 +309,10 @@
           <div class="form-group">
             <label for="comment">Any special requests?</label>
             <textarea class="form-control" rows="6" name="comment" id="comment"></textarea>
+            <small class="help-block">
+              Please note that we are unable to pass along detailed delivery
+              instructions on orders being shipped.
+            </small>
           </div>
 
           <input type="hidden" name="amount" value="{{ @sale.total - @sale.paid }}">
