@@ -3048,7 +3048,7 @@ class Sale {
         [
           'op' => 'replace',
           'path' => "/purchase_units/@reference_id=='{$sale->uuid}'/amount",
-          'value' => $order['purchase_units'][0]['amount'],
+          'value' => $amount,
         ],
         [
           'op' => 'replace',
