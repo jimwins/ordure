@@ -247,18 +247,37 @@ $f3->route('POST /update-pricing', function ($f3, $args) {
     $f3->error(500, 'Wrong key.');
   }
 
-  $q= "LOAD DATA LOCAL INFILE ?
-         REPLACE
-            INTO TABLE scat_item
-          FIELDS TERMINATED BY '\t'
-          IGNORE 1 LINES
-          (retail_price, @discount_type, @discount, @stock,
-           code, minimum_quantity, purchase_quantity, is_dropshippable)
-             SET discount_type = IF(@discount_type = 'NULL', NULL,
-                                    @discount_type),
-                 discount = IF(@discount = 'NULL', NULL, @discount),
-                 stock = IF(@stock = 'NULL', NULL, @stock)
-      ";
+  $version= (int)$_REQUEST['version'] ?: 1;
+
+  if ($version == 2) {
+    $q= "LOAD DATA LOCAL INFILE ?
+           REPLACE
+              INTO TABLE scat_item
+            FIELDS TERMINATED BY '\t'
+            IGNORE 1 LINES
+            (@id, retail_price, @discount_type, @discount,
+             minimum_quantity, purchase_quantity,
+             @stock, @active,
+             code, is_dropshippable)
+               SET discount_type = IF(@discount_type = 'NULL', NULL,
+                                      @discount_type),
+                   discount = IF(@discount = 'NULL', NULL, @discount),
+                   stock = IF(@stock = 'NULL', NULL, @stock)
+        ";
+  } else {
+    $q= "LOAD DATA LOCAL INFILE ?
+           REPLACE
+              INTO TABLE scat_item
+            FIELDS TERMINATED BY '\t'
+            IGNORE 1 LINES
+            (retail_price, @discount_type, @discount, @stock,
+             code, minimum_quantity, purchase_quantity, is_dropshippable)
+               SET discount_type = IF(@discount_type = 'NULL', NULL,
+                                      @discount_type),
+                   discount = IF(@discount = 'NULL', NULL, @discount),
+                   stock = IF(@stock = 'NULL', NULL, @stock)
+        ";
+  }
 
   $rows= $db->exec($q, $fn);
 
