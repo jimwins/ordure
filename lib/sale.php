@@ -169,7 +169,7 @@ class Sale {
       $which= "status = '$status'";
     }
 
-    $limit= (int)$f3->get('REQEUST.limit');
+    $limit= (int)$f3->get('REQUEST.limit');
 
     if ($f3->get('REQUEST.yesterday')) {
       $which.= " AND DATE(created) = DATE(NOW() - INTERVAL 1 DAY)";
@@ -366,6 +366,10 @@ class Sale {
     $payments_out= array();
     foreach ($payments as $i) {
       $pay= $i->cast();
+      // Everything except Amazon and Loyalty are captured
+      if (!in_array($pay['method'], [ 'amazon', 'loyalty'])) {
+        $pay['captured']= $pay['processed'];
+      }
       $pay['data']= json_decode($pay['data'], true);
       $payments_out[]= $pay;
     }
