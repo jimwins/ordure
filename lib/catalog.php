@@ -353,7 +353,6 @@ class Catalog {
                 minimum_quantity, is_dropshippable,
                 item.prop65, item.oversized, item.hazmat,
                 no_backorder,
-                dropship_fee,
                 thumbnail, active
            FROM item
            LEFT JOIN scat_item ON scat_item.code = item.code

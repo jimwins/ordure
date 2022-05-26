@@ -156,14 +156,7 @@
                           <p data-toggle="tooltip" class="text-danger" title="This item is currently unavailable.">Unavailable</p>
                         </true>
                         <false>
-                                      <check if="{{ @item.dropship_fee > 0 }}">
-                                        <true>
-                                          <span data-toggle="tooltip" title="This item will be shipped directly to you.">Shipped direct</span>
-                                        </true>
-                                        <false>
-                                          <span data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</span>
-                                        </false>
-                                      </check>
+                          <p data-toggle="tooltip" title="We don't normally stock this, but we can get it for you!">Out of stock, special order</p>
                         </false>
                       </check>
                 </false>
@@ -200,24 +193,14 @@
             <check if="isset(@shipping_options.shipping) && @shipping_options.shipping !== false">
               <check if="@shipping_options.shipping == 0">
                 <true>
-                  <check if="{{ @item.dropship_fee > 0 }}">
-                    <true>
-                      <br>Shipped direct for {{ amount(@item.dropship_fee) }}/order
-                    </true>
-                    <false>
-                      <br>Nationwide shipping
-                      <br><span class="text-warning">This item is not eligible for free shipping.</span>
-                    </false>
-                  </check>
+                  <br>Nationwide shipping
+                  <br><span class="text-warning">This item is not eligible for free shipping.</span>
                 </true>
                 <false>
                   <br>
                   Nationwide shipping starting at {{ @amount(@shipping_options.shipping) }}
-                  <check if="{{ @item.dropship_fee > 0 }}">
-                    plus a {{ amount(@item.dropship_fee) }}/order dropship fee.
-                  </check>
                   <br>
-                  <check if="@item.no_free_shipping || @item.dropship_fee">
+                  <check if="@item.no_free_shipping">
                     <true>
                       <span class="text-warning">This item is not eligible for free shipping.</span>
                     </true>

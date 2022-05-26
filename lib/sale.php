@@ -322,7 +322,6 @@ class Sale {
     $item->hazmat= "(SELECT hazmat FROM item WHERE item_id = item.id)";
     $item->oversized= "(SELECT oversized FROM item WHERE item_id = item.id)";
     $item->no_backorder= "(SELECT no_backorder FROM item WHERE item_id = item.id)";
-    $item->dropship_fee= "(SELECT dropship_fee FROM item WHERE item_id = item.id)";
     $item->stock= "(SELECT stock FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->minimum_quantity= "(SELECT minimum_quantity FROM item JOIN scat_item WHERE item_id = item.id AND scat_item.code = item.code)";
     $item->barcode= "(SELECT code FROM barcode WHERE id = item_id LIMIT 1)";
@@ -350,7 +349,7 @@ class Sale {
         $stock_status['stock_limited']++;
       }
       // doesn't meet free shipping requirements?
-      $item['no_free_shipping']= !Shipping::item_can_ship_free($i) || $item['dropship_fee'];
+      $item['no_free_shipping']= !Shipping::item_can_ship_free($i);
       if ($item['no_free_shipping']) {
         $stock_status['no_free_shipping']++;
       }
@@ -473,7 +472,6 @@ class Sale {
     $db= $f3->get('DBH');
     $status= $special= [];
     $weight= 0.0;
-    $dropship_fee= 0.0;
 
     if (!$address) {
       $address= new DB\SQL\Mapper($db, 'sale_address');
@@ -497,11 +495,6 @@ class Sale {
       if ($scat_item->dry()) {
         $status['special']++;
         continue;
-      }
-
-      if ($sale_item['dropship_fee'] > $dropship_fee) {
-        $dropship_fee= $sale_item['dropship_fee'];
-        error_log("adding dropship fee of $dropship_fee\n");
       }
 
       // no stock and not stocked? special order.
@@ -623,7 +616,7 @@ class Sale {
                                           $status['no_free_shipping'],
                                           $sale->subtotal);
       if ($method) {
-        $options[$method]= $rate + $dropship_fee;
+        $options[$method]= $rate;
       }
     }
 
