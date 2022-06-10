@@ -3,6 +3,9 @@ ordure
 
 Ordure is an online store.
 
+NOTE: This is retired, the functionality has been implemented as part of
+(Scat)[https://github.com/jimwins/scat/].
+
 Ordure uses the jQuery Javascript library.
   http://jquery.com/
 
